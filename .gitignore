@@ -1,0 +1,7 @@
+docs/site/
+ffi-packages/build/
+ffi-packages/Clipper2/Clipper2/
+modules/clipper2/*/
+*.so
+*.dll
+*.dylib

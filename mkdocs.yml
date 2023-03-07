@@ -1,0 +1,6 @@
+plugins: []
+site_name: ILL Documentation
+nav:
+    - Scripts: index.md
+    - Modules: modules.md
+theme: readthedocs

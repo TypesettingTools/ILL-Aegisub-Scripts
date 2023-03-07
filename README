@@ -1,0 +1,13 @@
+Welcome to Zeref and Alen's new project!
+Both the macros and the modules are ready to be used. In the upcoming days, we'll write the documentation for the macros.
+After that, we'll focus on explaining the ILL module with documentation and examples.
+
+If you have questions, advice, requests, or anything to say, please do.
+We hope that ILL can become a community project and not just a module of two people.
+For that, we need a lot feedback, both from users and macro developers.
+
+About ILL...
+ILL is a module that eases the creation of macros. It can be compared to two of the most commonly used libraries: AssFoundation and Yutils.
+Currently, the macros that use ILL are primarily designed for handling shapes, so ILL may be a bit immature for managing subtitles.
+
+That's all for now. Be sure to check the documentation when it comes out!
