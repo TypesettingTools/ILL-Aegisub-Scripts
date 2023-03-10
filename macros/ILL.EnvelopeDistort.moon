@@ -1,6 +1,6 @@
 export script_name        = "Envelope Distort"
 export script_description = "Allows you to warp and manipulate shapes within a customizable envelope"
-export script_version     = "1.0.1"
+export script_version     = "1.0.2"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.EnvelopeDistort"
 
@@ -22,7 +22,8 @@ config = depctrl\getConfigHandler {
 
 makeMesh = (ass, button, elements) ->
 	{:lineType, :rows, :cols, :perspective, :keepMesh} = elements
-	getMesh = (l, isBezier) ->
+	isBezier = lineType == "Bezier"
+	getMesh = (l) ->
 		clips, colDistance, rowDistance = {}, nil, nil
 		Line.callBackExpand ass, l, {rows, cols, isBezier}, (line) ->
 			{:colDistance, :rowDistance} = line.grid
