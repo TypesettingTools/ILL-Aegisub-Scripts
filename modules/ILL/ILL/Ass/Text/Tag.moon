@@ -42,6 +42,7 @@ export ASS_TAGS = {
 		["pattern_value"]: "%s*(%-?%d[%.%d]*[eE%-%+%d]*)"
 		["style_name"]: "scale_y"
 		["typer"]: "float"
+		["transformable"]: true
 		["value"]: 100
 	}
 	["fsp"]: {

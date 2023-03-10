@@ -98,7 +98,7 @@ class Line
 				.width = 0
 			else
 				.width, .height, .descent, .external_leading = aegisub.text_extents .data, .isShape and "" or .text_stripped
-			.width *= video_x_correct_factor
+				.width *= video_x_correct_factor
 
 			-- text alignment
 			{:an} = .data
@@ -331,11 +331,12 @@ class Line
 					s or= 0
 					e or= duration
 					t = Util.getTimeInInterval currTime, s, e, a
-					lerp, rems, values = "", {}, Tags(tr.tag.value.transform)\split!
+					lerp, values = "", Tags(tr.tag.value.transform)\split!
 					for i = 1, #values
 						{:name, :tag} = values[i]
 						if tag.transformable
-							insert rems, name
+							if tags\existsTag name
+								tags\remove name
 							name = tag.style_name and tag.style_name or name
 							v1, v2, result = data[name], tag.value, nil
 							unless name == "clip" or name == "iclip"
@@ -359,8 +360,6 @@ class Line
 									result = "(#{data[name]})"
 							lerp ..= tag.ass .. result
 					tags\remove {"t", lerp, 1}
-					for rem in *rems
-						tags\remove {rem, "", 1}
 				else
 					break
 		-- interpolates between the start and end coordinates of the \move tag

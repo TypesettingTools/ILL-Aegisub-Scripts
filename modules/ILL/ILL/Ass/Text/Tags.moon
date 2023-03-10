@@ -22,7 +22,7 @@ class Tags
 		-- fix "\\1c&H000000&" --> "\\c&H000000&"
 		@tags = @tags\gsub "\\1c%s*(&?[Hh]%x+&?)", "\\c%1"
 		-- fix "\\fr360" --> "\\frz360"
-		@tags = @tags\gsub "\\fr%s*(%-?%d[%.%d]*)", "\\frz%1"
+		@tags = @tags\gsub "\\fr%s*(%-?%d[%.%d]*[eE%-%+%d]*)", "\\frz%1"
 
 	get: => @tags
 
@@ -65,7 +65,7 @@ class Tags
 					when "perspective"
 						@remove "fax", "fay", "frx", "fry", "frz", "fscx", "fscy", "org"
 					when "colors"
-						@remove "1c", "2c", "3c", "4c"
+						@remove "c", "2c", "3c", "4c"
 					when "shadow"
 						@remove "xshad", "yshad", "shad"
 					when "outline"
@@ -128,14 +128,10 @@ class Tags
 			if tag = copy\getTag name, @tags
 				table.insert split, tag
 				copy\remove {name, "", 1}
-		-- does processing on the "\\t" tags
-		while copy\existsTag "t"
-			process "t"
-		-- does processing on all tags except the "\\t" tags
+		-- does processing on all tags
 		for k, v in pairs ASS_TAGS
-			if k != "t"
-				while copy\existsTag k
-					process k
+			while copy\existsTag k
+				process k
 		-- fixes the position of the array to the original tag position
 		table.sort split, (a, b) -> a.i < b.i
 		-- removes all tags that have been reset by the \r tag
@@ -158,9 +154,17 @@ class Tags
 
 	-- checks if the tag exists in the tags
 	existsTag: (name) =>
-		if @tags\match Tag.getPattern name
-			return true
-		return false
+		if name != "t"
+			@animated "hide"
+			if @tags\match Tag.getPattern name
+				@animated "unhide"
+				return true
+			@animated "unhide"
+			return false
+		else
+			if @tags\match Tag.getPattern "t"
+				return true
+			return false
 
 	-- checks if the tag exists in the tags
 	-- if any all tags exists returns true
@@ -178,6 +182,6 @@ class Tags
 				return true
 		return false
 
-	__tostring: => @tags
+	__tostring: => @tags\gsub("{%s*}", "")\gsub "\\t%(([%.%d]*)%,?([%.%d]*)%,?([%.%d]*)%,?%)", ""
 
 {:Tags}
