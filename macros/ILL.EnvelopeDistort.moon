@@ -1,6 +1,6 @@
-export script_name        = "ILL - Envelope Distort"
+export script_name        = "Envelope Distort"
 export script_description = "Allows you to warp and manipulate shapes within a customizable envelope"
-export script_version     = "1.0.0"
+export script_version     = "1.0.1"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.EnvelopeDistort"
 
@@ -34,21 +34,24 @@ makeMesh = (ass, button, elements) ->
 		if button == "Mesh"
 			ass\removeLine l, s
 			clips = getMesh lcopy
+			xr, yr = aegisub.video_size!
+			screen = "m 0 0 l #{xr} 0 #{xr} #{yr} 0 #{yr} "
 			lcopy.tags\remove "clip", "iclip"
 			if lcopy.isShape
 				clips = table.concat clips
-				lcopy.tags\insert {{"clip", clips}}
+				lcopy.tags\insert {{"clip", screen .. clips}}
 				ass\insertLine lcopy, s
 			else
 				isMove = lcopy.tags\existsTag "move"
 				Line.callBack ass, lcopy, (line, j) ->
-					line.tags\insert {{"clip", clips[j]}}
+					line.tags\insert {{"clip", screen .. clips[j]}}
 					ass\insertLine line, s
 		else
 			ass\removeLine l, s
 			{:clip, :pos} = lcopy.data
 			if clip
 				mesh = Path clip
+				table.remove mesh.path, 1
 				if perspective and (isBezier or #mesh.path != 1)
 					ass\error s, "Expected an quadrilateral"
 				clips, colDistance, rowDistance = getMesh lcopy
