@@ -3,6 +3,8 @@ import Util  from require "ILL.ILL.Util"
 import Aegi  from require "ILL.ILL.Aegi"
 import Text  from require "ILL.ILL.Ass.Text.Text"
 
+hasInspector, Inspector = pcall require, "SubInspector.Inspector"
+
 class Ass
 
 	set: (@sub, @sel, @activeLine, @remLine = true) =>
@@ -31,7 +33,6 @@ class Ass
 				if copy
 					if l.class == "dialogue"
 						line = Table.deepcopy l
-						line.raw = ""
 						line.isShape = Util.isShape line.text
 						line.text = Text line.text, line.isShape
 					return l, line, i, n
@@ -48,7 +49,6 @@ class Ass
 				l = @sub[s + @i]
 				if copy
 					line = Table.deepcopy l
-					line.raw = ""
 					line.isShape = Util.isShape line.text
 					line.text = Text line.text, line.isShape
 					return l, line, s, i, n
@@ -68,6 +68,10 @@ class Ass
 			else
 				break
 
+		-- gets the bounding box of the selected lines
+		if jit.os != "Windows"
+			@collectBounds!
+
 		-- check if there are any styles present in the ass file
 		if Table.isEmpty @styles
 			error "ERROR: No styles were found in the file, bug?!", 2
@@ -81,6 +85,38 @@ class Ass
 
 		Aegi.debug 4, "ILL: Video X correction factor = %f\n\n", @meta.video_x_correct_factor
 		return @
+
+	-- gets the bounding box of all selected lines
+	collectBounds: (si_exhaustive = false) =>
+		if hasInspector
+			lines, @bounds = {}, {}
+			for l, lcopy, s, i in @iterSel!
+				lines[i] = {}
+				newLine = Table.copy lcopy
+				newLine.text\callBack (tags, text) ->
+					tags\remove "clip", "iclip", "outline", "shadow", "perspective"
+					tags\insert "\\bord0\\shad0"
+					return tags, text
+				newLine.text = newLine.text\__tostring!
+				newLine.raw = newLine.raw\gsub "^(.-: .-,.-,.-,.-,.-,.-,.-,.-,.-,)(.*)$", "%1#{newLine.text}"
+				newLine.si_exhaustive = si_exhaustive
+				lines[i][1] = newLine
+			insp, msg = Inspector @sub
+			assert insp, "SubInspector Error: #{msg}"
+			for i = 1, #lines
+				bounds, times = insp\getBounds lines[i]
+				assert bounds != nil, "SubInspector Error: #{times}"
+				l, t, r, b = nil, nil, 0, 0
+				for j = 1, #times
+					if bound = bounds[j]
+						l = math.min bound.x, l or bound.x
+						t = math.min bound.y, t or bound.y
+						r = math.max bound.x + bound.w, r
+						b = math.max bound.y + bound.h, b
+				@bounds[i] = {:l, :t, :r, :b}
+			return @
+		else
+			error "ERROR: Install SubInspector", 2
 
 	-- gets the real number of the current line
 	lineNumber: (s) => s - @fi + 1
