@@ -75,6 +75,10 @@ class Line
 						if value = .reset.data[name]
 							.data[name] = value
 
+			-- resizes the font size value according to the set ratio
+			if .ratio
+				.data.fontsize *= .ratio
+
 			-- if it's a shape, this information are irrelevant
 			unless .isShape
 				-- gets the value of the width of a space
@@ -335,17 +339,17 @@ class Line
 					ratio = areaA / areaB
 				else
 					ratio = areaB / areaA
-				ratio = 1 / math.sqrt ratio
-				-- changes the font size value given the ratio found
+				l.ratio = 1 / math.sqrt ratio
+				-- gets the difference on the y-axis
+				diff = math.sqrt (realBound.t - tt) ^ 2 + (realBound.b - bb) ^ 2
+				offsety = switch l.data.an
+					when 7, 8, 9 then diff
+					when 4, 5, 6 then diff - (diff * l.ratio) * 1.08
+					when 1, 2, 3 then diff - (diff * l.ratio) * 2.16
+				l.lines = Line.lineBreaks ass, l, noblank
 				for lineBreak in *l.lines
 					for lineBlock in *lineBreak
-						lineBlock.data.fontsize *= ratio
-				-- gets the difference on the y-axis
-				diff = realBound.t - tt
-				l.diffy = switch l.data.an
-					when 7, 8, 9 then diff
-					when 4, 5, 6 then diff - (diff * ratio)
-					when 1, 2, 3 then diff - (diff * ratio) * 2
+						lineBlock.y += offsety
 
 	-- callback to map between all possible lines of text
 	callBack: (ass, l, fn) ->
@@ -467,8 +471,6 @@ class Line
 			Line.callBack ass, line, (lineBlock, j) ->
 				-- converts the text to shape and then converts the shape to Path
 				newShape = Line.toPath lineBlock
-				if l.diffy
-					newShape\move 0, l.diffy
 				newShape\reallocate line.data.an, {width: lineBlock.width, height: lineBlock.height}
 				-- fixes the scale interference in the function expand
 				lineBlock.styleref.scale_x = 100
@@ -514,8 +516,6 @@ class Line
 				lineBlock.width, lineBlock.height = aegisub.text_extents lineBlock.data, lineBlock.text_stripped
 				-- converts the text to shape and then converts the shape to Path
 				newShape = Line.toPath lineBlock
-				if l.diffy
-					newShape\move 0, l.diffy
 				-- makes the process of expanding shape
 				lineBlock.data.scale_x = scale_x
 				lineBlock.data.scale_y = scale_y
