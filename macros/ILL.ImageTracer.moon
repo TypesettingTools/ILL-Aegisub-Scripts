@@ -1,6 +1,6 @@
 export script_name        = "Image Tracer"
 export script_description = "Raster image tracer and vectorizer"
-export script_version     = "1.0.0"
+export script_version     = "1.0.1"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.ImageTracer"
 
@@ -260,7 +260,7 @@ class ImageTracer
 		thisgk = ImageTracer.gks[radius]
 		for j = 0, imgd.height - 1
 			for i = 0, imgd.width - 1
-				racc, bacc, aacc, wacc = 0, 0, 0, 0
+				racc, gacc, bacc, aacc, wacc = 0, 0, 0, 0, 0
 				for k = -radius, radius
 					if (i + k > 0) and (i + k < imgd.width)
 						idx = j * imgd.width + i + k
@@ -421,7 +421,7 @@ class ImageTracer
 		return bpaths
 
 	-- https://stackoverflow.com/a/28130452/15411556
-	pointInsidePolygon: (p, points, ep = 2) ->
+	pointInsidePolygon: (p, points, ep = 0.1) ->
 		n = #points
 		j = n
 		r = false

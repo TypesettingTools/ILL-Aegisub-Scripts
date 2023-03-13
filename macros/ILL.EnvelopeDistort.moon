@@ -1,6 +1,6 @@
 export script_name        = "Envelope Distort"
 export script_description = "Allows you to warp and manipulate shapes within a customizable envelope"
-export script_version     = "1.0.2"
+export script_version     = "1.0.3"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.EnvelopeDistort"
 
@@ -31,7 +31,7 @@ makeMesh = (ass, button, elements) ->
 		return clips, colDistance, rowDistance
 	for l, lcopy, s, i, n in ass\iterSel!
 		ass\progressLine s, i, n
-		Line.extend ass, lcopy
+		Line.extend ass, lcopy, i
 		if button == "Mesh"
 			ass\removeLine l, s
 			clips = getMesh lcopy

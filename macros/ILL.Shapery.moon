@@ -1,6 +1,6 @@
 export script_name        = "Shapery"
 export script_description = "Does several types of shape manipulations from the simplest to the most complex"
-export script_version     = "2.0.0"
+export script_version     = "2.0.1"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
@@ -352,7 +352,7 @@ Pathfinder = (ass, res) ->
 	for l, lcopy, s, i, n in ass\iterSel!
 		ass\progressLine s, i, n
 		ass\removeLine l, s
-		Line.extend ass, lcopy
+		Line.extend ass, lcopy, i
 		Line.callBackExpand ass, lcopy, nil, (line) ->
 			shape = Path line.shape
 			-- x-axis and y-axis of the tag \pos
@@ -400,7 +400,7 @@ Offsetting = (ass, res) ->
 	for l, lcopy, s, i, n in ass\iterSel!
 		ass\progressLine s, i, n
 		ass\removeLine l, s
-		Line.extend ass, lcopy
+		Line.extend ass, lcopy, i
 		Line.callBackExpand ass, lcopy, nil, (line) ->
 			path, clip = Path line.shape
 			if cutsOutside
@@ -419,7 +419,7 @@ Manipulate = (ass, res, button) ->
 	{:distance, :recreateBezier, :angleThreshold} = res
 	for l, line, s, i, n in ass\iterSel!
 		ass\progressLine s, i, n
-		Line.extend ass, line
+		Line.extend ass, line, i
 		if line.isShape
 			ass\removeLine l, s
 			path = Path line.shape
@@ -437,7 +437,7 @@ Transform = (ass, res) ->
 	{:horizontalScale, :verticalScale, :angle, :xAxis, :yAxis} = res
 	for l, line, s, i, n in ass\iterSel!
 		ass\progressLine s, i, n
-		Line.extend ass, line
+		Line.extend ass, line, i
 		if line.isShape
 			ass\removeLine l, s
 			path = Path line.shape
@@ -459,7 +459,7 @@ ShadowEffect = (ass, res) ->
 	for l, lcopy, s, i, n in ass\iterSel!
 		ass\progressLine s, i, n
 		ass\removeLine l, s
-		Line.extend ass, lcopy
+		Line.extend ass, lcopy, i
 		Line.callBackExpand ass, lcopy, nil, (line) ->
 			{:data} = line
 			switch shadow
@@ -495,7 +495,7 @@ CornerEffect = (ass, res) ->
 	for l, lcopy, s, i, n in ass\iterSel!
 		ass\progressLine s, i, n
 		ass\removeLine l, s
-		Line.extend ass, lcopy
+		Line.extend ass, lcopy, i
 		Line.callBackExpand ass, lcopy, nil, (line) ->
 			path = Path line.shape
 			path\openContours!
@@ -537,7 +537,7 @@ CornerEffect = (ass, res) ->
 ShaperyMacros = (ass, macro) ->
 	for l, lcopy, s, i, n in ass\iterSel!
 		ass\progressLine s, i, n
-		Line.extend ass, lcopy
+		Line.extend ass, lcopy, i
 		switch macro
 			when "Expand"
 				ass\removeLine l, s

@@ -1,6 +1,6 @@
 export script_name        = "ILL - Change Alignment"
 export script_description = "Changes the alignment of a text or shape without changing its original position"
-export script_version     = "1.0.0"
+export script_version     = "1.0.1"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.ChangeAlign"
 
@@ -25,7 +25,7 @@ main = (sub, sel, activeLine) ->
 		ass = Ass sub, sel, activeLine
 		for l, line, s, i, n in ass\iterSel!
 			ass\progressLine s, i, n
-			Line.extend ass, line
+			Line.extend ass, line, i
 			local width, height
 			if line.isShape
 				{:width, :height} = Path(line.shape)\boundingBox!
