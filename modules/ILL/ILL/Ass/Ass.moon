@@ -95,7 +95,7 @@ class Ass
 				newLine = Table.copy lcopy
 				newLine.text\callBack (tags, text) ->
 					tags\remove "clip", "iclip", "outline", "shadow", "perspective"
-					tags\insert "\\fscx100\\fscy100\\bord0\\shad0"
+					tags\insert "\\fscx100\\fscy100\\frz0\\bord0\\shad0"
 					return tags, text
 				newLine.text = newLine.text\__tostring!
 				newLine.raw = newLine.raw\gsub "^(.-: .-,.-,.-,.-,.-,.-,.-,.-,.-,)(.*)$", "%1#{newLine.text}"
