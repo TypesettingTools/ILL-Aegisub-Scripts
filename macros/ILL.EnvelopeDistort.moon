@@ -46,6 +46,8 @@ makeMesh = (ass, button, elements) ->
 				isMove = lcopy.tags\existsTag "move"
 				Line.callBack ass, lcopy, (line, j) ->
 					line.tags\insert {{"clip", screen .. clips[j]}}
+					if line.data.angle != 0 or line.tags\existsTagOr "frx", "fry", "frz"
+						line.tags\insert {{"org", line.data.org}, true}
 					ass\insertLine line, s
 		else
 			ass\removeLine l, s
