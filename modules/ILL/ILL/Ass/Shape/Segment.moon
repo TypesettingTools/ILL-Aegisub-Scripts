@@ -27,14 +27,14 @@ class Segment
 		table.insert points, Point @b.x, @b.y
 		return points
 
-    -- splits the segment in two
-    split: (t = 0.5) =>
-        {:a, :b} = @
-        c = a\lerp b, t
-        return {
-            Segment a, c
-            Segment c, b
-        }
+	-- splits the segment in two
+	split: (t = 0.5) =>
+		{:a, :b} = @
+		c = a\lerp b, t
+		return {
+			Segment a, c
+			Segment c, b
+		}
 
 	-- gets the normalized tangent given a time on a segment
 	getNormalized: (t, inverse) =>
@@ -43,17 +43,17 @@ class Segment
 		d = Point!
 		d.x = @b.x - p.x
 		d.y = @b.y - p.y
-        with d
-            if inverse
-                .x, .y = .y, -.x
-            else
-                .x, .y = -.y, .x
+		with d
+			if inverse
+				.x, .y = .y, -.x
+			else
+				.x, .y = -.y, .x
 		mag = d\vecMagnitude!
 		tan = Point d.x / mag, d.y / mag
 		return tan, p, u
 
-    -- gets the real length of the segment through time
-    getLength: (t = 1) => t * @a\distance @b
+	-- gets the real length of the segment through time
+	getLength: (t = 1) => t * @a\distance @b
 
 	-- converts a segment to a bezier curve
 	lineToBezier: =>
@@ -61,7 +61,7 @@ class Segment
 		b = Point (2 * @a.x + @b.x) / 3, (2 * @a.y + @b.y) / 3
 		c = Point (@a.x + 2 * @b.x) / 3, (@a.y + 2 * @b.y) / 3
 		d = @b\clone!
-        a.id, b.id, c.id, d.id = "l", "b", "b", "b"
+		a.id, b.id, c.id, d.id = "l", "b", "b", "b"
 		return a, b, c, d
 
 {:Segment}

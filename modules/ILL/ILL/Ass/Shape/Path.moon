@@ -306,7 +306,7 @@ class Path
 		return @
 
 	-- Converts all line segments to bezier segments
-	allCurve: (evenEqual) =>
+	allCurve: =>
 		newPath = {}
 		for contour in *@path
 			j, add = 2, {contour[1]\clone!}
@@ -344,7 +344,7 @@ class Path
 		@callBackPath (id, seg) ->
 			segmentLen = seg\getLength!
 			if sumLength + segmentLen >= length
-                u = (length - sumLength) / segmentLen
+				u = (length - sumLength) / segmentLen
 				tan, p, u = seg\getNormalized u
 				return "break"
 			sumLength += segmentLen
@@ -355,8 +355,8 @@ class Path
 	inClip: (an = 7, clip, mode = "center", leng, offset = 0) =>
 		{:origin, :width, :height} = @boundingBox!
 		{x: ox, y: oy} = origin
-        if type(clip) == "string"
-            clip = Path(clip)\openContours!
+		if type(clip) == "string"
+			clip = Path(clip)\openContours!
 		leng or= clip\getLength!
 		size = leng - width
 		@flatten nil, true
@@ -369,10 +369,10 @@ class Path
 			when 4, 5, 6 then -oy - height * 0.5
 			when 1, 2, 3 then -oy
 		@map (x, y) ->
-            tan, pnt = clip\getNormalized (sx + x) / leng, true
-            px = pnt.x + (sy + y) * tan.x
-            py = pnt.y + (sy + y) * tan.y
-            return px, py
+			tan, pnt = clip\getNormalized (sx + x) / leng, true
+			px = pnt.x + (sy + y) * tan.x
+			py = pnt.y + (sy + y) * tan.y
+			return px, py
 
 	-- Create the @path table for the given string
 	import: (shape) =>

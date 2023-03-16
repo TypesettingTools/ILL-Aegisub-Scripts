@@ -123,11 +123,11 @@ class Curve
 		u = Curve.uniformTime @getArcLenghts(n), n, t
 		p = @getPTatTime u
 		tan = @getDerivative u
-        with tan
-            if inverse
-                .x, .y = .y, -.x
-            else
-                .x, .y = -.y, .x
+		with tan
+			if inverse
+				.x, .y = .y, -.x
+			else
+				.x, .y = -.y, .x
 			mag = tan\vecMagnitude!
 			tan.x /= mag
 			tan.y /= mag
