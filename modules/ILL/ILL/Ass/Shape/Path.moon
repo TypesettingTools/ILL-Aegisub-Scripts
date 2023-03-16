@@ -2,6 +2,7 @@ CPP = require "clipper2.clipper2"
 
 import Point from require "ILL.ILL.Ass.Shape.Point"
 import Curve from require "ILL.ILL.Ass.Shape.Curve"
+import Segment from require "ILL.ILL.Ass.Shape.Segment"
 {:insert, :remove} = table
 
 class Path
@@ -11,13 +12,17 @@ class Path
 		if type(path) == "string"
 			@import path
 		elseif type(path) == "table"
+			@path = {}
 			if type(path[1]) == "number"
-				{x1, y1, x2, y2} = path
-				@import "m #{x1} #{y1} l #{x2} #{y1} #{x2} #{y2} #{x1} #{y2}"
+				@path[1] = {
+					Point path[1], path[2]
+					Point path[3], path[2]
+					Point path[3], path[4]
+					Point path[1], path[4]
+				}
 				return
 			if rawget path, "path"
 				path = path.path
-			@path = {}
 			for contour in *path
 				insert @path, {}
 				for point in *contour
@@ -35,6 +40,23 @@ class Path
 				px, py = fn point.x, point.y, point
 				if px and py
 					point.x, point.y = px, py
+		return @
+
+	-- Callback to access the Curves and Segments
+	callBackPath: (fn) =>
+		for contour in *@path
+			j = 2
+			while j <= #contour
+				prev = contour[j-1]
+				curr = contour[j]
+				if curr.id == "b"
+					if "break" == fn "b", Curve prev, curr, contour[j+1], contour[j+2]
+						return
+					j += 2
+				else
+					if "break" == fn "l", Segment prev, curr
+						return
+				j += 1
 		return @
 
 	-- Gets the bounding box and other information from the Path
@@ -69,7 +91,7 @@ class Path
 					j += 2
 				else
 					if flattenStraight
-						points = Path.flattenLine prev, curr, customLen, distance
+						points = Segment(prev, curr)\flatten customLen, distance
 						for k = 2, #points
 							insert newContour, points[k]
 					else
@@ -102,7 +124,17 @@ class Path
 		@map (x, y, p) ->
 			p\scale hor, ver
 
-	-- reallocates the shape to align 7 or from align 7 to any other align
+	-- Moves the points to the origin of the plane
+	toOrigin: =>
+		{:origin} = @boundingBox!
+		@move -origin.x, -origin.y
+
+	-- Moves the points to the center of the plane
+	toCenter: =>
+		{:origin, :width, :height} = @boundingBox!
+		@move -origin.x - width * 0.5, -origin.y - height * 0.5
+
+	-- Reallocates the shape to align 7 or from align 7 to any other align
 	reallocate: (an, box, rev, x = 0, y = 0) =>
 		{:width, :height} = box and box or @boundingBox!
 		-- offset to y-axis according to defined alignment
@@ -122,7 +154,7 @@ class Path
 			-- does the reverse operation
 			@move -x + width * tx, -y + height * ty
 
-	-- makes a distortion based on the control points given by a quadrilateral
+	-- Makes a distortion based on the control points given by a quadrilateral
 	perspective: (mesh, real, mode) =>
 		path = mode == "warping" and Path({mesh}) or @
 		unless real
@@ -133,7 +165,7 @@ class Path
 			pt = uv\quadUV2PT unpack mesh
 			return pt.x, pt.y
 
-	-- creates a grid for the distortion envelope
+	-- Creates a grid for the distortion envelope
 	envelopeGrid: (numRows, numCols, isBezier) =>
 		{:assDraw, :l, :t, :width, :height} = @boundingBox!
 		rowDistance = height / numRows
@@ -160,7 +192,7 @@ class Path
 			rectsRow\allCurve!
 		return rectsRow\move(l, t), colDistance, rowDistance
 
-	-- makes a distortion based on the control points given by a mesh
+	-- Makes a distortion based on the control points given by a mesh
 	envelopeDistort: (gridMesh, gridReal, ep = 0.5) =>
 		assert #gridMesh == #gridReal, "The control points must have the same quantity!"
 		{:l, :t, :r, :b} = @boundingBox!
@@ -168,11 +200,11 @@ class Path
 			assert #real == #mesh, "The control points must have the same quantity!"
 			for i = 1, #mesh
 				with mesh[i]
-					.x = (.x == l and .x - ep or (.x == r and .x + ep or .x))
-					.y = (.y == t and .y - ep or (.y == b and .y + ep or .y))
+					.x = .x == l and .x - ep or (.x == r and .x + ep or .x)
+					.y = .y == t and .y - ep or (.y == b and .y + ep or .y)
 				with real[i] 
-					.x = (.x == l and .x - ep or (.x == r and .x + ep or .x))
-					.y = (.y == t and .y - ep or (.y == b and .y + ep or .y))
+					.x = .x == l and .x - ep or (.x == r and .x + ep or .x)
+					.y = .y == t and .y - ep or (.y == b and .y + ep or .y)
 			findAngles = (pt) ->
 				A = {}
 				for i = 1, #real
@@ -226,7 +258,7 @@ class Path
 				if pointInsidePolygon gridReal.path[i], pt
 					return distort gridMesh.path[i], gridReal.path[i], pt
 
-	-- checks if all contours are open
+	-- Checks if all contours are open
 	areContoursOpen: =>
 		for contour in *@path
 			firstPoint = contour[1]
@@ -235,7 +267,7 @@ class Path
 				return false
 		return true
 
-	-- closes all contours that are open
+	-- Closes all contours that are open
 	closeContours: =>
 		for contour in *@path
 			firstPoint = contour[1]
@@ -244,16 +276,18 @@ class Path
 				newPoint = firstPoint\clone!
 				newPoint.id = "l"
 				insert contour, newPoint
+		return @
 
-	-- opens all contours that are closed
+	-- Opens all contours that are closed
 	openContours: =>
 		for contour in *@path
 			firstPoint = contour[1]
 			lastPoint = contour[#contour]
 			if lastPoint.id == "l" and firstPoint\equals lastPoint
 				remove contour, #contour
+		return @
 
-	-- removes the duplicate points in sequence on the contours
+	-- Removes the duplicate points in sequence on the contours
 	cleanContours: =>
 		for contour in *@path
 			j = 2
@@ -269,9 +303,10 @@ class Path
 					remove contour, j
 					j -= 1
 				j += 1
+		return @
 
 	-- Converts all line segments to bezier segments
-	allCurve: =>
+	allCurve: (evenEqual) =>
 		newPath = {}
 		for contour in *@path
 			j, add = 2, {contour[1]\clone!}
@@ -285,15 +320,59 @@ class Path
 					j += 2
 				else
 					unless prev\equals curr
-						bezier = Path.lineToBezier prev, curr
-						for k = 2, #bezier
-							insert add, bezier[k]
+						a, b, c, d = Segment(prev, curr)\lineToBezier!
+						insert add, b
+						insert add, c
+						insert add, d
 					else
 						insert add, curr
 				j += 1
 			insert newPath, add
 		@path = newPath
 		return @
+
+	-- Gets the total length of the Path
+	getLength: =>
+		length = 0
+		@callBackPath (id, seg) ->
+			length += seg\getLength!
+		return length
+
+	-- Gets the normalized tangent on the Path given a time
+	getNormalized: (t = 0.5) =>
+		sumLength, length, tan, p, u = 0, t * @getLength!, nil, nil, nil
+		@callBackPath (id, seg) ->
+			segmentLen = seg\getLength!
+			if sumLength + segmentLen >= length
+                u = (length - sumLength) / segmentLen
+				tan, p, u = seg\getNormalized u
+				return "break"
+			sumLength += segmentLen
+		return tan, p, u
+
+	-- Distort the Path into another Path
+	-- http://www.planetclegg.com/projects/WarpingTextToSplines.html
+	inClip: (an = 7, clip, mode = "center", leng, offset = 0) =>
+		{:origin, :width, :height} = @boundingBox!
+		{x: ox, y: oy} = origin
+        if type(clip) == "string"
+            clip = Path(clip)\openContours!
+		leng or= clip\getLength!
+		size = leng - width
+		@flatten nil, true
+		sx = switch mode
+			when 1, "left"   then -ox + offset
+			when 2, "center" then -ox + offset + size * 0.5
+			when 3, "right"  then -ox - offset + size
+		sy = switch an
+			when 7, 8, 9 then -oy - height
+			when 4, 5, 6 then -oy - height * 0.5
+			when 1, 2, 3 then -oy
+		@map (x, y) ->
+            tan, pnt = clip\getNormalized (sx + x) / leng, true
+            px = pnt.x + (sy + y) * tan.x
+            py = pnt.y + (sy + y) * tan.y
+            return px, py
 
 	-- Create the @path table for the given string
 	import: (shape) =>
@@ -318,18 +397,16 @@ class Path
 			shape[i] = {}
 			j, contour, cmd = 2, @path[i], nil
 			while j <= #contour
-				prev = contour[j-1]
-				curr = contour[j]
-				curr\round decimal
+				prev = contour[j-1]\round decimal
+				curr = contour[j]\round decimal
 				if curr.id == "b"
-					b, c, d = curr, contour[j+1], contour[j+2]
-					c\round decimal
-					d\round decimal
+					c = contour[j+1]\round decimal
+					d = contour[j+2]\round decimal
 					if cmd == "b"
-						insert shape[i], "#{b.x} #{b.y} #{c.x} #{c.y} #{d.x} #{d.y}"
+						insert shape[i], "#{curr.x} #{curr.y} #{c.x} #{c.y} #{d.x} #{d.y}"
 					else
 						cmd = "b"
-						insert shape[i], "b #{b.x} #{b.y} #{c.x} #{c.y} #{d.x} #{d.y}"
+						insert shape[i], "b #{curr.x} #{curr.y} #{c.x} #{c.y} #{d.x} #{d.y}"
 					j += 2
 				else
 					if cmd == "l"
@@ -338,7 +415,6 @@ class Path
 						cmd = "l"
 						insert shape[i], "l #{curr.x} #{curr.y}"
 				j += 1
-			contour[1]\round decimal
 			shape[i] = "m #{contour[1].x} #{contour[1].y} " .. table.concat shape[i], " "
 		return table.concat shape, " "
 
@@ -353,8 +429,8 @@ class Path
 				prev = contour[j-1]
 				curr = contour[j]
 				if curr.id == "b"
-					a, b, c, d = prev, curr, contour[j+1], contour[j+2]
-					cppPath\add "bezier", reduce, a.x, a.y, b.x, b.y, c.x, c.y, d.x, d.y
+					c, d = contour[j+1], contour[j+2]
+					cppPath\add "bezier", reduce, prev.x, prev.y, curr.x, curr.y, c.x, c.y, d.x, d.y
 					j += 2
 				else
 					if flattenStraight
@@ -416,27 +492,6 @@ class Path
 		subj = subj\inflate delta, join_type, end_type, miter_limit, arc_tolerance, preserve_collinear, reverse_solution
 		@path = Path.convertFromClipper(subj).path
 		return @
-
-	-- converts a line segment to a bezier segment
-	lineToBezier: (p1, p2) ->
-		a = p1\clone!
-		b = Point (2 * p1.x + p2.x) / 3, (2 * p1.y + p2.y) / 3
-		c = Point (p1.x + 2 * p2.x) / 3, (p1.y + 2 * p2.y) / 3
-		d = p2\clone!
-		a.id, b.id, c.id, d.id = "l", "b", "b", "b"
-		return {a, b, c, d}
-
-	-- flattens the line segment
-	flattenLine: (p1, p2, len = p1\distance(p2), reduce = 1) ->
-		len = math.floor len / reduce + 0.5
-		points = {Point p1.x, p1.y}
-		for i = 1, len - 1
-			t = i / len
-			x = (1 - t) * p1.x + t * p2.x
-			y = (1 - t) * p1.y + t * p2.y
-			insert points, Point x, y
-		insert points, Point p2.x, p2.y
-		return points
 
 Path.PathSimplifier = (points, tolerance = 0.1, highestQuality, recreateBezier, angleThreshold) ->
 	simplifyRadialDist = (points, sqTolerance) ->

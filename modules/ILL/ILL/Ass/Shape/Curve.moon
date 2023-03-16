@@ -1,5 +1,5 @@
+import Math from require "ILL.ILL.Math"
 import Point from require "ILL.ILL.Ass.Shape.Point"
-import Aegi from require "ILL.ILL.Aegi"
 
 {:bor} = require "bit"
 {:insert} = table
@@ -7,16 +7,21 @@ import Aegi from require "ILL.ILL.Aegi"
 class Curve
 
 	-- Create a new Curve object
-	new: (@a = Point!, @b = Point!, @c = Point!, @d = Point!) =>
+	new: (@a = Point!, @b = Point!, @c = Point!, @d = Point!) => @a.id, @b.id, @c.id, @d.id = "l", "b", "b", "b"
 
 	-- Get the X position of a point running through the bezier for the given time.
-	getXatTime: (t) => (1 - t) ^ 3 * @a.x + 3 * t * (1 - t) ^ 2 * @b.x + 3 * t ^ 2 * (1 - t) * @c.x + t ^ 3 * @d.x
+	getXatTime: (t) =>
+		t = Math.clamp t, 0, 1
+		return (1 - t) ^ 3 * @a.x + 3 * t * (1 - t) ^ 2 * @b.x + 3 * t ^ 2 * (1 - t) * @c.x + t ^ 3 * @d.x
 
 	-- Get the Y position of a point running through the bezier for the given time.
-	getYatTime: (t) => (1 - t) ^ 3 * @a.y + 3 * t * (1 - t) ^ 2 * @b.y + 3 * t ^ 2 * (1 - t) * @c.y + t ^ 3 * @d.y
+	getYatTime: (t) =>
+		t = Math.clamp t, 0, 1
+		return (1 - t) ^ 3 * @a.y + 3 * t * (1 - t) ^ 2 * @b.y + 3 * t ^ 2 * (1 - t) * @c.y + t ^ 3 * @d.y
 
 	-- Get the X and Y position of a point running through the bezier for the given time.
 	getPTatTime: (t) =>
+		t = Math.clamp t, 0, 1
 		x = @getXatTime t
 		y = @getYatTime t
 		return Point x, y
@@ -48,6 +53,7 @@ class Curve
 
 	-- splits the bezier segment in two
 	split: (t) =>
+		t = Math.clamp t, 0, 1
 		{:a, :b, :c, :d} = @
 		v1 = a\lerp b, t
 		v2 = b\lerp c, t
@@ -60,6 +66,38 @@ class Curve
 			Curve v6, v5, v3, d
 		}
 
+	-- splits the bezier segment given an interval
+	splitAtInterval: (t, u) =>
+		t = Math.clamp t, 0, 1
+		u = Math.clamp u, 0, 1
+		if t > u
+			u, t = t, u
+		{x: x1, y: y1} = @a
+		{x: x2, y: y2} = @b
+		{x: x3, y: y3} = @c
+		{x: x4, y: y4} = @d
+		t2 = t * t
+		t3 = t2 * t
+		mt = t - 1
+		mt2 = mt * mt
+		mt3 = mt2 * mt
+		u2 = u * u
+		u3 = u2 * u
+		mu = u - 1
+		mu2 = mu * mu
+		mu3 = mu2 * mu
+		tu = t * u
+		a, b, c, d = Point!, Point!, Point!, Point!
+		a.x = -mt3 * x1 + 3 * t * mt2 * x2 - 3 * t2 * mt * x3 + t3 * x4
+		a.y = -mt3 * y1 + 3 * t * mt2 * y2 - 3 * t2 * mt * y3 + t3 * y4
+		b.x = -1 * mt2 * mu * x1 + mt * (3 * tu - 2 * t - u) * x2 + t * (-3 * tu + t + 2 * u) * x3 + t2 * u * x4
+		b.y = -1 * mt2 * mu * y1 + mt * (3 * tu - 2 * t - u) * y2 + t * (-3 * tu + t + 2 * u) * y3 + t2 * u * y4
+		c.x = -1 * mt * mu2 * x1 + mu * (3 * tu - t - 2 * u) * x2 + u * (-3 * tu + 2 * t + u) * x3 + t * u2 * x4
+		c.y = -1 * mt * mu2 * y1 + mu * (3 * tu - t - 2 * u) * y2 + u * (-3 * tu + 2 * t + u) * y3 + t * u2 * y4
+		d.x = -mu3 * x1 + 3 * u * mu2 * x2 - 3 * u2 * mu * x3 + u3 * x4
+		d.y = -mu3 * y1 + 3 * u * mu2 * y2 - 3 * u2 * mu * y3 + u3 * y4
+		return Curve a, b, c, d
+
 	-- gets the cubic coefficient of the bezier segment
 	getCoefficient: =>
 		{:a, :b, :c, :d} = @
@@ -71,15 +109,33 @@ class Curve
 		}
 
 	-- gets the cubic derivative of the bezier segment
-	getDerivative: (t, cf) =>
+	getDerivative: (t, cf = @getCoefficient!) =>
+		t = Math.clamp t, 0, 1
 		{a, b, c} = cf
 		x = c.x + t * (2 * b.x + 3 * a.x * t)
 		y = c.y + t * (2 * b.y + 3 * a.y * t)
 		return Point x, y
 
+	-- gets the normalized tangent given a time on a bezier segment
+	getNormalized: (t, inverse) =>
+		t = Math.clamp t, 0, 1
+		n = @getLength!
+		u = Curve.uniformTime @getArcLenghts(n), n, t
+		p = @getPTatTime u
+		tan = @getDerivative u
+        with tan
+            if inverse
+                .x, .y = .y, -.x
+            else
+                .x, .y = -.y, .x
+			mag = tan\vecMagnitude!
+			tan.x /= mag
+			tan.y /= mag
+		return tan, p, u
+
 	-- gets the real length of the segment through time
 	getLength: (t = 1) =>
-
+		t = Math.clamp t, 0, 1
 		abscissas = {
 			-0.0640568928626056299791002857091370970011, 0.0640568928626056299791002857091370970011
 			-0.1911188674736163106704367464772076345980, 0.1911188674736163106704367464772076345980
@@ -94,7 +150,6 @@ class Curve
 			-0.9747285559713094738043537290650419890881, 0.9747285559713094738043537290650419890881
 			-0.9951872199970213106468008845695294439793, 0.9951872199970213106468008845695294439793
 		}
-
 		weights = {
 			0.1279381953467521593204025975865079089999, 0.1279381953467521593204025975865079089999
 			0.1258374563468283025002847352880053222179, 0.1258374563468283025002847352880053222179
@@ -109,12 +164,10 @@ class Curve
 			0.0285313886289336633705904233693217975087, 0.0285313886289336633705904233693217975087
 			0.0123412297999872001830201639904771582223, 0.0123412297999872001830201639904771582223
 		}
-
 		len, cf, z = 0, @getCoefficient!, t / 2
 		for i = 1, #abscissas
 			drv = @getDerivative z * abscissas[i] + z, cf
 			len += weights[i] * drv\hypot!
-
 		return len * z
 
 	-- Return a table containing the lenght of all the arc
@@ -122,7 +175,6 @@ class Curve
 	getArcLenghts: (precision = 100) =>
 		z = 1 / precision
 		lengths, clen = {0}, 0
-
 		cx, cy = @getXatTime(0), @getYatTime(0)
 		for i = 1, precision
 			px, py = @getXatTime(i * z), @getYatTime(i * z)
@@ -130,27 +182,22 @@ class Curve
 			cx, cy = px, py
 			clen += math.sqrt dx * dx + dy * dy
 			insert lengths, clen
-
 		return lengths
 
 	uniformTime: (lengths, len, u) ->
 		targetLength = u * lengths[#lengths]
 		low, high, index = 0, len, 0
-
 		while low < high
 			index = low + bor (high - low) / 2, 0
 			if lengths[index + 1] < targetLength
 				low = index + 1
 			else
 				high = index
-
 		if lengths[index + 1] > targetLength
 			index -= 1
-
 		lengthBefore = lengths[index + 1]
 		if lengthBefore == targetLength
 			return index / len
-
 		return (index + (targetLength - lengthBefore) / (lengths[index + 2] - lengthBefore)) / len
 
 {:Curve}
