@@ -1,4 +1,4 @@
-export __ILL_VER__ = "1.1.1"
+export __ILL_VER__ = "1.1.2"
 
 import Aegi    from require "ILL.ILL.Aegi"
 import Math    from require "ILL.ILL.Math"

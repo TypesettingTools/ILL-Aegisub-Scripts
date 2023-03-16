@@ -50,7 +50,7 @@ class Segment
 				.x, .y = -.y, .x
 		mag = d\vecMagnitude!
 		tan = Point d.x / mag, d.y / mag
-		return tan, p, u
+		return tan, p, t
 
 	-- gets the real length of the segment through time
 	getLength: (t = 1) => t * @a\distance @b
