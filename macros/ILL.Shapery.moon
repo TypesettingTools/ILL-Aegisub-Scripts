@@ -5,6 +5,7 @@ export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
 depctrl = require("l0.DependencyControl") {
+	feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json",
 	{
 		{
 			"a-mo.ConfigHandler"
@@ -14,9 +15,15 @@ depctrl = require("l0.DependencyControl") {
 		}
 		{
 			"clipper2.clipper2"
+			version: "1.2.0"
+			url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
+			feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
 		}
 		{
-			"ILL.Main"
+			"ILL.ILL"
+			version: "1.1.2"
+			url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
+			feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
 		}
 	}
 }

@@ -1,0 +1,336 @@
+{
+    "dependencyControlFeedFormatVersion": "0.3.0",
+    "name": "ILL Aegisub Scripts",
+    "description": "A collection of macros and modules that seek to add some Illustrator like functionality to Aegisub",
+    "maintainer": "ILLTeam",
+    "baseUrl": "https://github.com/klsruan/ILL-Aegisub-Scripts",
+    "url": "@{baseUrl}",
+    "fileBaseUrl": "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/@{channel}/",
+    "knownFeeds": {
+        "ILL": "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json",
+        "a-mo": "https://raw.githubusercontent.com/TypesettingTools/Aegisub-Motion/DepCtrl/DependencyControl.json",
+        "zeref": "https://raw.githubusercontent.com/TypesettingTools/zeref-Aegisub-Scripts/main/DependencyControl.json",
+        "SubInspector": "https://raw.githubusercontent.com/TypesettingTools/SubInspector/master/DependencyControl.json",
+        "ffi-experiments": "https://raw.githubusercontent.com/TypesettingTools/ffi-experiments/master/DependencyControl.json"
+    },
+    "macros": {
+        "ILL.EnvelopeDistort": {
+            "url": "@{baseUrl}#@{namespace}",
+            "fileBaseUrl": "@{fileBaseUrl}macros/@{namespace}",
+            "channels": {
+                "main": {
+                    "default": true,
+                    "version": "1.0.3",
+                    "released": "2023-03-18",
+                    "files": [
+                        {
+                            "sha1": "4e89fcd6d55506d4820e45a62feac57bd98bff9b",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "name": ".moon"
+                        }
+                    ],
+                    "requiredModules": [
+                        {
+                            "moduleName": "ILL.ILL",
+                            "feed": "@{feed:ILL}",
+                            "version": "1.1.2"
+                        }
+                    ]
+                }
+            },
+            "changelog": {
+                "1.0.3": ["Initial depctrl release"]
+            },
+            "name": "Envelope Distort",
+            "description": "Allows you to warp and manipulate shapes within a customizable envelope",
+            "author": "ILLTeam"
+        },
+        "ILL.Shapery": {
+            "url": "@{baseUrl}#@{namespace}",
+            "fileBaseUrl": "@{fileBaseUrl}macros/@{namespace}",
+            "channels": {
+                "main": {
+                    "default": true,
+                    "version": "2.0.1",
+                    "released": "2023-03-18",
+                    "files": [
+                        {
+                            "sha1": "cc2156ded2496f36178be7736845ef1c65aed1ce",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "name": ".moon"
+                        }
+                    ],
+                    "requiredModules": [
+                        {
+                            "moduleName": "a-mo.ConfigHandler",
+                            "feed": "@{feed:a-mo}",
+                            "version": "1.1.4"
+                        },
+                        {
+                            "moduleName": "clipper2.clipper2",
+                            "feed": "@{feed:ILL}",
+                            "version": "1.2.0"
+                        },
+                        {
+                            "moduleName": "ILL.ILL",
+                            "feed": "@{feed:ILL}",
+                            "version": "1.1.2"
+                        }
+                    ]
+                }
+            },
+            "changelog": {
+                "2.0.1": ["Initial depctrl release"]
+            },
+            "name": "Shapery",
+            "description": "Does several types of shape manipulations from the simplest to the most complex",
+            "author": "ILLTeam"
+        },
+        "ILL.ImageTracer": {
+            "url": "@{baseUrl}#@{namespace}",
+            "fileBaseUrl": "@{fileBaseUrl}macros/@{namespace}",
+            "channels": {
+                "main": {
+                    "default": true,
+                    "version": "1.0.1",
+                    "released": "2023-03-18",
+                    "files": [
+                        {
+                            "sha1": "773bf82d47e0157eb8d41879f7f6494e01d62ef5",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "name": ".moon"
+                        }
+                    ],
+                    "requiredModules": [
+                        {
+                            "moduleName": "zimg.main",
+                            "feed": "@{feed:zeref}",
+                            "version": "1.0.0"
+                        },
+                        {
+                            "moduleName": "ILL.ILL",
+                            "feed": "@{feed:ILL}",
+                            "version": "1.1.2"
+                        }
+                    ]
+                }
+            },
+            "changelog": {
+                "1.0.1": ["Initial depctrl release"]
+            },
+            "name": "Image Tracer",
+            "description": "Raster image tracer and vectorizer",
+            "author": "ILLTeam"
+        },
+        "ILL.ChangeAlign": {
+            "url": "@{baseUrl}#@{namespace}",
+            "fileBaseUrl": "@{fileBaseUrl}macros/@{namespace}",
+            "channels": {
+                "main": {
+                    "default": true,
+                    "version": "1.0.1",
+                    "released": "2023-03-18",
+                    "files": [
+                        {
+                            "sha1": "41fc0112ffb2faac8cd351b56a626c2c674facd0",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "name": ".moon"
+                        }
+                    ],
+                    "requiredModules": [
+                        {
+                            "moduleName": "ILL.ILL",
+                            "feed": "@{feed:ILL}",
+                            "version": "1.1.2"
+                        }
+                    ]
+                }
+            },
+            "changelog": {
+                "1.0.1": ["Initial depctrl release"]
+            },
+            "name": "ILL - Change Alignment",
+            "description": "Changes the alignment of a text or shape without changing its original position",
+            "author": "ILLTeam"
+        }
+    },
+    "modules": {
+        "clipper2.clipper2": {
+            "url": "@{baseUrl}",
+            "author": "ILLTeam",
+            "name": "Clipper2",
+            "description": "A polygon clipping and offsetting library",
+            "fileBaseUrl": "@{fileBaseUrl}modules/@{namespacePath}",
+            "channels": {
+                "main": {
+                    "default": true,
+                    "version": "1.2.0",
+                    "released": "2023-03-18",
+                    "platforms": ["Windows-x64", "OSX-x64", "Linux-x64"],
+                    "files": [
+                        {
+                            "sha1": "d07e5fec5f1aaa76179dcf0b0bf86fc30b0d9b86",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "name": ".moon"
+                        },
+                        {
+                            "name": "/clipper2.dll",
+                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/clipper2.dll",
+                            "platform": "Windows-x64",
+                            "sha1": "b9955d54679603ea12f0c0d7d1a23e31be052179"
+                        },
+                        {
+                            "name": "/libclipper2.dylib",
+                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/libclipper2.dylib",
+                            "platform": "OSX-x64",
+                            "sha1": "279d4a58d155a6173307c5912b49bd77d5530206"
+                        },
+                        {
+                            "name": "/libclipper2.so",
+                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/libclipper2.so",
+                            "platform": "Linux-x64",
+                            "sha1": "b06594a07d7579f0d90d1eec2e8a9a1466e3331e"
+                        }
+                    ],
+                    "requiredModules": [
+                        {
+                            "moduleName": "ffi"
+                        },
+                        {
+                            "moduleName": "requireffi.requireffi",
+                            "feed": "@{feed:ffi-experiments}",
+                            "version": "0.1.2"
+                        }
+                    ]
+                }
+            },
+            "changelog": {
+                "1.2.0": ["Initial depctrl release"]
+            }
+        },
+        "ILL.ILL": {
+            "url": "@{baseUrl}",
+            "author": "ILLTeam",
+            "name": "ILL",
+            "description": "Module that eases the creation of macros with a focus on handling shapes.",
+            "fileBaseUrl": "@{fileBaseUrl}modules/@{namespacePath}",
+            "channels": {
+                "main": {
+                    "default": true,
+                    "version": "1.1.2",
+                    "released": "2023-03-18",
+                    "files": [
+                        {
+                            "name": ".moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "d7cf4c0cde8d41343ae7ca526c7dce25b78c2a7a"
+                        },
+                        {
+                            "name": "/Ass/Shape/Curve.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "52f7bc9c3fd98d318962fae909ba80613f46ba26"
+                        },
+                        {
+                            "name": "/Ass/Shape/Path.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "89fca49c1049bcbe5aae2c83c005eba4a2a6b2a3"
+                        },
+                        {
+                            "name": "/Ass/Shape/Point.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "b486cfc7560ca001ec427f813021a32b7414938f"
+                        },
+                        {
+                            "name": "/Ass/Shape/Segment.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "65520baba964da1a2315921452e8b00c18ff1f41"
+                        },
+                        {
+                            "name": "/Ass/Text/Tag.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "d186dd6aee0626b732e2efcd36dedbe063fee3bc"
+                        },
+                        {
+                            "name": "/Ass/Text/Tags.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "269f7192c533023ab8e3f43550157f588f17f2c6"
+                        },
+                        {
+                            "name": "/Ass/Text/Text.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "b63958ebaf1551d6ad3af2158c1778953a77e3d6"
+                        },
+                        {
+                            "name": "/Ass/Ass.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "b04ca5e4430aa6411200506b365b4a8fd44b0714"
+                        },
+                        {
+                            "name": "/Ass/Line.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "4c610d8b982819b78d827072edd63c5756323ba7"
+                        },
+                        {
+                            "name": "/Font/Font.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "f8b4ff142c945e7a97c0a5ba5a5e5a7590f7840f"
+                        },
+                        {
+                            "name": "/Font/Init.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "84f8a0f04ea07e888badc7c03c434984750d62f5"
+                        },
+                        {
+                            "name": "/Font/Unx.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "74d4ed96ee3dbfbedb59a0706442807710d407da"
+                        },
+                        {
+                            "name": "/Font/Win.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "1c4b932594fb1e46ca323ba14725dff5d109676a"
+                        },
+                        {
+                            "name": "/Aegi.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "b580218eaf562b008f24cd73d3c56cebceb14319"
+                        },
+                        {
+                            "name": "/Math.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "478543eff10f7d16b1c2471d384e7593d0e22039"
+                        },
+                        {
+                            "name": "/Table.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "e73c3f626709e759502e558dc0485978611d3987"
+                        },
+                        {
+                            "name": "/Util.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "2592061380a8983b6f4856912020d6240d2fdef4"
+                        }
+                    ],
+                    "requiredModules": [
+                        {
+                            "moduleName": "ffi"
+                        },
+                        {
+                            "moduleName": "SubInspector.Inspector",
+                            "feed": "@{feed:SubInspector}",
+                            "version": "0.7.2"
+                        },
+                        {
+                            "moduleName": "clipper2.clipper2",
+                            "feed": "@{feed:ILL}",
+                            "version": "1.2.0"
+                        }
+                    ]
+                }
+            },
+            "changelog": {
+                "1.1.2": ["Initial depctrl release"]
+            }
+        }
+    }
+}

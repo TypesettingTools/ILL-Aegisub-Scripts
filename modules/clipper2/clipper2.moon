@@ -1,7 +1,33 @@
-ffi = require "ffi"
-import C, cdef, gc, metatype from ffi
+versionRecord = "1.2.0"
 
-requireffi = require "requireffi.requireffi"
+haveDepCtrl, DependencyControl = pcall require, 'l0.DependencyControl'
+
+local depctrl, ffi, requireffi
+if haveDepCtrl
+    depctrl = DependencyControl({
+        name: "clipper2"
+        version: versionRecord
+        description: "A polygon clipping and offsetting library"
+        author: "ILLTeam"
+        url: "https://github.com/klsruan/ILL-Aegisub-Scripts"
+        moduleName: "clipper2.clipper2"
+        feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
+		{
+            { "ffi" }
+            {
+				"requireffi.requireffi"
+				version: "0.1.2"
+				url: "https://github.com/TypesettingTools/ffi-experiments"
+				feed: "https://raw.githubusercontent.com/TypesettingTools/ffi-experiments/master/DependencyControl.json"
+			}
+        }
+    })
+    ffi, requireffi = depctrl\requireModules!
+else
+    ffi = require "ffi"
+    requireffi = require "requireffi.requireffi"
+
+import C, cdef, gc, metatype from ffi
 pc = requireffi "clipper2.clipper2.clipper2"
 
 cdef [[
@@ -56,7 +82,8 @@ SetEnum  = (enum, enumName, n) ->
 CPP = {
 	path: {}
 	paths: {}
-	version: -> ffi.string pc.version!
+	version: versionRecord
+	ffiversion: -> ffi.string pc.version!
 	viewError: -> ffi.string pc.errVal!
 	setPrecision: (n = 3) -> pc.setPrecision n
 }
@@ -137,4 +164,7 @@ CPP.paths.xor = (paths, fr = 1) =>
 metatype "PathD",    {__index: CPP.path}
 metatype "PathsD",   {__index: CPP.paths}
 
-return CPP
+if haveDepCtrl
+	return depctrl\register CPP
+else
+	return CPP
