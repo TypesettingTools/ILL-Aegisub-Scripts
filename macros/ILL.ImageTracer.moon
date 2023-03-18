@@ -5,10 +5,21 @@ export script_author      = "ILLTeam"
 export script_namespace   = "ILL.ImageTracer"
 
 depctrl = require("l0.DependencyControl") {
+	feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json",
 	{
 		{"ffi"}
-		{"zimg.main"}
-		{"ILL.Main"}
+		{
+			"zimg.main"
+			version: "1.0.0"
+			url: "https://github.com/TypesettingTools/zeref-Aegisub-Scripts"
+			feed: "https://raw.githubusercontent.com/TypesettingTools/zeref-Aegisub-Scripts/main/DependencyControl.json"
+		}
+		{
+			"ILL.ILL"
+			version: "1.1.2"
+			url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
+			feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
+		}
 	}
 }
 
