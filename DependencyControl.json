@@ -53,11 +53,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.0.1",
-                    "released": "2023-03-18",
+                    "version": "2.0.2",
+                    "released": "2023-03-20",
                     "files": [
                         {
-                            "sha1": "cc2156ded2496f36178be7736845ef1c65aed1ce",
+                            "sha1": "7e0dfb8bef53d518af9fc2666f62cbd76dc92ed7",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -84,6 +84,9 @@
             "changelog": {
                 "2.0.1": [
                     "Initial depctrl release"
+                ],
+                "2.0.2": [
+                    "Fix Shapery Macros / Expand bug"
                 ]
             },
             "name": "Shapery",
