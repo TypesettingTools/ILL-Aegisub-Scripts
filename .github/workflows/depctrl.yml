@@ -26,5 +26,4 @@ jobs:
           git config user.name "DepCtrl Updater"
           git config user.email github-actions@github.com
           git add DependencyControl.json
-          git commit -m "Update depctrl feed"
-          git push
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update depctrl feed"; git push)
