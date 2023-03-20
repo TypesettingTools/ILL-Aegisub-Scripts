@@ -1,4 +1,4 @@
-versionRecord = "1.2.0"
+export module_version = "1.2.1"
 
 haveDepCtrl, DependencyControl = pcall require, 'l0.DependencyControl'
 
@@ -6,7 +6,7 @@ local depctrl, ffi, requireffi
 if haveDepCtrl
     depctrl = DependencyControl({
         name: "clipper2"
-        version: versionRecord
+        version: module_version
         description: "A polygon clipping and offsetting library"
         author: "ILLTeam"
         url: "https://github.com/klsruan/ILL-Aegisub-Scripts"
@@ -82,7 +82,7 @@ SetEnum  = (enum, enumName, n) ->
 CPP = {
 	path: {}
 	paths: {}
-	version: versionRecord
+	version: module_version
 	ffiversion: -> ffi.string pc.version!
 	viewError: -> ffi.string pc.errVal!
 	setPrecision: (n = 3) -> pc.setPrecision n
