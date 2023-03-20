@@ -1,6 +1,6 @@
 export script_name        = "Shapery"
 export script_description = "Does several types of shape manipulations from the simplest to the most complex"
-export script_version     = "2.0.1"
+export script_version     = "2.0.2"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
@@ -574,7 +574,10 @@ ShaperyMacros = (ass, macro) ->
 								pathClip = (pathOutline and pathOutline or path)\clone!
 								pathShadow = pathClip\clone!
 								pathShadow\move xshad, yshad
-								pathShadow\difference cutShadow\offset -global.cutBordShadow, "miter"
+								if passOutline
+									pathShadow\difference cutShadow\offset -global.cutBordShadow, "miter"
+								else
+									pathShadow\difference path
 								-- adds shadow
 								line.shape = pathShadow\export!
 								line.tags\insert {{"c", color4}}
