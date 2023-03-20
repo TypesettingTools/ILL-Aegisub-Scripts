@@ -1,0 +1,30 @@
+name: "Update DependencyControl feed"
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  depctrl-feed:
+    name: "Update DependencyControl Feed"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.repository.default_branch }}
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: "Update DependencyControl Feed"
+        run: python .github/workflows/updateFeed.py
+        env:
+          AUTOMATION_CHANGELOG: ${{ github.event.head_commit.message }}
+      - name: "Commit Changes"
+        run: |
+          git config user.name "DepCtrl Updater"
+          git config user.email github-actions@github.com
+          git add DependencyControl.json
+          git commit -m "Update depctrl feed"
+          git push

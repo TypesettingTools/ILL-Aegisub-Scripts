@@ -1,8 +1,8 @@
-export __ILL_VER__ = "1.1.2"
+export module_version = "1.1.3"
 DependencyControl = require "l0.DependencyControl"
 depctrl = DependencyControl({
 	name: "ILL"
-	version: __ILL_VER__
+	version: module_version
 	description: "Module that eases the creation of macros with a focus on handling shapes."
 	author: "ILLTeam"
 	moduleName: "ILL.ILL"
@@ -46,5 +46,5 @@ return depctrl\register {
 	:Tag, :Tags, :Text
 	:Ass, :Line
 	:Font
-	version: __ILL_VER__
+	version: module_version
 }
