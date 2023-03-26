@@ -176,12 +176,14 @@ class Ass
 	-- sets the final value of the text
 	setText: (l, first, buildTextInstance) ->
 		if first and l.tags
+			l.tags\clear l.styleref
 			l.text.tagsBlocks[1] = l.tags\__tostring!
 			l.text = l.text\__tostring!
 		elseif buildTextInstance
 			l.text = l.text\__tostring!
 		else
 			if l.tags
+				l.tags\clear l.styleref
 				l.text = l.tags\__tostring!
 				l.text = l.text\gsub "{%s*}", ""
 			else

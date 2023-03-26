@@ -8,6 +8,7 @@ export ASS_TAGS = {
 		["pattern_value"]: "%s*([1-9])"
 		["style_name"]: "align"
 		["typer"]: "unsigned int"
+		["first_category"]: true
 		["value"]: 7
 	}
 	["fn"]: {
@@ -279,24 +280,28 @@ export ASS_TAGS = {
 		["pattern"]: "%b()"
 		["pattern_value"]: "%((.+)%)"
 		["typer"]: "coords"
+		["first_category"]: true
 	}
 	["move"]: {
 		["ass"]: "\\move"
 		["pattern"]: "%b()"
 		["pattern_value"]: "%((.+)%)"
 		["typer"]: "coords"
+		["first_category"]: true
 	}
 	["org"]: {
 		["ass"]: "\\org"
 		["pattern"]: "%b()"
 		["pattern_value"]: "%((.+)%)"
 		["typer"]: "coords"
+		["first_category"]: true
 	}
 	["clip"]: {
 		["ass"]: "\\clip"
 		["pattern"]: "%b()"
 		["pattern_value"]: "%((.+)%)"
 		["typer"]: "coords"
+		["first_category"]: true
 		["transformable"]: true
 	}
 	["iclip"]: {
@@ -304,6 +309,7 @@ export ASS_TAGS = {
 		["pattern"]: "%b()"
 		["pattern_value"]: "%((.+)%)"
 		["typer"]: "coords"
+		["first_category"]: true
 		["transformable"]: true
 	}
 	["fad"]: {
@@ -311,12 +317,14 @@ export ASS_TAGS = {
 		["pattern"]: "%b()"
 		["pattern_value"]: "%((.+)%)"
 		["typer"]: "coords"
+		["first_category"]: true
 	}
 	["fade"]: {
 		["ass"]: "\\fade"
 		["pattern"]: "%b()"
 		["pattern_value"]: "%((.+)%)"
 		["typer"]: "coords"
+		["first_category"]: true
 	}
 	["t"]: {
 		["ass"]: "\\t"

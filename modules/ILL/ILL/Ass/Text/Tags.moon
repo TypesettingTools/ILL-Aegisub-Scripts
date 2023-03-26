@@ -4,7 +4,7 @@ import Util from require "ILL.ILL.Util"
 class Tags
 
 	-- sets the tag value
-	set: (@tags) =>
+	set: (@tags = "") =>
 		-- corrects the positioning of the transformation tags,
 		-- some of them may be internally grouped,
 		-- which would be functional, but not ideal
@@ -151,6 +151,31 @@ class Tags
 		@tags = split.__tostring!
 		@close!
 		return @
+
+	-- removes duplicate tags
+	clear: (styleref) =>
+		get = (split, tagName) ->
+			local j
+			for i = 1, #split
+				{:name, :tag} = split[i]
+				if name == tagName
+					j = i
+					if tag.first_category
+						break
+			return split[j]
+		split, newSplit, save = @split!, {}, {}
+		for i = 1, #split
+			{:name} = split[i]
+			unless save[name]
+				result = get split, name
+				{:style_name, :value} = result.tag
+				if styleref and style_name and (styleref[style_name] == value)
+					save[name] = true
+					continue
+				table.insert newSplit, result
+				save[name] = true
+		@tags = table.concat [s\__tostring! for s in *newSplit]
+		@close!
 
 	-- checks if the tag exists in the tags
 	existsTag: (name) =>

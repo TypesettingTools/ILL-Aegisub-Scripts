@@ -1,6 +1,6 @@
-export module_version = "1.1.3"
-DependencyControl = require "l0.DependencyControl"
-depctrl = DependencyControl({
+export module_version = "1.2.0"
+
+depctrl = require("l0.DependencyControl") {
 	name: "ILL"
 	version: module_version
 	description: "Module that eases the creation of macros with a focus on handling shapes."
@@ -9,21 +9,15 @@ depctrl = DependencyControl({
 	url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
 	feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
 	{
-		"ffi",
-		{
-			"SubInspector.Inspector"
-			version: "0.7.2"
-			url: "https://github.com/TypesettingTools/SubInspector"
-			feed: "https://raw.githubusercontent.com/TypesettingTools/SubInspector/master/DependencyControl.json"
-		},
+		"ffi"
 		{
 			"clipper2.clipper2"
-			version: "1.2.0"
+			version: "1.3.0"
 			url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
 			feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
-		},
-	},
-})
+		}
+	}
+}
 
 import Aegi    from require "ILL.ILL.Aegi"
 import Math    from require "ILL.ILL.Math"
@@ -40,7 +34,7 @@ import Tags    from require "ILL.ILL.Ass.Text.Tags"
 import Text    from require "ILL.ILL.Ass.Text.Text"
 import Font    from require "ILL.ILL.Font.Font"
 
-return depctrl\register {
+depctrl\register {
 	:Aegi, :Math, :Table, :Util
 	:Curve, :Path, :Point, :Segment
 	:Tag, :Tags, :Text
