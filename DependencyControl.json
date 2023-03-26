@@ -20,11 +20,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.0.3",
-                    "released": "2023-03-18",
+                    "version": "1.0.4",
+                    "released": "2023-03-26",
                     "files": [
                         {
-                            "sha1": "4e89fcd6d55506d4820e45a62feac57bd98bff9b",
+                            "sha1": "4025fd360a1de8fa6ca7192e156a9e44522d44c8",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -41,6 +41,9 @@
             "changelog": {
                 "1.0.3": [
                     "Initial depctrl release"
+                ],
+                "1.0.4": [
+                    "Update macros"
                 ]
             },
             "name": "Envelope Distort",
@@ -53,11 +56,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.0.2",
-                    "released": "2023-03-20",
+                    "version": "2.1.0",
+                    "released": "2023-03-26",
                     "files": [
                         {
-                            "sha1": "7e0dfb8bef53d518af9fc2666f62cbd76dc92ed7",
+                            "sha1": "4c96502de16e64cfa21b27d0ef24593287241f2d",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -87,6 +90,9 @@
                 ],
                 "2.0.2": [
                     "Fix Shapery Macros / Expand bug"
+                ],
+                "2.1.0": [
+                    "Update macros"
                 ]
             },
             "name": "Shapery",
@@ -99,11 +105,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.0.1",
-                    "released": "2023-03-18",
+                    "version": "1.0.2",
+                    "released": "2023-03-26",
                     "files": [
                         {
-                            "sha1": "773bf82d47e0157eb8d41879f7f6494e01d62ef5",
+                            "sha1": "ce17354604d0caa5166da9b8b8f1dfd0c0d3f365",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -125,6 +131,9 @@
             "changelog": {
                 "1.0.1": [
                     "Initial depctrl release"
+                ],
+                "1.0.2": [
+                    "Update macros"
                 ]
             },
             "name": "Image Tracer",
@@ -137,11 +146,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.0.1",
-                    "released": "2023-03-18",
+                    "version": "1.0.2",
+                    "released": "2023-03-26",
                     "files": [
                         {
-                            "sha1": "41fc0112ffb2faac8cd351b56a626c2c674facd0",
+                            "sha1": "3ebde8854cf5be18056468c878d5cecc57880ed4",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -158,6 +167,9 @@
             "changelog": {
                 "1.0.1": [
                     "Initial depctrl release"
+                ],
+                "1.0.2": [
+                    "Update macros"
                 ]
             },
             "name": "ILL - Change Alignment",
