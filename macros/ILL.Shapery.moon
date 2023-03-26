@@ -1,6 +1,6 @@
 export script_name        = "Shapery"
 export script_description = "Does several types of shape manipulations from the simplest to the most complex"
-export script_version     = "2.0.2"
+export script_version     = "2.1.0"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
@@ -15,13 +15,13 @@ depctrl = require("l0.DependencyControl") {
 		}
 		{
 			"clipper2.clipper2"
-			version: "1.2.0"
+			version: "1.3.0"
 			url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
 			feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
 		}
 		{
 			"ILL.ILL"
-			version: "1.1.2"
+			version: "1.2.0"
 			url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
 			feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
 		}
@@ -342,7 +342,7 @@ shadow3D = (shape, xshad, yshad) ->
 		pb = pathB.path[i]
 		for j = 1, #pa - 1
 			newPathClipper = Clipper.path.new!
-			newPathClipper\push "line", toClockWise {pa[j], pa[j + 1], pb[j + 1], pb[j]}
+			newPathClipper\push toClockWise {pa[j], pa[j + 1], pb[j + 1], pb[j]}
 			newPathsClipper\add newPathClipper
 	return Path.convertFromClipper(pathsClipperA\union newPathsClipper)\export!
 
@@ -546,7 +546,7 @@ ShaperyMacros = (ass, macro) ->
 		ass\progressLine s, i, n
 		Line.extend ass, lcopy, i
 		switch macro
-			when "Expand"
+			when "Shape expand"
 				ass\removeLine l, s
 				Line.callBackExpand ass, lcopy, nil, (line) ->
 					copy = Table.copy line
@@ -571,19 +571,21 @@ ShaperyMacros = (ass, macro) ->
 									cutShadow = pathOutline\clone!
 							-- solves shadow
 							if passShadows
-								pathClip = (pathOutline and pathOutline or path)\clone!
-								pathShadow = pathClip\clone!
+								pathShadow = (pathOutline and pathOutline or path)\clone!
 								pathShadow\move xshad, yshad
 								if passOutline
-									pathShadow\difference cutShadow\offset -global.cutBordShadow, "miter"
+									if color3 == color4
+										pathShadow\unite pathOutline
+										pathShadow\difference path
+									else
+										pathShadow\difference cutShadow\offset -global.cutBordShadow, "miter"
 								else
 									pathShadow\difference path
-								-- adds shadow
 								line.shape = pathShadow\export!
 								line.tags\insert {{"c", color4}}
 								ass\insertLine line, s
 							-- solves outline
-							if passOutline
+							if passOutline and not (passShadows and color3 == color4)
 								path\offset -global.cutBordShadow, "miter"
 								pathOutline\difference path
 								-- adds outline
@@ -615,6 +617,13 @@ ShaperyMacros = (ass, macro) ->
 					ass\setLine lcopy, s
 				else
 					ass\error s, "Expected \\clip or \\iclip tag"
+			when "Shape bounding box"
+				if lcopy.isShape
+					{:assDraw} = Path(lcopy.shape)\boundingBox!
+					lcopy.shape = assDraw
+					ass\setLine lcopy, s
+				else
+					ass\warning s, "Expected a shape"
 			when "Shape to origin", "Shape to center"
 				if lcopy.isShape
 					torigin = macro == "Shape to origin"
@@ -977,9 +986,10 @@ depctrl\registerMacros {
 }, "Shapery"
 
 depctrl\registerMacros {
-	{"Expand",          "", ShaperyMacrosDialog "Expand"}
-	{"Clip to shape",   "", ShaperyMacrosDialog "Clip to shape"}
-	{"Shape to clip",   "", ShaperyMacrosDialog "Shape to clip"}
-	{"Shape to origin", "", ShaperyMacrosDialog "Shape to origin"}
-	{"Shape to center", "", ShaperyMacrosDialog "Shape to center"}
+	{"Shape expand",       "", ShaperyMacrosDialog "Shape expand"}
+	{"Clip to shape",      "", ShaperyMacrosDialog "Clip to shape"}
+	{"Shape to clip",      "", ShaperyMacrosDialog "Shape to clip"}
+	{"Shape to origin",    "", ShaperyMacrosDialog "Shape to origin"}
+	{"Shape to center",    "", ShaperyMacrosDialog "Shape to center"}
+	{"Shape bounding box", "", ShaperyMacrosDialog "Shape bounding box"}
 }, ": Shapery macros :"

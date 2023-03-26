@@ -1,6 +1,6 @@
 export script_name        = "Envelope Distort"
 export script_description = "Allows you to warp and manipulate shapes within a customizable envelope"
-export script_version     = "1.0.3"
+export script_version     = "1.0.4"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.EnvelopeDistort"
 
@@ -9,7 +9,7 @@ depctrl = require("l0.DependencyControl") {
 	{
 		{
 			"ILL.ILL"
-			version: "1.1.2"
+			version: "1.2.0"
 			url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
 			feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
 		}

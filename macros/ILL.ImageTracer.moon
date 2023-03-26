@@ -1,6 +1,6 @@
 export script_name        = "Image Tracer"
 export script_description = "Raster image tracer and vectorizer"
-export script_version     = "1.0.1"
+export script_version     = "1.0.2"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.ImageTracer"
 
@@ -16,7 +16,7 @@ depctrl = require("l0.DependencyControl") {
 		}
 		{
 			"ILL.ILL"
-			version: "1.1.2"
+			version: "1.2.0"
 			url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
 			feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
 		}
@@ -915,6 +915,7 @@ main = (sub, sel, activeLine) ->
 			Aegi.progressSet key, asslineslen
 			line = Table.copy sub[activeLine]
 			line.isShape = true
+			line.text = ""
 			line.shape = val
 			ass\insertLine line, activeLine
 		return ass\getNewSelection!

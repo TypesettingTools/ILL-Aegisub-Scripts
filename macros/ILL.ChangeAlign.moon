@@ -1,6 +1,6 @@
-export script_name        = "ILL - Change Alignment"
+export script_name        = "Change Alignment"
 export script_description = "Changes the alignment of a text or shape without changing its original position"
-export script_version     = "1.0.1"
+export script_version     = "1.0.2"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.ChangeAlign"
 
@@ -9,7 +9,7 @@ depctrl = require("l0.DependencyControl") {
 	{
 		{
 			"ILL.ILL"
-			version: "1.1.2"
+			version: "1.2.0"
 			url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
 			feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
 		}
@@ -38,4 +38,6 @@ main = (sub, sel, activeLine) ->
 			Line.changeAlign line, nan, width, height
 			ass\setLine line, s, true
 
-depctrl\registerMacro main
+depctrl\registerMacros {
+	{script_name, script_description, main}
+}, ": ILL macros :"
