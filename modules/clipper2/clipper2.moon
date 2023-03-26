@@ -1,4 +1,4 @@
-export module_version = "1.2.1"
+export module_version = "1.3.0"
 
 haveDepCtrl, DependencyControl = pcall require, 'l0.DependencyControl'
 
@@ -103,11 +103,11 @@ CPP.path.get = (i = 1) => pc.PathGet @, i < 1 and 0 or i - 1
 CPP.path.set = (i = 1, x, y) => pc.PathSet @, i < 1 and 0 or i - 1, x, y
 CPP.path.move = (x, y) => gc pc.PathMove(@, x, y), pc.PathFree
 CPP.path.flatten = (reduce = 2) => gc pc.PathFlatten(@, reduce), pc.PathFree
-CPP.path.push = (mode, ...) =>
+CPP.path.push = (...) =>
 	-- \push {x: 0, y: 0}, Point()
 	for {:x, :y} in *{...}
-		@add mode, x, y
-CPP.path.filter = (fn) =>
+		@add "line", x, y
+CPP.path.map = (fn) =>
 	for i = 1, @len!
 		p = @get i
 		x, y = fn p.x, p.y
@@ -126,9 +126,9 @@ CPP.paths.push = (...) =>
 	-- \push Path!, Path!
 	for path in *{...}
 		@add path
-CPP.paths.filter = (fn) =>
+CPP.paths.map = (fn) =>
 	for i = 1, @len!
-		@get(i)\filter fn
+		@get(i)\map fn
 
 CPP.paths.inflate = (delta, jt = 0, et = 0, mt = 2, at = 0) =>
 	jt = SetEnum JoinType, "JoinType", jt
