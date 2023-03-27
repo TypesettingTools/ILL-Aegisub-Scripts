@@ -109,7 +109,7 @@
                     "released": "2023-03-26",
                     "files": [
                         {
-                            "sha1": "54de8495d552639ac72d71a0d0f56475f57bdc7e",
+                            "sha1": "ba83ce497b10f0ef90d632dd1fa11aa03c84f6ab",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
