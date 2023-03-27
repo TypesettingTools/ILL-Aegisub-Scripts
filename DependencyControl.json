@@ -116,8 +116,8 @@
                     ],
                     "requiredModules": [
                         {
-                            "moduleName": "zimg.main",
-                            "feed": "@{feed:zeref}",
+                            "moduleName": "ILL.IMG",
+                            "feed": "@{feed:ILL}",
                             "version": "1.0.0"
                         },
                         {
@@ -246,7 +246,7 @@
         "ILL.ILL": {
             "url": "@{baseUrl}",
             "author": "ILLTeam",
-            "name": "ILL",
+            "name": "ILL Library",
             "description": "Module that eases the creation of macros with a focus on handling shapes.",
             "fileBaseUrl": "@{fileBaseUrl}modules/@{namespacePath}",
             "channels": {
@@ -374,6 +374,132 @@
                     "Update ILL"
                 ]
             }
+        },
+        "ILL.IMG": {
+            "url": "@{baseUrl}",
+            "author": "ILLTeam",
+            "name": "ILL Image Module",
+            "description": "A library for loading images in various foramts",
+            "fileBaseUrl": "@{fileBaseUrl}modules/@{namespacePath}",
+            "channels": {
+                "main": {
+                    "version": "1.0.0",
+                    "released": "2023-03-27",
+                    "default": true,
+                    "platforms": [
+                        "Windows-x64",
+                        "OSX-x64",
+                        "Linux-x64"
+                    ],
+                    "files": [
+                        {
+                            "name": ".moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "e3cae4aba87769b01cdc227761a29e64c00de53e"
+                        },
+                        {
+                            "name": "/Potrace.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "7629c90f24800c3881a6e0d3e9dd3bfd9bc0579d"
+                        },
+                        {
+                            "name": "/Tracer.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "30702c6e27ff7a9b1738ce1bc4f9242e3c80f2fe"
+                        },
+                        {
+                            "name": "/bitmap/bitmap.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "dc8c5215fdaf48d27b13b72d986976180753755f"
+                        },
+                        {
+                            "name": "/buffer/buffer.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "8ce2bafdcb207eb11b039857bb1cd4aaac1d38b3"
+                        },
+                        {
+                            "name": "/giflib/giflib.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "c50ec056071d5ffb0b87c2f9ebc80b6a9f9d1993"
+                        },
+                        {
+                            "name": "/giflib/giflib/giflib.dll",
+                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/giflib.dll",
+                            "platform": "Windows-x64",
+                            "sha1": "f6db7b35f93ec692c5b11a289d30b4262aa55b5c"
+                        },
+                        {
+                            "name": "/giflib/giflib/libgiflib.dylib",
+                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/libgiflib.dylib",
+                            "platform": "OSX-x64",
+                            "sha1": "dcf9bf1141348e0e49c5e755fc0afa3a45b8b7f4"
+                        },
+                        {
+                            "name": "/giflib/giflib/libgiflib.so",
+                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/libgiflib.so",
+                            "platform": "Linux-x64",
+                            "sha1": "5fc0374a1f89d0f786cac5bbce5ce4cb512a3902"
+                        },
+                        {
+                            "name": "/lodepng/lodepng.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "307316c695a862251160a848c4d648c1e5ac4bfd"
+                        },
+                        {
+                            "name": "/lodepng/lodepng/lodepng.dll",
+                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/lodepng.dll",
+                            "platform": "Windows-x64",
+                            "sha1": "106993c11b4e72d00b813509e2cf9f9a16e3a5ab"
+                        },
+                        {
+                            "name": "/lodepng/lodepng/liblodepng.dylib",
+                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/liblodepng.dylib",
+                            "platform": "OSX-x64",
+                            "sha1": "4d7452a0a77551437062d59d9ef01f141422b562"
+                        },
+                        {
+                            "name": "/lodepng/lodepng/liblodepng.so",
+                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/liblodepng.so",
+                            "platform": "Linux-x64",
+                            "sha1": "22a58b4cce2f202c7e96d3518fa35868793aac43"
+                        },
+                        {
+                            "name": "/turbojpeg/turbojpeg.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "3b73ea1bb0e0831648a4baa0c7d4796027daf885"
+                        },
+                        {
+                            "name": "/turbojpeg/turbojpeg/turbojpeg.dll",
+                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/turbojpeg.dll",
+                            "platform": "Windows-x64",
+                            "sha1": "fac16a6991bc5ccf79cfc12717b91828e0280179"
+                        },
+                        {
+                            "name": "/turbojpeg/turbojpeg/libturbojpeg.dylib",
+                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/libturbojpeg.dylib",
+                            "platform": "OSX-x64",
+                            "sha1": "d99df3508622fa757adff37a782e67a6cd33fda1"
+                        },
+                        {
+                            "name": "/turbojpeg/turbojpeg/libturbojpeg.so",
+                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/libturbojpeg.so",
+                            "platform": "Linux-x64",
+                            "sha1": "c76a65d5a0433eeaa67e9b1ea4739b6118dfeb29"
+                        }
+                    ],
+                    "requiredModules": [
+                        {
+                            "moduleName": "ffi"
+                        },
+                        {
+                            "moduleName": "requireffi.requireffi",
+                            "version": "0.1.2",
+                            "feed": "@{feed:ffi-experiments}"
+                        }
+                    ]
+                }
+            },
+            "changelog": {}
         }
     }
 }
