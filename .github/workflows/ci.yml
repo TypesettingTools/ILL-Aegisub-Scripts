@@ -36,41 +36,49 @@ jobs:
         run: |
           ffi-packages/build.bat
           bash ffi-packages/build.sh
+          mkdir ffi-packages/binaries
+          cp ffi-packages/Clipper2/buildCP/clipper2.dll ffi-packages/binaries/clipper2.dll
+          cp ffi-packages/Images/buildJP/turbojpeg.dll ffi-packages/binaries/turbojpeg.dll
+          cp ffi-packages/Images/buildLG/libgiflib.dll ffi-packages/binaries/giflib.dll
+          cp ffi-packages/Images/buildLG/liblodepng.dll ffi-packages/binaries/lodepng.dll
 
       - name: Upload Artifacts Windows
         uses: actions/upload-artifact@v2
         if: matrix.os.host == 'windows-latest'
         with:
           name: Windows
-          path: |
-            ffi-packages/Clipper2/buildCP/Release/*.dll
-            ffi-packages/Images/buildJP/Release/*.dll
-            ffi-packages/Images/buildLG/*.dll
+          path: ffi-packages/binaries/*.dll
 
       - name: Building Linux
         if: matrix.os.host == 'ubuntu-latest'
-        run: bash ffi-packages/build.sh -all
+        run: |
+          bash ffi-packages/build.sh -all
+          mkdir ffi-packages/binaries
+          cp ffi-packages/Clipper2/buildCP/libclipper2.so ffi-packages/binaries/libclipper2.so
+          cp ffi-packages/Images/buildJP/libturbojpeg.so ffi-packages/binaries/libturbojpeg.so
+          cp ffi-packages/Images/buildLG/libgiflib.so ffi-packages/binaries/libgiflib.so
+          cp ffi-packages/Images/buildLG/liblodepng.so ffi-packages/binaries/liblodepng.so
 
       - name: Upload Artifacts Linux
         uses: actions/upload-artifact@v2
         if: matrix.os.host == 'ubuntu-latest'
         with:
           name: Linux
-          path: |
-            ffi-packages/Clipper2/buildCP/*.so
-            ffi-packages/Images/buildJP/*.so
-            ffi-packages/Images/buildLG/*.so
+          path: ffi-packages/binaries/*.so
 
       - name: Building MacOS
         if: matrix.os.host == 'macos-11'
-        run: bash ffi-packages/build.sh -all
+        run: |
+          bash ffi-packages/build.sh -all
+          mkdir ffi-packages/binaries
+          cp ffi-packages/Clipper2/buildCP/libclipper2.dylib ffi-packages/binaries/libclipper2.dylib
+          cp ffi-packages/Images/buildJP/libturbojpeg.dylib ffi-packages/binaries/libturbojpeg.dylib
+          cp ffi-packages/Images/buildLG/libgiflib.dylib ffi-packages/binaries/libgiflib.dylib
+          cp ffi-packages/Images/buildLG/liblodepng.dylib ffi-packages/binaries/liblodepng.dylib
 
       - name: Upload Artifacts MacOS
         uses: actions/upload-artifact@v2
         if: matrix.os.host == 'macos-11'
         with:
           name: MacOS
-          path: |
-            ffi-packages/Clipper2/buildCP/*.dylib
-            ffi-packages/Images/buildJP/*.dylib
-            ffi-packages/Images/buildLG/*.dylib
+          path: ffi-packages/binaries/*.dylib
