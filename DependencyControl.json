@@ -23,7 +23,7 @@
                     "released": "2023-03-26",
                     "files": [
                         {
-                            "sha1": "4025fd360a1de8fa6ca7192e156a9e44522d44c8",
+                            "sha1": "415d24b1f3f1e45967bf1f3c5c1ba4e4cdc8aaab",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -59,7 +59,7 @@
                     "released": "2023-03-26",
                     "files": [
                         {
-                            "sha1": "4c96502de16e64cfa21b27d0ef24593287241f2d",
+                            "sha1": "59c8f747e074bad8f64f52c487a0c2b3315da612",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -108,7 +108,7 @@
                     "released": "2023-03-26",
                     "files": [
                         {
-                            "sha1": "ba83ce497b10f0ef90d632dd1fa11aa03c84f6ab",
+                            "sha1": "dd4b7f738e2be3aeee8fb7c12f5f997dc94bab68",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -149,7 +149,7 @@
                     "released": "2023-03-26",
                     "files": [
                         {
-                            "sha1": "3ebde8854cf5be18056468c878d5cecc57880ed4",
+                            "sha1": "6ec69c64ce556eed8ac605ee4798ddc0e81b2d5b",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -195,7 +195,7 @@
                     ],
                     "files": [
                         {
-                            "sha1": "307cb5496bd3b6323c2da67e33e862c67f03ee97",
+                            "sha1": "971a5aa7047f94fab41efe1934392c1ea78ec0dc",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         },
@@ -257,7 +257,7 @@
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "14b265172bbe7318968d1f12ac6f4044db338166"
+                            "sha1": "7418cbd496d5ada66582727a0fb03245bbbdc4da"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -394,7 +394,7 @@
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "e3cae4aba87769b01cdc227761a29e64c00de53e"
+                            "sha1": "ada536cf94f71a836b195d609c6194163398fe20"
                         },
                         {
                             "name": "/Potrace.moon",
