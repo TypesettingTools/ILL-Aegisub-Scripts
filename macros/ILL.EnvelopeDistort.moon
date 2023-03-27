@@ -5,13 +5,13 @@ export script_author      = "ILLTeam"
 export script_namespace   = "ILL.EnvelopeDistort"
 
 depctrl = require("l0.DependencyControl") {
-	feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json",
+	feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json",
 	{
 		{
 			"ILL.ILL"
 			version: "1.2.0"
-			url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
-			feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
+			url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
+			feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 		}
 	}
 }

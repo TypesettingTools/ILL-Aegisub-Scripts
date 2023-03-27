@@ -10,8 +10,8 @@ if haveDepCtrl
 		description: "A library for loading images in various formats"
 		author: "Zeref"
         moduleName: "ILL.IMG"
-		url: "https://github.com/klsruan/ILL-Aegisub-Scripts"
-		feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
+		url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts"
+		feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 		{
 			{"ffi"}
 			{"requireffi.requireffi", version: "0.1.2"}

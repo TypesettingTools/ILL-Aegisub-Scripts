@@ -3,11 +3,11 @@
     "name": "ILL Aegisub Scripts",
     "description": "A collection of macros and modules that seek to add some Illustrator like functionality to Aegisub",
     "maintainer": "ILLTeam",
-    "baseUrl": "https://github.com/klsruan/ILL-Aegisub-Scripts",
+    "baseUrl": "https://github.com/TypesettingTools/ILL-Aegisub-Scripts",
     "url": "@{baseUrl}",
-    "fileBaseUrl": "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/@{channel}/",
+    "fileBaseUrl": "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/@{channel}/",
     "knownFeeds": {
-        "ILL": "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json",
+        "ILL": "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json",
         "a-mo": "https://raw.githubusercontent.com/TypesettingTools/Aegisub-Motion/DepCtrl/DependencyControl.json",
         "SubInspector": "https://raw.githubusercontent.com/TypesettingTools/SubInspector/master/DependencyControl.json",
         "ffi-experiments": "https://raw.githubusercontent.com/TypesettingTools/ffi-experiments/master/DependencyControl.json"
@@ -201,19 +201,19 @@
                         },
                         {
                             "name": "/clipper2.dll",
-                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/clipper2.dll",
+                            "url": "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/releases/download/clipper2-1.3.0/clipper2.dll",
                             "platform": "Windows-x64",
-                            "sha1": "b9955d54679603ea12f0c0d7d1a23e31be052179"
+                            "sha1": "438aed67d88060ad5321a846dc1e2271b6fe615c"
                         },
                         {
                             "name": "/libclipper2.dylib",
-                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/libclipper2.dylib",
+                            "url": "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/releases/download/clipper2-1.3.0/libclipper2.dylib",
                             "platform": "OSX-x64",
                             "sha1": "279d4a58d155a6173307c5912b49bd77d5530206"
                         },
                         {
                             "name": "/libclipper2.so",
-                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/libclipper2.so",
+                            "url": "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/releases/download/clipper2-1.3.0/libclipper2.so",
                             "platform": "Linux-x64",
                             "sha1": "b06594a07d7579f0d90d1eec2e8a9a1466e3331e"
                         }
@@ -423,19 +423,19 @@
                         },
                         {
                             "name": "/giflib/giflib/giflib.dll",
-                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/giflib.dll",
+                            "url": "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/releases/download/image-v1.0.0/giflib.dll",
                             "platform": "Windows-x64",
-                            "sha1": "f6db7b35f93ec692c5b11a289d30b4262aa55b5c"
+                            "sha1": "bbbbbf7940a1d8f112c4db08a1680075bfe59fad"
                         },
                         {
                             "name": "/giflib/giflib/libgiflib.dylib",
-                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/libgiflib.dylib",
+                            "url": "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/releases/download/image-v1.0.0/libgiflib.dylib",
                             "platform": "OSX-x64",
-                            "sha1": "dcf9bf1141348e0e49c5e755fc0afa3a45b8b7f4"
+                            "sha1": "8b7b7bc9ef42f6256cc770274a117655a475e77b"
                         },
                         {
                             "name": "/giflib/giflib/libgiflib.so",
-                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/libgiflib.so",
+                            "url": "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/releases/download/image-v1.0.0/libgiflib.so",
                             "platform": "Linux-x64",
                             "sha1": "5fc0374a1f89d0f786cac5bbce5ce4cb512a3902"
                         },
@@ -446,19 +446,19 @@
                         },
                         {
                             "name": "/lodepng/lodepng/lodepng.dll",
-                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/lodepng.dll",
+                            "url": "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/releases/download/image-v1.0.0/lodepng.dll",
                             "platform": "Windows-x64",
-                            "sha1": "106993c11b4e72d00b813509e2cf9f9a16e3a5ab"
+                            "sha1": "61a65e04b034ee094637e23720718791ca1865f5"
                         },
                         {
                             "name": "/lodepng/lodepng/liblodepng.dylib",
-                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/liblodepng.dylib",
+                            "url": "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/releases/download/image-v1.0.0/liblodepng.dylib",
                             "platform": "OSX-x64",
                             "sha1": "4d7452a0a77551437062d59d9ef01f141422b562"
                         },
                         {
                             "name": "/lodepng/lodepng/liblodepng.so",
-                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/liblodepng.so",
+                            "url": "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/releases/download/image-v1.0.0/liblodepng.so",
                             "platform": "Linux-x64",
                             "sha1": "22a58b4cce2f202c7e96d3518fa35868793aac43"
                         },
@@ -469,19 +469,19 @@
                         },
                         {
                             "name": "/turbojpeg/turbojpeg/turbojpeg.dll",
-                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/turbojpeg.dll",
+                            "url": "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/releases/download/image-v1.0.0/turbojpeg.dll",
                             "platform": "Windows-x64",
-                            "sha1": "fac16a6991bc5ccf79cfc12717b91828e0280179"
+                            "sha1": "4d11a21b550768f4cc497a53b09a436c75f426d5"
                         },
                         {
                             "name": "/turbojpeg/turbojpeg/libturbojpeg.dylib",
-                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/libturbojpeg.dylib",
+                            "url": "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/releases/download/image-v1.0.0/libturbojpeg.dylib",
                             "platform": "OSX-x64",
                             "sha1": "d99df3508622fa757adff37a782e67a6cd33fda1"
                         },
                         {
                             "name": "/turbojpeg/turbojpeg/libturbojpeg.so",
-                            "url": "https://github.com/klsruan/ILL-Aegisub-Scripts/releases/download/binaries-v1.0.0/libturbojpeg.so",
+                            "url": "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/releases/download/image-v1.0.0/libturbojpeg.so",
                             "platform": "Linux-x64",
                             "sha1": "c76a65d5a0433eeaa67e9b1ea4739b6118dfeb29"
                         }

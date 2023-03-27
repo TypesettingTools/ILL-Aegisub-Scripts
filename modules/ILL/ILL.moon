@@ -6,15 +6,15 @@ depctrl = require("l0.DependencyControl") {
 	description: "Module that eases the creation of macros with a focus on handling shapes."
 	author: "ILLTeam"
 	moduleName: "ILL.ILL"
-	url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
-	feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
+	url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
+	feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 	{
 		"ffi"
 		{
 			"clipper2.clipper2"
 			version: "1.3.0"
-			url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
-			feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
+			url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
+			feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 		}
 	}
 }

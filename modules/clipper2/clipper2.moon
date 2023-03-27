@@ -9,9 +9,9 @@ if haveDepCtrl
         version: module_version
         description: "A polygon clipping and offsetting library"
         author: "ILLTeam"
-        url: "https://github.com/klsruan/ILL-Aegisub-Scripts"
+        url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts"
         moduleName: "clipper2.clipper2"
-        feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
+        feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 		{
             { "ffi" }
             {
