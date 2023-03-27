@@ -1,6 +1,6 @@
 export script_name        = "Make Image"
 export script_description = "Does several procedures for converting images to the .ass"
-export script_version     = "1.0.2"
+export script_version     = "2.0.0"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.ImageTracer"
 

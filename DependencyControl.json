@@ -99,13 +99,13 @@
             "description": "Does several types of shape manipulations from the simplest to the most complex",
             "author": "ILLTeam"
         },
-        "ILL.ImageTracer": {
+        "ILL.MakeImage": {
             "url": "@{baseUrl}#@{namespace}",
             "fileBaseUrl": "@{fileBaseUrl}macros/@{namespace}",
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.0.2",
+                    "version": "2.0.0",
                     "released": "2023-03-26",
                     "files": [
                         {
@@ -137,7 +137,7 @@
                 ]
             },
             "name": "Image Tracer",
-            "description": "Raster image tracer and vectorizer",
+            "description": "Does several procedures for converting images to the .ass",
             "author": "ILLTeam"
         },
         "ILL.ChangeAlign": {
