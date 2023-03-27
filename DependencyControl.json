@@ -9,7 +9,6 @@
     "knownFeeds": {
         "ILL": "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json",
         "a-mo": "https://raw.githubusercontent.com/TypesettingTools/Aegisub-Motion/DepCtrl/DependencyControl.json",
-        "zeref": "https://raw.githubusercontent.com/TypesettingTools/zeref-Aegisub-Scripts/main/DependencyControl.json",
         "SubInspector": "https://raw.githubusercontent.com/TypesettingTools/SubInspector/master/DependencyControl.json",
         "ffi-experiments": "https://raw.githubusercontent.com/TypesettingTools/ffi-experiments/master/DependencyControl.json"
     },
@@ -136,7 +135,7 @@
                     "Update macros"
                 ]
             },
-            "name": "Mage Image",
+            "name": "Make Image",
             "description": "Does several procedures for converting images to the .ass",
             "author": "ILLTeam"
         },
