@@ -7,9 +7,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-set(CLIPPER2_SRC Clipper2/Clipper2/CPP/Clipper2Lib/src/clipper.engine.cpp Clipper2/Clipper2/CPP/Clipper2Lib/src/clipper.offset.cpp Clipper2/clipper.wrap.cpp)
+set(CLIPPER2_SRC Clipper2/CPP/Clipper2Lib/src/clipper.engine.cpp Clipper2/CPP/Clipper2Lib/src/clipper.offset.cpp clipper.wrap.cpp)
 add_library(clipper2 SHARED ${CLIPPER2_SRC})
-target_include_directories(clipper2 PUBLIC Clipper2/Clipper2/CPP/Clipper2Lib/include)
+target_include_directories(clipper2 PUBLIC Clipper2/CPP/Clipper2Lib/include)
 
 if (MSVC)
     target_compile_options(clipper2 PRIVATE /W4 /WX)

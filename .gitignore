@@ -1,6 +1,6 @@
 docs/site/
-ffi-packages/build/
-ffi-packages/Clipper2/Clipper2/
+ffi-packages/Clipper2/*/
+ffi-packages/Images/*/
 modules/clipper2/*/
 *.so
 *.dll

@@ -1,4 +1,4 @@
-name: "Build clipper2"
+name: "Build Binaries"
 
 on: workflow_dispatch
 
@@ -31,35 +31,46 @@ jobs:
         if: matrix.os.host == 'windows-latest'
         uses: microsoft/setup-msbuild@v1.0.2
 
-      - name: Building clipper2 Windows
+      - name: Building Windows
         if: matrix.os.host == 'windows-latest'
-        run: ffi-packages\build.bat
+        run: |
+          ffi-packages/build.bat
+          bash ffi-packages/build.sh
 
       - name: Upload Artifacts Windows
         uses: actions/upload-artifact@v2
         if: matrix.os.host == 'windows-latest'
         with:
           name: Windows
-          path: ffi-packages/build/Release/*.dll
+          path: |
+            ffi-packages/Clipper2/buildCP/Release/*.dll
+            ffi-packages/Images/buildJP/Release/*.dll
+            ffi-packages/Images/buildLG/*.dll
 
-      - name: Building clipper2 Linux
+      - name: Building Linux
         if: matrix.os.host == 'ubuntu-latest'
-        run: bash ffi-packages/build.sh
+        run: bash ffi-packages/build.sh -all
 
       - name: Upload Artifacts Linux
         uses: actions/upload-artifact@v2
         if: matrix.os.host == 'ubuntu-latest'
         with:
           name: Linux
-          path: ffi-packages/build/*.so
+          path: |
+            ffi-packages/Clipper2/buildCP/*.so
+            ffi-packages/Images/buildJP/*.so
+            ffi-packages/Images/buildLG/*.so
 
-      - name: Building clipper2 MacOS
+      - name: Building MacOS
         if: matrix.os.host == 'macos-11'
-        run: bash ffi-packages/build.sh
+        run: bash ffi-packages/build.sh -all
 
       - name: Upload Artifacts MacOS
         uses: actions/upload-artifact@v2
         if: matrix.os.host == 'macos-11'
         with:
           name: MacOS
-          path: ffi-packages/build/*.dylib
+          path: |
+            ffi-packages/Clipper2/buildCP/*.dylib
+            ffi-packages/Images/buildJP/*.dylib
+            ffi-packages/Images/buildLG/*.dylib
