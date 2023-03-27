@@ -37,8 +37,8 @@ jobs:
           ffi-packages/build.bat
           bash ffi-packages/build.sh
           mkdir ffi-packages/binaries
-          cp ffi-packages/Clipper2/buildCP/clipper2.dll ffi-packages/binaries/clipper2.dll
-          cp ffi-packages/Images/buildJP/turbojpeg.dll ffi-packages/binaries/turbojpeg.dll
+          cp ffi-packages/Clipper2/buildCP/Release/clipper2.dll ffi-packages/binaries/clipper2.dll
+          cp ffi-packages/Images/buildJP/Release/turbojpeg.dll ffi-packages/binaries/turbojpeg.dll
           cp ffi-packages/Images/buildLG/libgiflib.dll ffi-packages/binaries/giflib.dll
           cp ffi-packages/Images/buildLG/liblodepng.dll ffi-packages/binaries/lodepng.dll
 
