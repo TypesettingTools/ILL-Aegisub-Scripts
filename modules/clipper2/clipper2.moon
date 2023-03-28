@@ -1,31 +1,31 @@
-export module_version = "1.3.0"
+module_version = "1.3.1"
 
-haveDepCtrl, DependencyControl = pcall require, 'l0.DependencyControl'
+haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
 
 local depctrl, ffi, requireffi
 if haveDepCtrl
-    depctrl = DependencyControl({
-        name: "clipper2"
-        version: module_version
-        description: "A polygon clipping and offsetting library"
-        author: "ILLTeam"
-        url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts"
-        moduleName: "clipper2.clipper2"
-        feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
+	depctrl = DependencyControl {
+		name: "clipper2"
+		version: module_version
+		description: "A polygon clipping and offsetting library"
+		author: "ILLTeam"
+		moduleName: "clipper2.clipper2"
+		url: "https://github.com/klsruan/ILL-Aegisub-Scripts"
+		feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
 		{
-            { "ffi" }
-            {
+			{"ffi"}
+			{
 				"requireffi.requireffi"
 				version: "0.1.2"
 				url: "https://github.com/TypesettingTools/ffi-experiments"
 				feed: "https://raw.githubusercontent.com/TypesettingTools/ffi-experiments/master/DependencyControl.json"
 			}
-        }
-    })
-    ffi, requireffi = depctrl\requireModules!
+		}
+	}
+	ffi, requireffi = depctrl\requireModules!
 else
-    ffi = require "ffi"
-    requireffi = require "requireffi.requireffi"
+	ffi = require "ffi"
+	requireffi = require "requireffi.requireffi"
 
 import C, cdef, gc, metatype from ffi
 pc = requireffi "clipper2.clipper2.clipper2"
@@ -161,10 +161,10 @@ CPP.paths.xor = (paths, fr = 1) =>
 	assert solution != nil, CPP.viewError!
 	return gc solution, pc.PathsFree
 
-metatype "PathD",    {__index: CPP.path}
-metatype "PathsD",   {__index: CPP.paths}
+metatype "PathD",  {__index: CPP.path}
+metatype "PathsD", {__index: CPP.paths}
 
 if haveDepCtrl
-	return depctrl\register CPP
+	depctrl\register CPP
 else
-	return CPP
+	CPP

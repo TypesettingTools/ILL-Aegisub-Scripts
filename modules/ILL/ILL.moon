@@ -1,23 +1,27 @@
-export module_version = "1.2.0"
+module_version = "1.2.1"
 
-depctrl = require("l0.DependencyControl") {
-	name: "ILL"
-	version: module_version
-	description: "Module that eases the creation of macros with a focus on handling shapes."
-	author: "ILLTeam"
-	moduleName: "ILL.ILL"
-	url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
-	feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
-	{
-		"ffi"
+haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
+
+local depctrl
+if haveDepCtrl
+	depctrl = DependencyControl {
+		name: "ILL"
+		version: module_version
+		description: "Module that eases the creation of macros with a focus on handling shapes."
+		author: "ILLTeam"
+		moduleName: "ILL.ILL"
+		url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
+		feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 		{
-			"clipper2.clipper2"
-			version: "1.3.0"
-			url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
-			feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
+			"ffi"
+			{
+				"clipper2.clipper2"
+				version: "1.3.0"
+				url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
+				feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
+			}
 		}
 	}
-}
 
 import Aegi    from require "ILL.ILL.Aegi"
 import Math    from require "ILL.ILL.Math"
@@ -34,7 +38,7 @@ import Tags    from require "ILL.ILL.Ass.Text.Tags"
 import Text    from require "ILL.ILL.Ass.Text.Text"
 import Font    from require "ILL.ILL.Font.Font"
 
-depctrl\register {
+modules = {
 	:Aegi, :Math, :Table, :Util
 	:Curve, :Path, :Point, :Segment
 	:Tag, :Tags, :Text
@@ -42,3 +46,8 @@ depctrl\register {
 	:Font
 	version: module_version
 }
+
+if haveDepCtrl
+	depctrl\register modules
+else
+	modules
