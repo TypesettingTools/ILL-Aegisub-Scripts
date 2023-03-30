@@ -1,33 +1,30 @@
 export script_name        = "Envelope Distort"
 export script_description = "Allows you to warp and manipulate shapes within a customizable envelope"
-export script_version     = "1.0.4"
+export script_version     = "1.0.5"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.EnvelopeDistort"
 
-depctrl = require("l0.DependencyControl") {
-	feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json",
-	{
+haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
+
+local depctrl, Ass, Line, Path
+if haveDepCtrl
+	depctrl = DependencyControl {
+		feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json",
 		{
-			"ILL.ILL"
-			version: "1.2.0"
-			url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
-			feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
+			{
+				"ILL.ILL"
+				version: "1.2.0"
+				url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
+				feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
+			}
 		}
 	}
-}
-
-{:Ass, :Line, :Path} = depctrl\requireModules!
-
-config = depctrl\getConfigHandler {
-	lineType: "Straight"
-	rows: 1
-	cols: 1
-	perspective: false
-	keepMesh: false
-}
+	{:Ass, :Line, :Path} = depctrl\requireModules!
+else
+	{:Ass, :Line, :Path} = require "ILL.ILL"
 
 makeMesh = (ass, button, elements) ->
-	{:lineType, :rows, :cols, :perspective, :keepMesh} = elements
+	{:lineType, :rows, :cols, :tolerance, :perspective, :keepMesh} = elements
 	isBezier = lineType == "Bezier"
 	getMesh = (l) ->
 		clips, colDistance, rowDistance = {}, nil, nil
@@ -78,7 +75,7 @@ makeMesh = (ass, button, elements) ->
 						path\perspective mesh.path[1], real.path[1]
 					else
 						path\allCurve!
-						path\envelopeDistort mesh, real
+						path\envelopeDistort mesh, real, tolerance
 					unless maintainMesh
 						line.tags\remove "clip", "iclip"
 					line.shape = path\move(-x, -y)\export!
@@ -87,25 +84,41 @@ makeMesh = (ass, button, elements) ->
 				ass\error s, "The grid was not found"
 	return ass\getNewSelection!
 
-main = (sub, sel, activeLine) ->
-	gui = {
-		{class: "label", label: " - Mesh options ----", x: 0, y: 0}
+config = depctrl\getConfigHandler {
+	lineType: "Straight"
+	rows: 1
+	cols: 1
+	tolerance: 0
+	perspective: false
+	keepMesh: false
+}
+
+interface = ->
+	{
+		{class: "label", label: " - Mesh options -----", x: 0, y: 0}
 		{class: "label", label: "Line type", x: 0, y: 1}
-		{class: "dropdown", items: {"Straight", "Bezier"}, x: 3, y: 1, name: "lineType", value: config.c.lineType}
+		{class: "dropdown", items: {"Straight", "Bezier"}, x: 1, y: 1, name: "lineType", value: config.c.lineType}
 		{class: "label", label: "Rows", x: 0, y: 2}
-		{class: "intedit", min: 1, step: 1, x: 3, y: 2, width: 1, height: 1, name: "rows", value: config.c.rows}
+		{class: "intedit", min: 1, x: 1, y: 2, name: "rows", value: config.c.rows}
 		{class: "label", label: "Columns", x: 0, y: 3}
-		{class: "intedit", min: 1, step: 1, x: 3, y: 3, width: 1, height: 1, name: "cols", value: config.c.cols}
-		{class: "checkbox", label: "Perspective", x: 0, y: 5, name: "perspective", value: config.c.perspective}
-		{class: "checkbox", label: "Keep Mesh", x: 3, y: 5, width: 1, height: 1, name: "keepMesh", value: config.c.keepMesh}
+		{class: "intedit", min: 1, x: 1, y: 3, name: "cols", value: config.c.cols}
+		{class: "label", label: "Tolerance", x: 0, y: 4}
+		{class: "floatedit", min: 0, x: 1, y: 4, name: "tolerance", value: config.c.tolerance}
+		{class: "checkbox", label: "Perspective", x: 0, y: 6, name: "perspective", value: config.c.perspective}
+		{class: "checkbox", label: "Keep Mesh", x: 1, y: 6, name: "keepMesh", value: config.c.keepMesh}
 	}
-	button, elements = aegisub.dialog.display gui, {"Warp", "Mesh", "Cancel"}, {close: "Cancel"}
+
+makeWithMesh = (sub, sel, activeLine) ->
+	button, elements = aegisub.dialog.display interface!, {"Warp", "Mesh", "Cancel"}, {close: "Cancel"}
 	if button != "Cancel"
 		for key, value in pairs elements
 			config.c[key] = value
 		config\write!
 		return makeMesh Ass(sub, sel, activeLine), button, config.c
 
-depctrl\registerMacros {
-	{"Make with Mesh", "", main}
-}
+if haveDepCtrl
+	depctrl\registerMacros {
+		{"Make with Mesh", script_name, makeWithMesh}
+	}
+else
+	aegisub.register_macro "#{script_name} / Make with Mesh", script_description, makeWithMesh

@@ -1,35 +1,44 @@
 export script_name        = "Shapery"
 export script_description = "Does several types of shape manipulations from the simplest to the most complex"
-export script_version     = "2.1.0"
+export script_version     = "2.1.1"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
-depctrl = require("l0.DependencyControl") {
-	feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json",
-	{
+haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
+
+local depctrl, ConfigHandler, Clipper, ILL, Aegi, Ass, Line, Curve, Path, Point, Util, Math, Table, Util
+if haveDepCtrl
+	depctrl = DependencyControl {
+		feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json",
 		{
-			"a-mo.ConfigHandler"
-			version: "1.1.4"
-			url: "https://github.com/TypesettingTools/Aegisub-Motion"
-			feed: "https://raw.githubusercontent.com/TypesettingTools/Aegisub-Motion/DepCtrl/DependencyControl.json"
-		}
-		{
-			"clipper2.clipper2"
-			version: "1.3.0"
-			url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
-			feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
-		}
-		{
-			"ILL.ILL"
-			version: "1.2.0"
-			url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
-			feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
+			{
+				"a-mo.ConfigHandler"
+				version: "1.1.4"
+				url: "https://github.com/TypesettingTools/Aegisub-Motion"
+				feed: "https://raw.githubusercontent.com/TypesettingTools/Aegisub-Motion/DepCtrl/DependencyControl.json"
+			}
+			{
+				"clipper2.clipper2"
+				version: "1.3.0"
+				url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
+				feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
+			}
+			{
+				"ILL.ILL"
+				version: "1.2.0"
+				url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
+				feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
+			}
 		}
 	}
-}
+	ConfigHandler, Clipper, ILL = depctrl\requireModules!
+	{:Aegi, :Ass, :Line, :Curve, :Path, :Point, :Util, :Math, :Table, :Util} = ILL
+else
+	ConfigHandler = require "a-mo.ConfigHandler"
+	Clipper = require "clipper2.clipper2"
+	ILL = require "ILL.ILL"
+	{:Aegi, :Ass, :Line, :Curve, :Path, :Point, :Util, :Math, :Table, :Util} = ILL
 
-ConfigHandler, Clipper, ILL = depctrl\requireModules!
-{:Aegi, :Ass, :Line, :Curve, :Path, :Point, :Util, :Math, :Table, :Util} = ILL
 {:insert} = table
 
 global = {}
@@ -976,20 +985,35 @@ ShaperyMacrosDialog = (macro) ->
 		LoadGlobalOptions!
 		return ShaperyMacros Ass(sub, sel, activeLine, not global.saveLines), macro
 
-depctrl\registerMacros {
-	{"Pathfinder", "", PathfinderDialog}
-	{"Offsetting", "", OffsettingDialog}
-	{"Manipulate", "", ManipulateDialog}
-	{"Transform",  "", TransformDialog}
-	{"Utilities",  "", UtilitiesDialog}
-	{"Config",     "", ConfigDialog}
-}, "Shapery"
+if haveDepCtrl
+	depctrl\registerMacros {
+		{"Pathfinder", "", PathfinderDialog}
+		{"Offsetting", "", OffsettingDialog}
+		{"Manipulate", "", ManipulateDialog}
+		{"Transform",  "", TransformDialog}
+		{"Utilities",  "", UtilitiesDialog}
+		{"Config",     "", ConfigDialog}
+	}
 
-depctrl\registerMacros {
-	{"Shape expand",       "", ShaperyMacrosDialog "Shape expand"}
-	{"Clip to shape",      "", ShaperyMacrosDialog "Clip to shape"}
-	{"Shape to clip",      "", ShaperyMacrosDialog "Shape to clip"}
-	{"Shape to origin",    "", ShaperyMacrosDialog "Shape to origin"}
-	{"Shape to center",    "", ShaperyMacrosDialog "Shape to center"}
-	{"Shape bounding box", "", ShaperyMacrosDialog "Shape bounding box"}
-}, ": Shapery macros :"
+	depctrl\registerMacros {
+		{"Shape expand",       "", ShaperyMacrosDialog "Shape expand"}
+		{"Clip to shape",      "", ShaperyMacrosDialog "Clip to shape"}
+		{"Shape to clip",      "", ShaperyMacrosDialog "Shape to clip"}
+		{"Shape to origin",    "", ShaperyMacrosDialog "Shape to origin"}
+		{"Shape to center",    "", ShaperyMacrosDialog "Shape to center"}
+		{"Shape bounding box", "", ShaperyMacrosDialog "Shape bounding box"}
+	}, ": Shapery macros :"
+else
+	aegisub.register_macro "#{script_name} / Pathfinder", "", PathfinderDialog
+	aegisub.register_macro "#{script_name} / Offsetting", "", OffsettingDialog
+	aegisub.register_macro "#{script_name} / Manipulate", "", ManipulateDialog
+	aegisub.register_macro "#{script_name} / Transform",  "", TransformDialog
+	aegisub.register_macro "#{script_name} / Utilities",  "", UtilitiesDialog
+	aegisub.register_macro "#{script_name} / Config",     "", ConfigDialog
+
+	aegisub.register_macro ": Shapery macros : / Shape expand",       "", ShaperyMacrosDialog "Shape expand"
+	aegisub.register_macro ": Shapery macros : / Clip to shape",      "", ShaperyMacrosDialog "Clip to shape"
+	aegisub.register_macro ": Shapery macros : / Shape to clip",      "", ShaperyMacrosDialog "Shape to clip"
+	aegisub.register_macro ": Shapery macros : / Shape to origin",    "", ShaperyMacrosDialog "Shape to origin"
+	aegisub.register_macro ": Shapery macros : / Shape to center",    "", ShaperyMacrosDialog "Shape to center"
+	aegisub.register_macro ": Shapery macros : / Shape bounding box", "", ShaperyMacrosDialog "Shape bounding box"

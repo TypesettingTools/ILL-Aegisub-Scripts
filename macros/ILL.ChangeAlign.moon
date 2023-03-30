@@ -1,22 +1,27 @@
 export script_name        = "Change Alignment"
 export script_description = "Changes the alignment of a text or shape without changing its original position"
-export script_version     = "1.0.2"
+export script_version     = "1.0.3"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.ChangeAlign"
 
-depctrl = require("l0.DependencyControl") {
-	feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json",
-	{
+haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
+
+local depctrl, Ass, Line, Path
+if haveDepCtrl
+	depctrl = DependencyControl {
+		feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json",
 		{
-			"ILL.ILL"
-			version: "1.2.0"
-			url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
-			feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
+			{
+				"ILL.ILL"
+				version: "1.2.0"
+				url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
+				feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
+			}
 		}
 	}
-}
-
-{:Ass, :Line, :Path} = depctrl\requireModules!
+	{:Ass, :Line, :Path} = depctrl\requireModules!
+else
+	{:Ass, :Line, :Path} = require "ILL.ILL"
 
 interface = ->
 	{
@@ -38,6 +43,9 @@ main = (sub, sel, activeLine) ->
 			Line.changeAlign line, nan, width, height
 			ass\setLine line, s, true
 
-depctrl\registerMacros {
-	{script_name, script_description, main}
-}, ": ILL macros :"
+if haveDepCtrl
+	depctrl\registerMacros {
+		{script_name, script_description, main}
+	}, ": ILL macros :"
+else
+	aegisub.register_macro ": ILL macros : / #{script_name}", script_description, main

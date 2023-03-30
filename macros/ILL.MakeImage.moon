@@ -1,30 +1,36 @@
 export script_name        = "Make Image"
 export script_description = "Does several procedures for converting images to the .ass"
-export script_version     = "2.0.0"
+export script_version     = "2.0.1"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.MakeImage"
 
-depctrl = require("l0.DependencyControl") {
-	feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json",
-	{
-		{"ffi"}
+haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
+
+local depctrl, IMG, ILL, Aegi, Ass, Math, Table
+if haveDepCtrl
+	depctrl = DependencyControl {
+		feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json",
 		{
-			"ILL.IMG"
-			version: "1.0.0"
-			url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts"
-			feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
-		}
-		{
-			"ILL.ILL"
-			version: "1.2.0"
-			url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts"
-			feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
+			{
+				"ILL.IMG"
+				version: "1.0.0"
+				url: "https://github.com/klsruan/ILL-Aegisub-Scripts"
+				feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
+			}
+			{
+				"ILL.ILL"
+				version: "1.2.0"
+				url: "https://github.com/klsruan/ILL-Aegisub-Scripts"
+				feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
+			}
 		}
 	}
-}
-
-ffi, IMG, ILL = depctrl\requireModules!
-{:Aegi, :Ass, :Math, :Table} = ILL
+	IMG, ILL = depctrl\requireModules!
+	{:Aegi, :Ass, :Math, :Table} = ILL
+else
+	IMG = require "ILL.IMG"
+	ILL = require "ILL.ILL"
+	{:Aegi, :Ass, :Math, :Table} = ILL
 
 getData = ->
 	exts = "*.png;*.jpeg;*.jpe;*.jpg;*.jfif;*.jfi;*.bmp;"
@@ -184,8 +190,13 @@ imagePotrace = (sub, sel, activeLine) ->
 		ass\insertLine line, activeLine
 		return ass\getNewSelection!
 
-depctrl\registerMacros {
-	{"Image Tracer", script_description, imageTracer}
-	{"Pixels", script_description, imagePixels}
-	{"Potrace", script_description, imagePotrace}
-}, "Make Image"
+if haveDepCtrl
+	depctrl\registerMacros {
+		{"Image Tracer", script_description, imageTracer}
+		{"Pixels", script_description, imagePixels}
+		{"Potrace", script_description, imagePotrace}
+	}
+else
+	aegisub.register_macro "#{script_name} / Image Tracer", script_description, imageTracer
+	aegisub.register_macro "#{script_name} / Pixels", script_description, imagePixels
+	aegisub.register_macro "#{script_name} / Potrace", script_description, imagePotrace
