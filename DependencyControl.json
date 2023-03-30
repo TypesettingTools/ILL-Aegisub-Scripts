@@ -19,11 +19,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.0.4",
-                    "released": "2023-03-26",
+                    "version": "1.0.5",
+                    "released": "2023-03-30",
                     "files": [
                         {
-                            "sha1": "415d24b1f3f1e45967bf1f3c5c1ba4e4cdc8aaab",
+                            "sha1": "f458dbaa4b03afdbb48705ca22cc1e569d512a59",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -43,6 +43,13 @@
                 ],
                 "1.0.4": [
                     "Update macros"
+                ],
+                "1.0.5": [
+                    "Update macro register",
+                    "",
+                    "Macros can now be installed manually without having to have DepControl",
+                    "",
+                    "Regardless, it is always recommended to install via DepControl"
                 ]
             },
             "name": "Envelope Distort",
@@ -55,11 +62,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.1.0",
-                    "released": "2023-03-26",
+                    "version": "2.1.1",
+                    "released": "2023-03-30",
                     "files": [
                         {
-                            "sha1": "59c8f747e074bad8f64f52c487a0c2b3315da612",
+                            "sha1": "7db2c9cac8da0d16010cad997d93780f6838391e",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -92,6 +99,13 @@
                 ],
                 "2.1.0": [
                     "Update macros"
+                ],
+                "2.1.1": [
+                    "Update macro register",
+                    "",
+                    "Macros can now be installed manually without having to have DepControl",
+                    "",
+                    "Regardless, it is always recommended to install via DepControl"
                 ]
             },
             "name": "Shapery",
@@ -104,11 +118,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.0.0",
-                    "released": "2023-03-26",
+                    "version": "2.0.1",
+                    "released": "2023-03-30",
                     "files": [
                         {
-                            "sha1": "dd4b7f738e2be3aeee8fb7c12f5f997dc94bab68",
+                            "sha1": "73694a7586b22e98b56a1c672326b579c76b9049",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -133,6 +147,13 @@
                 ],
                 "1.0.2": [
                     "Update macros"
+                ],
+                "2.0.1": [
+                    "Update macro register",
+                    "",
+                    "Macros can now be installed manually without having to have DepControl",
+                    "",
+                    "Regardless, it is always recommended to install via DepControl"
                 ]
             },
             "name": "Make Image",
@@ -145,11 +166,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.0.2",
-                    "released": "2023-03-26",
+                    "version": "1.0.3",
+                    "released": "2023-03-30",
                     "files": [
                         {
-                            "sha1": "6ec69c64ce556eed8ac605ee4798ddc0e81b2d5b",
+                            "sha1": "288f7dd8c33d4342fbf9ba2f0709ecd0c8cd1391",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -169,6 +190,13 @@
                 ],
                 "1.0.2": [
                     "Update macros"
+                ],
+                "1.0.3": [
+                    "Update macro register",
+                    "",
+                    "Macros can now be installed manually without having to have DepControl",
+                    "",
+                    "Regardless, it is always recommended to install via DepControl"
                 ]
             },
             "name": "ILL - Change Alignment",
