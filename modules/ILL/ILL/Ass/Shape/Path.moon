@@ -533,7 +533,7 @@ Path.PathSimplifier = (points, tolerance = 0.1, highestQuality, recreateBezier, 
 		last = #points
 		simplified = {points[1]}
 
-		simplifyDPStep(points, 1, last - 1, sqTolerance, simplified)
+		simplifyDPStep(points, 1, last, sqTolerance, simplified)
 		table.insert simplified, points[last]
 
 		return simplified
@@ -700,11 +700,9 @@ Path.PathSimplifier = (points, tolerance = 0.1, highestQuality, recreateBezier, 
 		return bezCurve
 	
 	addtoB = (b, bez) ->
-		n = #b
-		lastP = b[n]
+		if b[#b]\equals bez[1]
+			table.remove bez, 1
 		for i = 1, #bez
-			if lastP.x == bez[i].x and lastP.y == bez[i].y
-				continue
 			table.insert(b, bez[i])
 		
 	fitCubic = (b, d, first, last, tHat1, tHat2, _error) ->
