@@ -803,7 +803,6 @@ Path.PathSimplifier = (points, tolerance = 0.1, highestQuality, recreateBezier, 
 			if i == 2
 				lastSegmentLength = points[2]\distance(points[3])
 				points[i].id = "l"
-				table.insert final, points[i]
 				selected = {points[i]}
 				continue
 			table.insert selected, points[i]
