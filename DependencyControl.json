@@ -325,13 +325,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.3.1",
+                    "version": "1.3.2",
                     "released": "2023-04-02",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "f6ffb587f1fe104068466e43362840f9aff0879f"
+                            "sha1": "aa4331051c31be5d8c9550a1e09cc6c5bd2dc50c"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -371,7 +371,7 @@
                         {
                             "name": "/Ass/Ass.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "64b8a13391c714ebccf13d8d103f90bc9c5bfa5f"
+                            "sha1": "5795259e345a64279f4171e5817195f449624c04"
                         },
                         {
                             "name": "/Ass/Line.moon",
@@ -470,6 +470,9 @@
                 ],
                 "1.3.1": [
                     "Fix iteration bug"
+                ],
+                "1.3.2": [
+                    "Fix instance bug"
                 ]
             }
         },
