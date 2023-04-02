@@ -1,6 +1,6 @@
 export script_name        = "Make Image"
 export script_description = "Does several procedures for converting images to the .ass"
-export script_version     = "2.0.1"
+export script_version     = "2.0.2"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.MakeImage"
 
@@ -19,7 +19,7 @@ if haveDepCtrl
 			}
 			{
 				"ILL.ILL"
-				version: "1.2.0"
+				version: "1.3.0"
 				url: "https://github.com/klsruan/ILL-Aegisub-Scripts"
 				feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}
@@ -150,7 +150,6 @@ imageTracer = (sub, sel, activeLine) ->
 		Aegi.progressTask "Adding new lines..."
 		for key, trace in ipairs asslines
 			Aegi.progressSet key, asslineslen
-			line.text = ""
 			line.shape = trace
 			ass\insertLine line, activeLine
 		return ass\getNewSelection!
@@ -170,7 +169,6 @@ imagePixels = (sub, sel, activeLine) ->
 		Aegi.progressTask "Adding new lines..."
 		for key, pixel in ipairs asslines
 			Aegi.progressSet key, asslineslen
-			line.text = ""
 			line.shape = pixel\gsub "}{", ""
 			ass\insertLine line, activeLine
 		return ass\getNewSelection!

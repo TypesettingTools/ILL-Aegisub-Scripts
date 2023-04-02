@@ -1,6 +1,6 @@
 export script_name        = "Change Alignment"
 export script_description = "Changes the alignment of a text or shape without changing its original position"
-export script_version     = "1.0.3"
+export script_version     = "1.0.4"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.ChangeAlign"
 
@@ -13,7 +13,7 @@ if haveDepCtrl
 		{
 			{
 				"ILL.ILL"
-				version: "1.2.0"
+				version: "1.3.0"
 				url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
 				feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}
@@ -32,16 +32,16 @@ interface = ->
 main = (sub, sel, activeLine) ->
 	button, elements = aegisub.dialog.display interface!, {"Ok", "Cancel"}, {close: "Cancel"}
 	if button == "Ok"
-		nan = tonumber elements.an
+		aln = tonumber elements.an
 		ass = Ass sub, sel, activeLine
-		for l, line, s, i, n in ass\iterSel!
+		for l, s, i, n in ass\iterSel!
 			ass\progressLine s, i, n
-			Line.extend ass, line, i
+			Line.extend ass, l, i
 			local width, height
-			if line.isShape
-				{:width, :height} = Path(line.shape)\boundingBox!
-			Line.changeAlign line, nan, width, height
-			ass\setLine line, s, true
+			if l.isShape
+				{:width, :height} = Path(l.shape)\boundingBox!
+			Line.changeAlign l, aln, width, height
+			ass\setLine l, s
 
 if haveDepCtrl
 	depctrl\registerMacros {

@@ -1,6 +1,6 @@
 export script_name        = "Envelope Distort"
 export script_description = "Allows you to warp and manipulate shapes within a customizable envelope"
-export script_version     = "1.0.5"
+export script_version     = "1.0.6"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.EnvelopeDistort"
 
@@ -13,7 +13,7 @@ if haveDepCtrl
 		{
 			{
 				"ILL.ILL"
-				version: "1.2.0"
+				version: "1.3.0"
 				url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
 				feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}
@@ -32,40 +32,43 @@ makeMesh = (ass, button, elements) ->
 			{:colDistance, :rowDistance} = line.grid
 			table.insert clips, line.grid.path\export!
 		return clips, colDistance, rowDistance
-	for l, lcopy, s, i, n in ass\iterSel!
+	for l, s, i, n in ass\iterSel!
 		ass\progressLine s, i, n
-		Line.extend ass, lcopy, i
+		Line.extend ass, l, i
 		if button == "Mesh"
 			ass\removeLine l, s
-			clips = getMesh lcopy
+			clips = getMesh l
 			xr, yr = aegisub.video_size!
 			screen = "m 0 0 l #{xr} 0 #{xr} #{yr} 0 #{yr} "
-			lcopy.tags\remove "clip", "iclip"
-			if lcopy.isShape
+			l.tags\remove "clip", "iclip"
+			if l.isShape
 				clips = table.concat clips
-				lcopy.tags\insert {{"clip", screen .. clips}}
-				ass\insertLine lcopy, s
+				l.tags\insert {{"clip", screen .. clips}}
+				ass\insertLine l, s
 			else
-				isMove = lcopy.tags\existsTag "move"
-				Line.callBack ass, lcopy, (line, j) ->
-					line.tags\insert {{"clip", screen .. clips[j]}}
-					if line.data.angle != 0 or line.tags\existsTagOr "frx", "fry", "frz"
-						line.tags\insert {{"org", line.data.org}, true}
+				{:org} = l.data
+				isMove = l.tags\existsTag "move"
+				Line.callBack ass, l, (line, j) ->
+					line.text\callBack (tags, text) ->
+						line.tags\insert {{"clip", screen .. clips[j]}}
+						if line.data.angle != 0 or line.tags\existsTagOr "frx", "fry", "frz"
+							line.tags\insert {{"org", org}, true}
+						return line.tags, text
 					ass\insertLine line, s
 		else
 			ass\removeLine l, s
-			{:clip, :pos} = lcopy.data
+			{:clip, :pos} = l.data
 			if clip
 				mesh = Path clip
 				table.remove mesh.path, 1
 				if perspective and (isBezier or #mesh.path != 1)
 					ass\error s, "Expected an quadrilateral"
-				clips, colDistance, rowDistance = getMesh lcopy
+				clips, colDistance, rowDistance = getMesh l
 				local area
 				if isBezier
 					area = (colDistance * rowDistance) / 1000
 					mesh\flatten 1, nil, area
-				Line.callBackExpand ass, lcopy, {rows, cols, isBezier}, (line, j) ->
+				Line.callBackExpand ass, l, {rows, cols, isBezier}, (line, j) ->
 					{x, y} = line.data.pos
 					real = Path clips[j]
 					if isBezier
