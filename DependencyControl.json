@@ -282,13 +282,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.2.1",
-                    "released": "2023-03-28",
+                    "version": "1.2.2",
+                    "released": "2023-04-02",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "8a31481142635f63546f6d9986f1e2c70a51688b"
+                            "sha1": "b545b3a135dfaa4bcd02f386f4155e27e2c70bf9"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -298,7 +298,7 @@
                         {
                             "name": "/Ass/Shape/Path.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "89fca49c1049bcbe5aae2c83c005eba4a2a6b2a3"
+                            "sha1": "80caa154368ebd86869b9ff4ef6453e2784dc258"
                         },
                         {
                             "name": "/Ass/Shape/Point.moon",
@@ -405,6 +405,11 @@
                 ],
                 "1.2.1": [
                     "Fix identation"
+                ],
+                "1.2.2": [
+                    "Merge pull request #1 from Alendt/main",
+                    "",
+                    "Fixed some bugs of Path.simplify"
                 ]
             }
         },
