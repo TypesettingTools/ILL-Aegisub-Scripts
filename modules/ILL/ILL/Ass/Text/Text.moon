@@ -96,6 +96,14 @@ class Text
 		-- update text
 		@text = @__tostring!
 
+	-- modifies the value of the defined tag block
+	modifyBlock: (newTags, newText, i = 1) =>
+		@callBack (tags, text, j) ->
+			if i == j
+				return newTags, newText or text
+		-- update text
+		@text = @__tostring!
+
 	-- tags known as first category tags can only appear once in a line,
 	-- so to solve problems of repeated or misplaced tags, the functional
 	-- tag is moved to the first tag block

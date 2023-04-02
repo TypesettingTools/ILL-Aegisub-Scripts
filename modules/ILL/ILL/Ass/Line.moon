@@ -19,13 +19,14 @@ class Line
 		{:styles, :meta} = ass
 		{:res_x, :res_y, :video_x_correct_factor} = meta
 
-		local getFirstCategory
-		unless l.data
-			getFirstCategory = true
+		if type(l.text) == "string" and not l.isShape 
+			l.text = Text l.text
+
+		if not l.data and not l.isShape
 			l.text\moveToFirstLayer!
 
 		with l
-			.text_stripped = .text\stripped!
+			.text_stripped = .isShape and .text\gsub("%b{}", "") or .text\stripped!
 			.duration = .end_time - .start_time
 			textIsBlank = Util.isBlank .text_stripped
 
@@ -55,25 +56,24 @@ class Line
 						.data[tag] = value
 
 			-- sets the values found in the tags to the style
-			.tags or= Tags l.text.tagsBlocks[1]\get!
+			.tags or= Tags .isShape and .text\match("%b{}") or .text.tagsBlocks[1]\get!
 			for {:tag, :name} in *.tags\split!
 				{:style_name, :value} = tag
 				if style_name
 					.data[style_name] = value
-				elseif .data[name]
+				elseif .isShape or .data[name]
 					.data[name] = value
 
 			-- as some tags can only appear once this avoids unnecessary
 			-- capture repetitions which minimizes processing
-			if getFirstCategory or .reset
-				unless .reset
-					values = Line.firstCategoryTags l, res_x, res_y
-					for k, v in pairs values
-						.data[k] = v
-				else
-					for name in *{"an", "pos", "move", "org", "fad", "fade"}
-						if value = .reset.data[name]
-							.data[name] = value
+			unless .reset
+				values = Line.firstCategoryTags l, res_x, res_y
+				for k, v in pairs values
+					.data[k] = v
+			else
+				for name in *{"an", "pos", "move", "org", "fad", "fade"}
+					if value = .reset.data[name]
+						.data[name] = value
 
 			-- resizes the font size value according to the set ratio
 			if .ratio
@@ -611,10 +611,17 @@ class Line
 					when 4, 5, 6 then -cy
 					when 1, 2, 3 then 0
 		-- if necessary insert the tag \org
-		if l.data.angle != 0 or l.text\existsTagOr "frx", "fry", "frz"
-			l.tags\insert {{"org", l.data.org}, true}
+		fr = l.data.angle != 0
+		if l.isShape
+			if fr or l.tags\existsTagOr "frx", "fry", "frz"
+				l.tags\insert {{"org", l.data.org}, true}
+		else
+			if fr or l.text\existsTagOr "frx", "fry", "frz"
+				l.tags\insert {{"org", l.data.org}, true}
 		-- changes the value of the current alignment to the new one
 		l.tags\insert {{"an", an}, true}
+		unless l.isShape
+			l.text\modifyBlock l.tags
 		-- if the \move tag exists change its value
 		with l.data
 			if l.tags\existsTag "move"

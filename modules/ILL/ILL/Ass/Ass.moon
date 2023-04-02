@@ -10,7 +10,7 @@ class Ass
 	set: (@sub, @sel, @activeLine, @remLine = true) =>
 		-- sets the selection information
 		@i, @fi, @newSelection = 0, 0, {}
-		for l, i in @iterSub false
+		for l, i in @iterSub!
 			if l.class == "dialogue"
 				-- number of the first line of the dialog
 				@fi = i
@@ -23,23 +23,25 @@ class Ass
 	new: (...) => @set ...
 
 	-- iterates over all the lines of the ass file
-	iterSub: (copy = true) =>
+	iterSub: (copy) =>
 		i = 0
 		n = #@sub
 		->
 			i += 1
 			if i <= n
 				l = @sub[i + @i]
+				if l.class == "dialogue"
+					l.isShape = Util.isShape l.text
 				if copy
 					if l.class == "dialogue"
 						line = Table.deepcopy l
-						line.isShape = Util.isShape line.text
-						line.text = Text line.text, line.isShape
+						unless l.isShape
+							line.text = Text line.text, line.isShape
 					return l, line, i, n
 				return l, i, n
 
 	-- iterates over all the selected lines of the ass file
-	iterSel: (copy = true) =>
+	iterSel: (copy) =>
 		i = 0
 		n = #@sel
 		->
@@ -47,17 +49,18 @@ class Ass
 			if i <= n
 				s = @sel[i]
 				l = @sub[s + @i]
+				l.isShape = Util.isShape l.text
 				if copy
 					line = Table.deepcopy l
-					line.isShape = Util.isShape line.text
-					line.text = Text line.text, line.isShape
+					unless l.isShape
+						line.text = Text line.text, line.isShape
 					return l, line, s, i, n
 				return l, s, i, n
 
 	-- gets the meta and styles values from the ass file
 	collectHead: =>
 		@meta, @styles = {res_x: 0, res_y: 0, video_x_correct_factor: 1}, {}
-		for l in @iterSub false
+		for l in @iterSub!
 			if aegisub.progress.is_cancelled!
 				error "User cancelled", 2
 
@@ -122,19 +125,23 @@ class Ass
 	lineNumber: (s) => s - @fi + 1
 
 	-- sets the value of the line in the dialog
-	setLine: (l, s, first, buildTextInstance) =>
+	setLine: (l, s) =>
 		-- makes updating the text more dynamic
-		Ass.setText l, first, buildTextInstance
+		instance = Ass.setText l
 		-- sets the value of the line
 		@sub[s + @i] = l
+		if instance
+			l.text = instance
 
 	-- inserts a line in dialogs
-	insertLine: (l, s, first, buildTextInstance) =>
+	insertLine: (l, s) =>
 		i = s + @i + 1
 		-- makes updating the text more dynamic
-		Ass.setText l, first, buildTextInstance
+		instance = Ass.setText l
 		-- adds a dialogue line in subtitle
 		@sub.insert i, l
+		if instance
+			l.text = instance
 		-- inserts the index of this new line in the selected lines box
 		table.insert @newSelection, i
 		@i += 1
@@ -144,6 +151,8 @@ class Ass
 	removeLine: (l, s) =>
 		i = s + @i
 		l.comment = true
+		if Util.checkClass l.text, "Text"
+			l.text = l.text\__tostring!
 		@sub[i] = l
 		l.comment = false
 		if @remLine
@@ -174,20 +183,24 @@ class Ass
 		Aegi.debug 2, "—— [Cause] ➔ " .. msg .. "\n\n"
 
 	-- sets the final value of the text
-	setText: (l, first, buildTextInstance) ->
-		if first and l.tags
-			l.tags\clear l.styleref
-			l.text.tagsBlocks[1] = l.tags\__tostring!
+	setText: (l) ->
+		if not l.isShape and Util.checkClass l.text, "Text"
+			copyInstance = Table.copy l.text
 			l.text = l.text\__tostring!
-		elseif buildTextInstance
-			l.text = l.text\__tostring!
-		else
-			if l.tags
-				l.tags\clear l.styleref
-				l.text = l.tags\__tostring!
-				l.text = l.text\gsub "{%s*}", ""
+			return copyInstance
+		elseif l.tags
+			local tags
+			if Util.checkClass l.tags, "Tags"
+				tags = Table.copy l.tags
+				tags\clear l.styleref
+				tags = tags\__tostring!
 			else
-				l.text = l.text\match("%b{}") or ""
-			l.text ..= l.isShape and l.shape or l.text_stripped
+				tags = l.tags
+			if l.isShape
+				l.text = tags .. l.shape
+			else
+				l.text = tags .. l.text_stripped
+		elseif l.isShape and l.shape
+			l.text = l.shape
 
 {:Ass}

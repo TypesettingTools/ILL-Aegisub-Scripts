@@ -48,6 +48,7 @@ class Tags
 			@tags = @tags\gsub "\\t%b()", (t) -> t\gsub "\\", "\\@"
 		else
 			@tags = @tags\gsub "\\@", "\\"
+		return @
 
 	-- removes one or more tags simultaneously
 	remove: (...) =>
@@ -103,7 +104,6 @@ class Tags
 		for argument in *{...}
 			insert argument
 		@close!
-		return @
 
 	-- gets the value of a given tag within the tag layer
 	getTag: (name, subTags = @tags) =>
@@ -119,6 +119,7 @@ class Tags
 			return res
 		if notIsAnimated
 			@animated "unhide"
+		return
 
 	-- separates all tags and gets all possible information about them
 	split: =>
@@ -128,10 +129,14 @@ class Tags
 			if tag = copy\getTag name, @tags
 				table.insert split, tag
 				copy\remove {name, "", 1}
-		-- does processing on all tags
+		-- processes all the \t tag
+		while copy\existsTag "t"
+			process "t"
+		-- processes all tags except the \t tag
 		for k, v in pairs ASS_TAGS
-			while copy\existsTag k
-				process k
+			if k != "t"
+				while copy\existsTag k
+					process k
 		-- fixes the position of the array to the original tag position
 		table.sort split, (a, b) -> a.i < b.i
 		-- removes all tags that have been reset by the \r tag
@@ -147,33 +152,34 @@ class Tags
 
 	-- clean up the tags
 	clean: =>
-		split = @split!
-		@tags = split.__tostring!
+		@tags = @split!.__tostring!
 		@close!
-		return @
 
 	-- removes duplicate tags
 	clear: (styleref) =>
-		get = (split, tagName) ->
+		get = (spt, tagName) ->
 			local j
-			for i = 1, #split
-				{:name, :tag} = split[i]
+			for i = 1, #spt
+				{:name, :tag} = spt[i]
 				if name == tagName
 					j = i
 					if tag.first_category
 						break
-			return split[j]
+			return spt[j]
 		split, newSplit, save = @split!, {}, {}
-		for i = 1, #split
-			{:name} = split[i]
-			unless save[name]
-				result = get split, name
-				{:style_name, :value} = result.tag
-				if styleref and style_name and (styleref[style_name] == value)
+		for tag in *split
+			{:name} = tag
+			if name != "t"
+				unless save[name]
+					result = get split, name
+					{:style_name, :value} = result.tag
+					if styleref and style_name and styleref[style_name] == value
+						save[name] = true
+						continue
+					table.insert newSplit, result
 					save[name] = true
-					continue
-				table.insert newSplit, result
-				save[name] = true
+			else
+				table.insert newSplit, tag
 		@tags = table.concat [s\__tostring! for s in *newSplit]
 		@close!
 
