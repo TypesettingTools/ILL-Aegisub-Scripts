@@ -1,6 +1,6 @@
 export script_name        = "Shapery"
 export script_description = "Does several types of shape manipulations from the simplest to the most complex"
-export script_version     = "2.1.1"
+export script_version     = "2.2.0"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
@@ -25,7 +25,7 @@ if haveDepCtrl
 			}
 			{
 				"ILL.ILL"
-				version: "1.2.0"
+				version: "1.3.0"
 				url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
 				feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}
@@ -189,7 +189,7 @@ getProportionPoint = (point, segment, length, d) ->
 	factor = segment / length
 	return Point point.x - d.x * factor, point.y - d.y * factor
 
-modeRoundingAbsolute = (radius, p1, angularPoint, p2, getPoints) ->
+modeRoundingAbsolute = (radius, p1, angularPoint, p2) ->
 	-- Vector 1
 	v1 = Point angularPoint.x - p1.x, angularPoint.y - p1.y
 
@@ -247,21 +247,6 @@ modeRoundingAbsolute = (radius, p1, angularPoint, p2, getPoints) ->
 	degreeFactor = 180 / math.pi
 	sweepFlag = getSweepFlag p1Cross, angularPoint, p2Cross
 
-	if getPoints
-		n = math.abs sweepAngle * degreeFactor
-		sign = Math.sign sweepAngle
-
-		points = {}
-		for i = 0, n
-			j = startAngle == endAngle and n - i or i
-			t = startAngle + sign * j / degreeFactor
-			p = Point!
-			p.x = circlePoint.x + math.cos(t) * radius
-			p.y = circlePoint.y + math.sin(t) * radius
-			insert points, p
-
-		return points
-
 	return {
 		line1: {p1, p1Cross}
 		line2: {p2, p2Cross}
@@ -303,7 +288,7 @@ modeChamfer = (radius, a, b, c, path) ->
 
 makeRoundingAbsolute = (r, inverted, a, b, c, path) ->
 	{:line1, :line2, :arc} = modeRoundingAbsolute r, a, b, c
-	curves = arc2CubicBezier({
+	curves = arc2CubicBezier {
 		px: line1[2].x
 		py: line1[2].y
 		cx: line2[2].x
@@ -311,7 +296,7 @@ makeRoundingAbsolute = (r, inverted, a, b, c, path) ->
 		rx: arc.rx
 		ry: arc.ry
 		sweepFlag: inverted and 1 - arc.sweepFlag or arc.sweepFlag
-	})
+	}
 	insert path, Point line1[2].x, line1[2].y
 	for curve in *curves
 		insert path, Point curve[1], curve[2], "b"
@@ -364,45 +349,51 @@ shadowInner = (shape, xshad, yshad) ->
 
 Pathfinder = (ass, res) ->
 	{:multiline, :operation} = res
-	others, baseShape, basePos, baseLine = Path!, Path!, {0, 0}, nil
-	for l, lcopy, s, i, n in ass\iterSel!
+	info = {shapes: {}}
+	for l, s, i, n in ass\iterSel!
 		ass\progressLine s, i, n
 		ass\removeLine l, s
-		Line.extend ass, lcopy, i
-		Line.callBackExpand ass, lcopy, nil, (line) ->
-			shape = Path line.shape
-			-- x-axis and y-axis of the tag \pos
-			{px, py} = line.data.pos
-			if multiline
-				if i == 1
-					baseShape = Path line.shape
-					basePos = line.data.pos
-					baseLine = line
-					return
-				shape\move px - basePos[1], py - basePos[2]
-				-- it's probably better to combine all the "other" shape using directly a clipper_path 
-				others\unite shape, false
-				if i == n
+		Line.extend ass, l, i
+		if multiline
+			if n == 1
+				Aegi.progressCancel "You must select 2 lines or more."
+			clip = {}
+			Line.callBackExpand ass, l, nil, (line, j) ->
+				{x, y} = line.data.pos
+				if i == 1 and j == 1
+					info.pos = {x, y}
+					info.line = Table.copy line
+				insert clip, Path(line.shape)\move(x - info.pos[1], y - info.pos[2])\export!
+			insert info.shapes, Path table.concat clip
+			if i == n
+				{:line, :shapes} = info
+				shape = shapes[1]
+				for j = 2, #shapes
+					cut = shapes[j]
 					switch operation
-						when "Unite"      then baseShape\unite others, false
-						when "Intersect"  then baseShape\intersect others, false
-						when "Difference" then baseShape\difference others, false
-						when "Exclude"    then baseShape\exclude others, false
-					baseLine.shape = baseShape\export!
-					ass\insertLine baseLine, s
-			else
-				if clip = lcopy.data.clip
-					-- gets the shape contained inside the clip and
-					-- moves it the value relative to the shape
-					clip = Path(clip)\move -px, -py
-					switch operation
-						when "Unite"      then shape\unite clip
-						when "Intersect"  then shape\intersect clip
-						when "Difference" then shape\difference clip
-						when "Exclude"    then shape\exclude clip
-					line.shape = shape\export!
-					line.tags\remove "clip", "iclip"
+						when "Unite"      then shape\unite      cut
+						when "Intersect"  then shape\intersect  cut
+						when "Difference" then shape\difference cut
+						when "Exclude"    then shape\exclude    cut
+				line.shape = shape\export!
+				if line.shape != ""
 					ass\insertLine line, s
+		else
+			clip = l.data.clip
+			Line.callBackExpand ass, l, nil, (line) ->
+				{px, py} = line.data.pos
+				shape = Path line.shape
+				if clip
+					cut = Path(clip)\move -px, -py
+					switch operation
+						when "Unite"      then shape\unite      cut
+						when "Intersect"  then shape\intersect  cut
+						when "Difference" then shape\difference cut
+						when "Exclude"    then shape\exclude    cut
+					line.shape = shape\export!
+					if line.shape != ""
+						line.tags\remove "clip", "iclip"
+						ass\insertLine line, s
 				else
 					ass\error s, "Expected \\clip or \\iclip tag"
 	return ass\getNewSelection!
@@ -413,11 +404,11 @@ Offsetting = (ass, res) ->
 		strokeAlign = "Inside"
 	cornerStyle = cornerStyle\lower!
 	cutsOutside = cut and strokeAlign == "Outside"
-	for l, lcopy, s, i, n in ass\iterSel!
+	for l, s, i, n in ass\iterSel!
 		ass\progressLine s, i, n
 		ass\removeLine l, s
-		Line.extend ass, lcopy, i
-		Line.callBackExpand ass, lcopy, nil, (line) ->
+		Line.extend ass, l, i
+		Line.callBackExpand ass, l, nil, (line) ->
 			path, clip = Path line.shape
 			if cutsOutside
 				clip = path\clone!
@@ -432,39 +423,54 @@ Offsetting = (ass, res) ->
 	return ass\getNewSelection!
 
 Manipulate = (ass, res, button) ->
-	{:distance, :recreateBezier, :angleThreshold} = res
-	for l, line, s, i, n in ass\iterSel!
+	{:enableClip, :recreateBezier, :distance, :angleThreshold} = res
+	for l, s, i, n in ass\iterSel!
 		ass\progressLine s, i, n
-		Line.extend ass, line, i
-		if line.isShape
-			ass\removeLine l, s
-			path = Path line.shape
-			if button == "Flatten"
-				path\flatten distance
-			elseif button == "Simplify"
-				path\simplify tolerance, false, recreateBezier, angleThreshold
-			line.shape = path\export!
-			ass\insertLine line, s
+		Line.extend ass, l, i
+		if enableClip
+			{:clip, :isIclip} = l.data
+			if clip
+				if type(clip) != "table"
+					clip = Path(clip)\flatten(1)\simplify(tolerance, false, recreateBezier, angleThreshold)\export!
+					if isIclip
+						l.tags\insert {{"iclip", clip}}
+					else
+						l.tags\insert {{"clip", clip}}
+					unless l.isShape
+						l.text\modifyBlock l.tags
+					ass\setLine l, s
+			else
+				ass\warning s, "Expected \\clip or \\iclip tag"
 		else
-			ass\warning s, "Expected a shape"
+			if l.isShape
+				ass\removeLine l, s
+				path = Path l.shape
+				if button == "Flatten"
+					path\flatten distance
+				elseif button == "Simplify"
+					path\flatten(distance)\simplify tolerance, false, recreateBezier, angleThreshold
+				l.shape = path\export!
+				ass\insertLine l, s
+			else
+				ass\warning s, "Expected a shape"
 	return ass\getNewSelection!
 
 Transform = (ass, res) ->
 	{:horizontalScale, :verticalScale, :angle, :xAxis, :yAxis} = res
-	for l, line, s, i, n in ass\iterSel!
+	for l, s, i, n in ass\iterSel!
 		ass\progressLine s, i, n
-		Line.extend ass, line, i
-		if line.isShape
+		Line.extend ass, l, i
+		if l.isShape
 			ass\removeLine l, s
-			path = Path line.shape
+			path = Path l.shape
 			if horizontalScale != 0 or verticalScale != 0
 				path\scale horizontalScale, verticalScale
 			if angle != 0
 				path\rotate angle
 			if xAxis != 0 or yAxis != 0
 				path\move xAxis, yAxis
-			line.shape = path\export!
-			ass\insertLine line, s
+			l.shape = path\export!
+			ass\insertLine l, s
 		else
 			ass\warning s, "Expected a shape"
 	return ass\getNewSelection!
@@ -472,11 +478,11 @@ Transform = (ass, res) ->
 ShadowEffect = (ass, res) ->
 	{:shadow} = res
 	local xshad, yshad
-	for l, lcopy, s, i, n in ass\iterSel!
+	for l, s, i, n in ass\iterSel!
 		ass\progressLine s, i, n
 		ass\removeLine l, s
-		Line.extend ass, lcopy, i
-		Line.callBackExpand ass, lcopy, nil, (line) ->
+		Line.extend ass, l, i
+		Line.callBackExpand ass, l, nil, (line) ->
 			{:data} = line
 			switch shadow
 				when "3D from shadow", "Inner shadow"
@@ -508,11 +514,11 @@ ShadowEffect = (ass, res) ->
 CornerEffect = (ass, res) ->
 	{:cornerStyle, :rounding, :radius} = res
 	inverted = cornerStyle == "Inverted Round"
-	for l, lcopy, s, i, n in ass\iterSel!
+	for l, s, i, n in ass\iterSel!
 		ass\progressLine s, i, n
 		ass\removeLine l, s
-		Line.extend ass, lcopy, i
-		Line.callBackExpand ass, lcopy, nil, (line) ->
+		Line.extend ass, l, i
+		Line.callBackExpand ass, l, nil, (line) ->
 			path = Path line.shape
 			path\openContours!
 			newPath = Path!
@@ -551,13 +557,13 @@ CornerEffect = (ass, res) ->
 	return ass\getNewSelection!
 
 ShaperyMacros = (ass, macro) ->
-	for l, lcopy, s, i, n in ass\iterSel!
+	for l, s, i, n in ass\iterSel!
 		ass\progressLine s, i, n
-		Line.extend ass, lcopy, i
+		Line.extend ass, l, i
 		switch macro
 			when "Shape expand"
 				ass\removeLine l, s
-				Line.callBackExpand ass, lcopy, nil, (line) ->
+				Line.callBackExpand ass, l, nil, (line) ->
 					copy = Table.copy line
 					if global.expandBordShadow
 						xshad, yshad = Line.solveShadow line
@@ -602,58 +608,80 @@ ShaperyMacros = (ass, macro) ->
 								line.tags\insert {{"c", color3}}
 								ass\insertLine line, s
 					ass\insertLine copy, s
+			when "Shape clipper"
+				{:clip, :isIclip} = l.data
+				if clip
+					ass\removeLine l, s
+					Line.callBackExpand ass, l, nil, (line) ->
+						shape = Path line.shape
+						{px, py} = line.data.pos
+						cut = Path(clip)\move -px, -py
+						if isIclip
+							shape\difference cut
+						else
+							shape\intersect cut
+						line.shape = shape\export!
+						if line.shape != ""
+							line.tags\remove "clip", "iclip"
+							ass\insertLine line, s
+				else
+					ass\warning s, "Expected \\clip or \\iclip tag"
 			when "Shape to clip"
 				clip = {}
-				Line.callBackExpand ass, lcopy, nil, (line) ->
+				Line.callBackExpand ass, l, nil, (line) ->
 					{px, py} = line.data.pos
 					insert clip, Path(line.shape)\move(px, py)\export!
 				clip = table.concat clip, " "
-				lcopy.tags\insert {{"clip", clip}}
-				ass\setLine lcopy, s, true
+				if l.data.isIclip
+					l.tags\insert {{"iclip", clip}}
+				else
+					l.tags\insert {{"clip", clip}}
+				unless l.isShape
+					l.text\modifyBlock l.tags
+				ass\setLine l, s
 			when "Clip to shape"
-				{:an, :pos, :clip} = lcopy.data
+				{:an, :pos, :clip} = l.data
 				if clip
 					{px, py} = pos
 					if type(clip) == "table"
 						{cl, ct, cr, cb} = clip
 						clip = "m #{cl} #{ct} l #{cr} #{ct} #{cr} #{cb} #{cl} #{cb}"
-					lcopy.shape = Path(clip)\reallocate(an, nil, true, px, py)\export!
-					lcopy.tags\remove "perspective", "clip", "iclip"
-					unless lcopy.isShape
-						lcopy.isShape = true
-						lcopy.tags\remove "font"
-						lcopy.tags\insert {{"pos", pos}, true}, {{"an", an}, true}, "\\fscx100\\fscy100\\frz0\\p1"
-					ass\setLine lcopy, s
+					l.shape = Path(clip)\reallocate(an, nil, true, px, py)\export!
+					l.tags\remove "perspective", "clip", "iclip"
+					unless l.isShape
+						l.isShape = true
+						l.tags\remove "font"
+						l.tags\insert {{"pos", pos}, true}, {{"an", an}, true}, "\\fscx100\\fscy100\\frz0\\p1"
+					ass\setLine l, s
 				else
-					ass\error s, "Expected \\clip or \\iclip tag"
+					ass\warning s, "Expected \\clip or \\iclip tag"
 			when "Shape bounding box"
-				if lcopy.isShape
-					{:assDraw} = Path(lcopy.shape)\boundingBox!
-					lcopy.shape = assDraw
-					ass\setLine lcopy, s
+				if l.isShape
+					l.shape = Path(l.shape)\boundingBox!["assDraw"]
+					ass\setLine l, s
 				else
 					ass\warning s, "Expected a shape"
 			when "Shape to origin", "Shape to center"
-				if lcopy.isShape
+				if l.isShape
 					torigin = macro == "Shape to origin"
-					newPath = Path lcopy.shape
+					newPath = Path l.shape
 					{l: pl, t: pt, :width, :height} = newPath\boundingBox!
 					x = torigin and -pl or -pl - width / 2
 					y = torigin and -pt or -pt - height / 2
 					newPath\move x, y
-					lcopy.shape = newPath\export!
-					with lcopy.data
-						if lcopy.tags\existsTag "move"
+					l.shape = newPath\export!
+					with l.data
+						if l.tags\existsTag "move"
 							.move[1] -= x
 							.move[2] -= y
 							.move[3] -= x
 							.move[4] -= y
-							lcopy.tags\insert {{"move", .move}, true}
+							l.tags\insert {{"move", .move}, true}
 						else
 							.pos[1] -= x
 							.pos[2] -= y
-							lcopy.tags\insert {{"pos", .pos}, true}
-					ass\setLine lcopy, s
+							l.tags\insert {{"pos", .pos}, true}
+					ass\setLine l, s
 				else
 					ass\warning s, "Expected a shape"
 	return ass\getNewSelection!
@@ -734,46 +762,66 @@ guis = {
 		},
 	},
 	manipulate: {
-		simplifyLabel:{
-			class: "label", label: "Simplify",
+		fitCurvesLabel: {
+			class: "label",
+			label: "Fit Curves",
 			x: 0, y: 0
 		},
 		recreateBezier: {
-			class: "checkbox", label: "Use bezier",
+			class: "checkbox",
+			label: "#{(" ")\rep 28}"
 			value: true, config: true,
-			x: 1, y: 0, width: 1, height: 1
-			hint: ""
+			x: 3, y: 0
+		},
+		enableClipLabel: {
+			class: "label",
+			label: "Execute On \\clip",
+			x: 0, y: 1
+		},
+		enableClip: {
+			class: "checkbox",
+			value: false, config: true,
+			x: 3, y: 1
+		},
+		simplifyLabel: {
+			class: "label",
+			label: "- Simplify -----",
+			x: 0, y: 3
 		},
 		toleranceLabel: {
-			class: "label", label: "Tolerance",
-			x: 0, y: 2
+			class: "label",
+			label: "Tolerance",
+			x: 0, y: 4
 		},
 		tolerance: {
 			class: "floatedit",
 			value: 0.5, config: true, min: 0.1, max: 10, step: 0.01
-			x: 1, y: 2, width: 1, height: 1
+			x: 3, y: 4
 		},
 		angleThresholdLabel: {
-			class: "label", label: "Angle Threshold",
-			x: 0, y: 3
+			class: "label",
+			label: "Angle Threshold",
+			x: 0, y: 5
 		},
 		angleThreshold: {
 			class: "floatedit",
-			value: 170, config: true, min: 90, max: 180, step: 0.1
-			x: 1, y: 3, width: 1, height: 1
+			value: 170, config: true, min: 0, max: 180, step: 0.1
+			x: 3, y: 5
 		},
 		flattenLabel: {
-			class: "label", label: "Flatten",
-			x: 6, y: 0
+			class: "label",
+			label: "- Flatten -----",
+			x: 0, y: 7
 		},
 		distanceLabel: {
-			class: "label", label: "Distance",
-			x: 6, y: 2
+			class: "label",
+			label: "Distance",
+			x: 0, y: 8
 		},
 		distance: {
 			class: "floatedit",
 			value: 1, config: true, min: 0.1, max: 100, step: 0.1
-			x: 7, y: 2, width: 1, height: 1
+			x: 3, y: 8
 		},
 	},
 	transform: {
@@ -876,22 +924,23 @@ guis = {
 	},
 	config: {
 		expandTagLabel: {
-			class: "label", label: "Expand tags",
+			class: "label", label: "Expand",
 			x: 0, y: 0
-		},
-		expandBordShadow: {
-			class: "checkbox", label: "Bord Shad",
-			value: false, config: true,
-			x: 0, y: 1,
-			hint: "\\bord \\shad"
 		},
 		cutBordShadow: {
 			class: "floatedit",
 			value: 1, config: true, min: 0.1, max: 2, step: 0.1,
-			x: 0, y: 2
-		}
+			hint: "Cutting gap size"
+			x: 0, y: 1
+		},
+		expandBordShadow: {
+			class: "checkbox", label: "Cut",
+			value: false, config: true,
+			hint: "Cuts the outline, shadow and fill"
+			x: 0, y: 2,
+		},
 		bordBehaviourLabel: {
-			class: "label", label: "\\bord behaviour",
+			class: "label", label: "Renderer #{(" ")\rep 14}",
 			x: 0, y: 5
 		},
 		bordBehaviour: {
@@ -902,6 +951,7 @@ guis = {
 		saveLines: {
 			class: "checkbox", label: "Save lines",
 			value: false, config: true,
+			hint: "Saves the selected lines, the saved lines will be commented out"
 			x: 5, y: 0
 		},
 	}
@@ -997,6 +1047,7 @@ if haveDepCtrl
 
 	depctrl\registerMacros {
 		{"Shape expand",       "", ShaperyMacrosDialog "Shape expand"}
+		{"Shape clipper",      "", ShaperyMacrosDialog "Shape clipper"}
 		{"Clip to shape",      "", ShaperyMacrosDialog "Clip to shape"}
 		{"Shape to clip",      "", ShaperyMacrosDialog "Shape to clip"}
 		{"Shape to origin",    "", ShaperyMacrosDialog "Shape to origin"}
@@ -1012,6 +1063,7 @@ else
 	aegisub.register_macro "#{script_name} / Config",     "", ConfigDialog
 
 	aegisub.register_macro ": Shapery macros : / Shape expand",       "", ShaperyMacrosDialog "Shape expand"
+	aegisub.register_macro ": Shapery macros : / Shape clipper",      "", ShaperyMacrosDialog "Shape clipper"
 	aegisub.register_macro ": Shapery macros : / Clip to shape",      "", ShaperyMacrosDialog "Clip to shape"
 	aegisub.register_macro ": Shapery macros : / Shape to clip",      "", ShaperyMacrosDialog "Shape to clip"
 	aegisub.register_macro ": Shapery macros : / Shape to origin",    "", ShaperyMacrosDialog "Shape to origin"
