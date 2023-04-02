@@ -93,9 +93,9 @@ class Ass
 	collectBounds: (si_exhaustive = false) =>
 		if hasInspector
 			lines, @bounds = {}, {}
-			for l, lcopy, s, i in @iterSel!
+			for l, s, i in @iterSel!
 				lines[i] = {}
-				newLine = Table.copy lcopy
+				newLine = Table.copy l
 				newLine.text\callBack (tags, text) ->
 					tags\remove "clip", "iclip", "outline", "shadow", "perspective"
 					tags\insert "\\fscx100\\fscy100\\frz0\\bord0\\shad0"
