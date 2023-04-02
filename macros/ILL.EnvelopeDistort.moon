@@ -1,6 +1,6 @@
 export script_name        = "Envelope Distort"
 export script_description = "Allows you to warp and manipulate shapes within a customizable envelope"
-export script_version     = "1.0.6"
+export script_version     = "1.0.7"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.EnvelopeDistort"
 
@@ -9,13 +9,13 @@ haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
 local depctrl, Ass, Line, Path
 if haveDepCtrl
 	depctrl = DependencyControl {
-		feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json",
+		feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json",
 		{
 			{
 				"ILL.ILL"
 				version: "1.3.0"
-				url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
-				feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
+				url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
+				feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}
 		}
 	}

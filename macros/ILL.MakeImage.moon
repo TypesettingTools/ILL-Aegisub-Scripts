@@ -1,6 +1,6 @@
 export script_name        = "Make Image"
 export script_description = "Does several procedures for converting images to the .ass"
-export script_version     = "2.0.2"
+export script_version     = "2.0.3"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.MakeImage"
 
@@ -9,19 +9,19 @@ haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
 local depctrl, IMG, ILL, Aegi, Ass, Math, Table
 if haveDepCtrl
 	depctrl = DependencyControl {
-		feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json",
+		feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json",
 		{
 			{
 				"ILL.IMG"
 				version: "1.0.0"
-				url: "https://github.com/klsruan/ILL-Aegisub-Scripts"
-				feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
+				url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts"
+				feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}
 			{
 				"ILL.ILL"
 				version: "1.3.0"
-				url: "https://github.com/klsruan/ILL-Aegisub-Scripts"
-				feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
+				url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts"
+				feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}
 		}
 	}

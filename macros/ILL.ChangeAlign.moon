@@ -1,6 +1,6 @@
 export script_name        = "Change Alignment"
 export script_description = "Changes the alignment of a text or shape without changing its original position"
-export script_version     = "1.0.4"
+export script_version     = "1.0.5"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.ChangeAlign"
 
@@ -9,13 +9,13 @@ haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
 local depctrl, Ass, Line, Path
 if haveDepCtrl
 	depctrl = DependencyControl {
-		feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json",
+		feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json",
 		{
 			{
 				"ILL.ILL"
 				version: "1.3.0"
-				url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
-				feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
+				url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
+				feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}
 		}
 	}

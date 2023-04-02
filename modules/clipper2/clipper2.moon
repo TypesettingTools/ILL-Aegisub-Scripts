@@ -1,4 +1,4 @@
-module_version = "1.3.1"
+module_version = "1.3.2"
 
 haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
 
@@ -10,8 +10,8 @@ if haveDepCtrl
 		description: "A polygon clipping and offsetting library"
 		author: "ILLTeam"
 		moduleName: "clipper2.clipper2"
-		url: "https://github.com/klsruan/ILL-Aegisub-Scripts"
-		feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
+		url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts"
+		feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 		{
 			{"ffi"}
 			{

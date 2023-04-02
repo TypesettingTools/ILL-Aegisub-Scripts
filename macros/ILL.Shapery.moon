@@ -1,6 +1,6 @@
 export script_name        = "Shapery"
 export script_description = "Does several types of shape manipulations from the simplest to the most complex"
-export script_version     = "2.2.0"
+export script_version     = "2.2.1"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
@@ -9,7 +9,7 @@ haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
 local depctrl, ConfigHandler, Clipper, ILL, Aegi, Ass, Line, Curve, Path, Point, Util, Math, Table, Util
 if haveDepCtrl
 	depctrl = DependencyControl {
-		feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json",
+		feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json",
 		{
 			{
 				"a-mo.ConfigHandler"
@@ -20,14 +20,14 @@ if haveDepCtrl
 			{
 				"clipper2.clipper2"
 				version: "1.3.0"
-				url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
-				feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
+				url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
+				feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}
 			{
 				"ILL.ILL"
 				version: "1.3.0"
-				url: "https://github.com/klsruan/ILL-Aegisub-Scripts/"
-				feed: "https://raw.githubusercontent.com/klsruan/ILL-Aegisub-Scripts/main/DependencyControl.json"
+				url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
+				feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}
 		}
 	}
