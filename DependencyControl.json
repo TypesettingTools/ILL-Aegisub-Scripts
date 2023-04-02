@@ -19,11 +19,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.0.5",
-                    "released": "2023-03-30",
+                    "version": "1.0.6",
+                    "released": "2023-04-02",
                     "files": [
                         {
-                            "sha1": "f458dbaa4b03afdbb48705ca22cc1e569d512a59",
+                            "sha1": "365347246d36501e23afef247c86752530cc60d7",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -50,6 +50,13 @@
                     "Macros can now be installed manually without having to have DepControl",
                     "",
                     "Regardless, it is always recommended to install via DepControl"
+                ],
+                "1.0.6": [
+                    "Update macros",
+                    "",
+                    "Bugs:",
+                    "",
+                    "- Iterators are now aligned with the fixes made in class Ass"
                 ]
             },
             "name": "Envelope Distort",
@@ -62,11 +69,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.1.1",
-                    "released": "2023-03-30",
+                    "version": "2.2.0",
+                    "released": "2023-04-02",
                     "files": [
                         {
-                            "sha1": "7db2c9cac8da0d16010cad997d93780f6838391e",
+                            "sha1": "a25505190da56eeafb90d56ec07036e3d9d21923",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -106,6 +113,13 @@
                     "Macros can now be installed manually without having to have DepControl",
                     "",
                     "Regardless, it is always recommended to install via DepControl"
+                ],
+                "2.2.0": [
+                    "Update macros",
+                    "",
+                    "Bugs:",
+                    "",
+                    "- Iterators are now aligned with the fixes made in class Ass"
                 ]
             },
             "name": "Shapery",
@@ -118,11 +132,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.0.1",
-                    "released": "2023-03-30",
+                    "version": "2.0.2",
+                    "released": "2023-04-02",
                     "files": [
                         {
-                            "sha1": "73694a7586b22e98b56a1c672326b579c76b9049",
+                            "sha1": "8c6418e5896b924e824cb7726a6e206c3750d975",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -154,6 +168,13 @@
                     "Macros can now be installed manually without having to have DepControl",
                     "",
                     "Regardless, it is always recommended to install via DepControl"
+                ],
+                "2.0.2": [
+                    "Update macros",
+                    "",
+                    "Bugs:",
+                    "",
+                    "- Iterators are now aligned with the fixes made in class Ass"
                 ]
             },
             "name": "Make Image",
@@ -166,11 +187,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.0.3",
-                    "released": "2023-03-30",
+                    "version": "1.0.4",
+                    "released": "2023-04-02",
                     "files": [
                         {
-                            "sha1": "288f7dd8c33d4342fbf9ba2f0709ecd0c8cd1391",
+                            "sha1": "057690fb6e27437f6f74fa5f14d3332660ff245e",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -197,6 +218,13 @@
                     "Macros can now be installed manually without having to have DepControl",
                     "",
                     "Regardless, it is always recommended to install via DepControl"
+                ],
+                "1.0.4": [
+                    "Update macros",
+                    "",
+                    "Bugs:",
+                    "",
+                    "- Iterators are now aligned with the fixes made in class Ass"
                 ]
             },
             "name": "ILL - Change Alignment",
