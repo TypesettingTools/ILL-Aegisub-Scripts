@@ -95,15 +95,16 @@ class Ass
 			lines, @bounds = {}, {}
 			for l, s, i in @iterSel!
 				lines[i] = {}
-				newLine = Table.copy l
-				newLine.text\callBack (tags, text) ->
-					tags\remove "clip", "iclip", "outline", "shadow", "perspective"
+				l.text = l.text\gsub "\\i?clip%b()", ""
+				l.text = Text l.text, l.isShape
+				l.text\callBack (tags, text) ->
+					tags\remove "outline", "shadow", "perspective"
 					tags\insert "\\fscx100\\fscy100\\frz0\\bord0\\shad0"
 					return tags, text
-				newLine.text = newLine.text\__tostring!
-				newLine.raw = newLine.raw\gsub "^(.-: .-,.-,.-,.-,.-,.-,.-,.-,.-,)(.*)$", "%1#{newLine.text}"
-				newLine.si_exhaustive = si_exhaustive
-				lines[i][1] = newLine
+				l.text = l.text\__tostring!
+				l.raw = l.raw\gsub "^(.-: .-,.-,.-,.-,.-,.-,.-,.-,.-,)(.*)$", "%1#{l.text}"
+				l.si_exhaustive = si_exhaustive
+				lines[i][1] = l
 			insp, msg = Inspector @sub
 			assert insp, "SubInspector Error: #{msg}"
 			for i = 1, #lines
