@@ -1,4 +1,4 @@
-module_version = "1.3.2"
+module_version = "1.3.3"
 
 haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
 
@@ -16,7 +16,7 @@ if haveDepCtrl
 			"ffi"
 			{
 				"clipper2.clipper2"
-				version: "1.3.0"
+				version: "1.3.2"
 				url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
 				feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}
