@@ -424,7 +424,7 @@
                         {
                             "name": "/Config.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "1c53aaa93f9d48112b044afd35e8f21e120d3bed"
+                            "sha1": "d4d1b25bea64bd17098acd11749d5d18d4d4ca72"
                         },
                         {
                             "name": "/Math.moon",
