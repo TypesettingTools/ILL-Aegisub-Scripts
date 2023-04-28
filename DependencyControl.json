@@ -88,11 +88,6 @@
                     ],
                     "requiredModules": [
                         {
-                            "moduleName": "a-mo.ConfigHandler",
-                            "feed": "@{feed:a-mo}",
-                            "version": "1.1.4"
-                        },
-                        {
                             "moduleName": "clipper2.clipper2",
                             "feed": "@{feed:ILL}",
                             "version": "1.2.0"
