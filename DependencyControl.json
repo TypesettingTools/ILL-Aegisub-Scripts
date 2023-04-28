@@ -8,7 +8,6 @@
     "fileBaseUrl": "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/@{channel}/",
     "knownFeeds": {
         "ILL": "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json",
-        "a-mo": "https://raw.githubusercontent.com/TypesettingTools/Aegisub-Motion/DepCtrl/DependencyControl.json",
         "SubInspector": "https://raw.githubusercontent.com/TypesettingTools/SubInspector/master/DependencyControl.json",
         "ffi-experiments": "https://raw.githubusercontent.com/TypesettingTools/ffi-experiments/master/DependencyControl.json"
     },
@@ -446,6 +445,9 @@
                     "requiredModules": [
                         {
                             "moduleName": "ffi"
+                        },
+                        {
+                            "moduleName": "json"
                         },
                         {
                             "moduleName": "SubInspector.Inspector",

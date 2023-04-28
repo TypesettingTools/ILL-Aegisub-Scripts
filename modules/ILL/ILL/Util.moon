@@ -1,8 +1,6 @@
 import Math  from require "ILL.ILL.Math"
 import Table from require "ILL.ILL.Table"
 
-json = require "json"
-
 class Util
 
 	-- finds the last occurrence of a pattern in a string
@@ -161,7 +159,7 @@ class Util
 		u = math.floor t
 		return fn t - u, values[u + 1], values[u + 2] or values[u + 1]
 
-	-- 
+	-- fixes the way windows sees the path
 	fixPath: (path) ->
 		if jit.os == "Windows"
 			path = path\gsub "/", "\\"
@@ -169,18 +167,18 @@ class Util
 			path = path\gsub "\\", "/"
 		return path
 
-	-- 
-    fileExist: (dir, isDir) ->
-        a = dir\sub 1, 1
-        b = dir\sub -1, -1
-        c = "\""
-        if a == c and b == c
-            dir = dir\sub 2, -2
-        dir ..= "/" if isDir
-        ok, err, code = os.rename dir, dir
-        unless ok
-            return true if code == 13
-        return ok, err
+	-- checks if a file or folder exists
+	fileExist: (dir, isDir) ->
+		a = dir\sub 1, 1
+		b = dir\sub -1, -1
+		c = "\""
+		if a == c and b == c
+			dir = dir\sub 2, -2
+		dir ..= "/" if isDir
+		ok, err, code = os.rename dir, dir
+		unless ok
+			return true if code == 13
+		return ok, err
 
 	-- checks if the text is a blank
 	isBlank: (t) ->
