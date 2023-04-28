@@ -422,6 +422,11 @@
                             "sha1": "76c6e38c00fdd5c453a903076613e4985144a969"
                         },
                         {
+                            "name": "/Config.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "1c53aaa93f9d48112b044afd35e8f21e120d3bed"
+                        },
+                        {
                             "name": "/Math.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "sha1": "478543eff10f7d16b1c2471d384e7593d0e22039"
