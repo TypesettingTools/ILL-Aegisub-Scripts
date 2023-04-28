@@ -1,29 +1,50 @@
 export script_name        = "Envelope Distort"
 export script_description = "Allows you to warp and manipulate shapes within a customizable envelope"
-export script_version     = "1.0.7"
+export script_version     = "1.1.0"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.EnvelopeDistort"
 
 haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
 
-local depctrl, Ass, Line, Path
+local depctrl, Aegi, Ass, Line, Path, Util
 if haveDepCtrl
 	depctrl = DependencyControl {
 		feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json",
 		{
 			{
 				"ILL.ILL"
-				version: "1.3.0"
+				version: "1.3.4"
 				url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
 				feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}
 		}
 	}
-	{:Ass, :Line, :Path} = depctrl\requireModules!
+	{:Aegi, :Ass, :Line, :Path, :Util} = depctrl\requireModules!
 else
-	{:Ass, :Line, :Path} = require "ILL.ILL"
+	{:Aegi, :Ass, :Line, :Path, :Util} = require "ILL.ILL"
 
-makeMesh = (ass, button, elements) ->
+interface = -> {
+	{class: "label", label: " - Mesh options -----", x: 0, y: 0}
+	{class: "label", label: "Line type", x: 0, y: 1}
+	{class: "dropdown", items: {"Straight", "Bezier"}, x: 1, y: 1, name: "lineType", value: "Straight"}
+	{class: "label", label: "Rows", x: 0, y: 2}
+	{class: "intedit", min: 1, x: 1, y: 2, name: "rows", value: 1}
+	{class: "label", label: "Columns", x: 0, y: 3}
+	{class: "intedit", min: 1, x: 1, y: 3, name: "cols", value: 1}
+	{class: "label", label: "Tolerance", x: 0, y: 4}
+	{class: "floatedit", min: 0, x: 1, y: 4, name: "tolerance", value: 0}
+	{class: "checkbox", label: "Perspective", x: 0, y: 6, name: "perspective", value: false}
+	{class: "checkbox", label: "Keep Mesh", x: 1, y: 6, name: "keepMesh", value: false}
+}
+
+makeWithMesh = (sub, sel, activeLine) ->
+	button, elements, config = Aegi.display interface!, {"Warp", "Mesh", "Reset", "Cancel"}, {close: "Cancel"}, "Mesh"
+	if button == "Reset"
+		config\reset!
+		makeWithMesh sub, sel, activeLine
+	elseif button == "Cancel"
+		return
+	ass = Ass sub, sel, activeLine
 	{:lineType, :rows, :cols, :tolerance, :perspective, :keepMesh} = elements
 	isBezier = lineType == "Bezier"
 	getMesh = (l) ->
@@ -34,7 +55,7 @@ makeMesh = (ass, button, elements) ->
 		return clips, colDistance, rowDistance
 	for l, s, i, n in ass\iterSel!
 		ass\progressLine s, i, n
-		Line.extend ass, l, i
+		Line.extend ass, l
 		if button == "Mesh"
 			ass\removeLine l, s
 			clips = getMesh l
@@ -86,38 +107,6 @@ makeMesh = (ass, button, elements) ->
 			else
 				ass\error s, "The grid was not found"
 	return ass\getNewSelection!
-
-config = depctrl\getConfigHandler {
-	lineType: "Straight"
-	rows: 1
-	cols: 1
-	tolerance: 0
-	perspective: false
-	keepMesh: false
-}
-
-interface = ->
-	{
-		{class: "label", label: " - Mesh options -----", x: 0, y: 0}
-		{class: "label", label: "Line type", x: 0, y: 1}
-		{class: "dropdown", items: {"Straight", "Bezier"}, x: 1, y: 1, name: "lineType", value: config.c.lineType}
-		{class: "label", label: "Rows", x: 0, y: 2}
-		{class: "intedit", min: 1, x: 1, y: 2, name: "rows", value: config.c.rows}
-		{class: "label", label: "Columns", x: 0, y: 3}
-		{class: "intedit", min: 1, x: 1, y: 3, name: "cols", value: config.c.cols}
-		{class: "label", label: "Tolerance", x: 0, y: 4}
-		{class: "floatedit", min: 0, x: 1, y: 4, name: "tolerance", value: config.c.tolerance}
-		{class: "checkbox", label: "Perspective", x: 0, y: 6, name: "perspective", value: config.c.perspective}
-		{class: "checkbox", label: "Keep Mesh", x: 1, y: 6, name: "keepMesh", value: config.c.keepMesh}
-	}
-
-makeWithMesh = (sub, sel, activeLine) ->
-	button, elements = aegisub.dialog.display interface!, {"Warp", "Mesh", "Cancel"}, {close: "Cancel"}
-	if button != "Cancel"
-		for key, value in pairs elements
-			config.c[key] = value
-		config\write!
-		return makeMesh Ass(sub, sel, activeLine), button, config.c
 
 if haveDepCtrl
 	depctrl\registerMacros {
