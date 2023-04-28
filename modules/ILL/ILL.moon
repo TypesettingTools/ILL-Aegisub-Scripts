@@ -1,4 +1,4 @@
-module_version = "1.3.3"
+module_version = "1.3.4"
 
 haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
 
@@ -20,10 +20,14 @@ if haveDepCtrl
 				url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
 				feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}
+			{
+				"json"
+			}
 		}
 	}
 
 import Aegi    from require "ILL.ILL.Aegi"
+import Config  from require "ILL.ILL.Config"
 import Math    from require "ILL.ILL.Math"
 import Table   from require "ILL.ILL.Table"
 import Util    from require "ILL.ILL.Util"
@@ -39,7 +43,7 @@ import Text    from require "ILL.ILL.Ass.Text.Text"
 import Font    from require "ILL.ILL.Font.Font"
 
 modules = {
-	:Aegi, :Math, :Table, :Util
+	:Aegi, :Config, :Math, :Table, :Util
 	:Curve, :Path, :Point, :Segment
 	:Tag, :Tags, :Text
 	:Ass, :Line

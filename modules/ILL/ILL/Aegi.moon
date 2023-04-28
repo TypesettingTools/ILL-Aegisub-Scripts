@@ -1,4 +1,5 @@
-import Table from require "ILL.ILL.Table"
+import Table  from require "ILL.ILL.Table"
+import Config from require "ILL.ILL.Config"
 
 -- https://aegisub.org/docs/latest/automation/lua/progress_reporting/
 class Aegi
@@ -47,6 +48,20 @@ class Aegi
 	debug: (lvl = 0, msg) ->
 		aegisub.debug.out lvl, msg
 		return
+
+	-- interface display
+	display: (interface, ...) ->
+		args = {...}
+		config = Config interface
+		if extra = args[3]
+			if script_namespace
+				config\setJsonPath script_namespace .. extra
+			else
+				error "Expected script_namespace"
+		button, elements = aegisub.dialog.display config\getInterface!, ...
+		if not args[4] and button != "Cancel"
+			config\save elements
+		return button, elements, config
 
 	-- prints any value in the Aegisub log
 	log: (value) ->
