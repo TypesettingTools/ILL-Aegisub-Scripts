@@ -348,13 +348,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.3.4",
+                    "version": "1.3.5",
                     "released": "2023-04-28",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "71bad00b80ae3b316028318210c7dcc4870f6200"
+                            "sha1": "78277de65b7fbbfd71c212eb647f9d021ba019c6"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -439,7 +439,7 @@
                         {
                             "name": "/Util.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "60e8ad5ff71e95cd096757a6d765d6e6bbfc8e0c"
+                            "sha1": "be2990e8299a4be5a5d2ddc0fa4a219b61a94e75"
                         }
                     ],
                     "requiredModules": [
@@ -508,6 +508,9 @@
                     "",
                     "- Fixed some bugs",
                     "- Add save system"
+                ],
+                "1.3.5": [
+                    "Update DepControl"
                 ]
             }
         },
