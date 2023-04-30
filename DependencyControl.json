@@ -522,8 +522,8 @@
             "fileBaseUrl": "@{fileBaseUrl}modules/@{namespacePath}",
             "channels": {
                 "main": {
-                    "version": "1.0.1",
-                    "released": "2023-03-28",
+                    "version": "1.0.2",
+                    "released": "2023-04-30",
                     "default": true,
                     "platforms": [
                         "Windows-x64",
@@ -534,7 +534,7 @@
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "bde0def3b732e3355944a139585f3a75b79507fe"
+                            "sha1": "8eef6452f0c1dea6f1bc43d1d56b4e65149b9455"
                         },
                         {
                             "name": "/Potrace.moon",
@@ -544,7 +544,7 @@
                         {
                             "name": "/Tracer.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "30702c6e27ff7a9b1738ce1bc4f9242e3c80f2fe"
+                            "sha1": "a516d8373055fa4f96ecc457405ab4ae3856e67e"
                         },
                         {
                             "name": "/bitmap/bitmap.moon",
@@ -641,6 +641,11 @@
             "changelog": {
                 "1.0.1": [
                     "Fix identation"
+                ],
+                "1.0.2": [
+                    "Update ILL IMG module",
+                    "",
+                    "- Corrigido inicializa\u00e7\u00e3o no Aegisub v3.2.2"
                 ]
             }
         }
