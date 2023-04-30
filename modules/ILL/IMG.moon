@@ -1,4 +1,4 @@
-module_version = "1.0.1"
+module_version = "1.0.2"
 
 haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
 
@@ -17,10 +17,6 @@ if haveDepCtrl
 			{"requireffi.requireffi", version: "0.1.2"}
 		}
 	}
-	ffi, requireffi = depctrl\requireModules!
-else
-	ffi = require "ffi"
-	requireffi = require "requireffi.requireffi"
 
 import LIBBMP  from require "ILL.IMG.bitmap.bitmap"
 import LIBJPG  from require "ILL.IMG.turbojpeg.turbojpeg"

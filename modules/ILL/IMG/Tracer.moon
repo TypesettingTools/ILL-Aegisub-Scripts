@@ -1,3 +1,4 @@
+ffi = require "ffi"
 {:insert, :remove} = table
 
 -- imagetracer.js version 1.2.6
@@ -706,10 +707,11 @@ class Tracer
 		return dec >= 1 and a / t or b
 
 	assColor: (c) ->
+		local color, alpha
 		with c
 			color = ("&H%02X%02X%02X&")\format .b, .g, .r
 			alpha = ("&H%02X&")\format 255 - .a
-			return color, alpha
+		return color, alpha
 
 	assDraw: (tracedata, lnum, pathnum, options) ->
 		{:roundcoords, :scale} = options
@@ -718,47 +720,24 @@ class Tracer
 		smp = layer[pathnum]
 		if #smp.segments < 3
 			return ""
-		shape = ("m %s %s ")\format(
-			Tracer.round smp.segments[1].x1 * scale, round
-			Tracer.round smp.segments[1].y1 * scale, round
-		)
+		shape = ("m %s %s ")\format Tracer.round(smp.segments[1].x1 * scale, round), Tracer.round(smp.segments[1].y1 * scale, round)
 		local currType
 		for pcnt = 1, #smp.segments
 			seg = smp.segments[pcnt]
 			if currType != seg.type
 				currType = seg.type
-				shape ..= ("%s %s %s ")\format(
-					seg.type,
-					Tracer.round seg.x2 * scale, round
-					Tracer.round seg.y2 * scale, round
-				)
+				shape ..= ("%s %s %s ")\format seg.type, Tracer.round(seg.x2 * scale, round), Tracer.round(seg.y2 * scale, round)
 			else
-				shape ..= ("%s %s ")\format(
-					Tracer.round seg.x2 * scale, round
-					Tracer.round seg.y2 * scale, round
-				)
+				shape ..= ("%s %s ")\format Tracer.round(seg.x2 * scale, round), Tracer.round(seg.y2 * scale, round)
 			if rawget seg, "x4"
-				shape ..= ("%s %s %s %s ")\format(
-					Tracer.round seg.x3 * scale, round
-					Tracer.round seg.y3 * scale, round
-					Tracer.round seg.x4 * scale, round
-					Tracer.round seg.y4 * scale, round
-				)
+				shape ..= ("%s %s %s %s ")\format Tracer.round(seg.x3 * scale, round), Tracer.round(seg.y3 * scale, round), Tracer.round(seg.x4 * scale, round), Tracer.round(seg.y4 * scale, round)
 		for hcnt = 1, #smp.holechildren
 			hsmp = layer[smp.holechildren[hcnt]]
 			seg = hsmp.segments[#hsmp.segments]
 			if rawget seg, "x4"
-				shape ..= ("m %s %s l %s %s ")\format(
-					Tracer.round seg.x3 * scale
-					Tracer.round seg.y3 * scale
-					Tracer.round seg.x4 * scale
-					Tracer.round seg.y4 * scale
-				)
+				shape ..= ("m %s %s l %s %s ")\format Tracer.round(seg.x3 * scale), Tracer.round(seg.y3 * scale), Tracer.round(seg.x4 * scale), Tracer.round(seg.y4 * scale)
 			else
-				shape ..= ("m %s %s ")\format(
-					Tracer.round seg.x2 * scale
-					Tracer.round seg.y2 * scale
-				)
+				shape ..= ("m %s %s ")\format Tracer.round(seg.x2 * scale), Tracer.round(seg.y2 * scale)
 			local currType
 			for pcnt = #hsmp.segments, 1, -1
 				seg = hsmp.segments[pcnt]
@@ -766,16 +745,8 @@ class Tracer
 					currType = seg.type
 					shape ..= currType .. " "
 				if rawget seg, "x4"
-					shape ..= ("%s %s %s %s ")\format(
-						Tracer.round seg.x2 * scale
-						Tracer.round seg.y2 * scale
-						Tracer.round seg.x3 * scale
-						Tracer.round seg.y3 * scale
-					)
-				shape ..= ("%s %s ")\format(
-					Tracer.round seg.x1 * scale
-					Tracer.round seg.y1 * scale
-				)
+					shape ..= ("%s %s %s %s ")\format Tracer.round(seg.x2 * scale), Tracer.round(seg.y2 * scale), Tracer.round(seg.x3 * scale), Tracer.round(seg.y3 * scale)
+				shape ..= ("%s %s ")\format Tracer.round(seg.x1 * scale), Tracer.round(seg.y1 * scale)
 		palette = tracedata.palette[lnum]
 		if palette.a != 0
 			return shape, Tracer.assColor palette
