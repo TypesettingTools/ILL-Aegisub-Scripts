@@ -1,6 +1,6 @@
 export script_name        = "Shapery"
 export script_description = "Does several types of shape manipulations from the simplest to the most complex"
-export script_version     = "2.3.0"
+export script_version     = "2.4.0"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
@@ -19,7 +19,7 @@ if haveDepCtrl
 			}
 			{
 				"ILL.ILL"
-				version: "1.3.4"
+				version: "1.3.6"
 				url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
 				feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}
@@ -562,13 +562,16 @@ TransformDialog = (sub, sel, activeLine) ->
 				if filter != ""
 					box = path\boundingBox!
 					raw = [[
-						x, y = %s, %s
-						left, top, right, bottom = %s, %s, %s, %s
-						width, height = right - left, bottom - top
-						%s
-						return x, y
+						local ILL = require "ILL.ILL"
+						local s, i, n = %d, %d, %d
+						return function(x, y)
+							left, top, right, bottom = %s, %s, %s, %s
+							width, height = right - left, bottom - top
+							%s
+							return x, y
+						end
 					]]
-					path\map (x, y) -> loadstring(raw\format(x, y, box.l, box.t, box.r, box.b, filter))!
+					path\map loadstring(raw\format(s, i, n, box.l, box.t, box.r, box.b, filter))!
 				l.shape = path\export!
 				ass\insertLine l, s
 			else
@@ -675,6 +678,7 @@ ShaperyMacrosDialog = (macro) ->
 	(sub, sel, activeLine) ->
 		cfg = getConfigElements!
 		ass = Ass sub, sel, activeLine, not cfg.saveLines
+		mergeShapesObj = {}
 		for l, s, i, n in ass\iterSel!
 			ass\progressLine s, i, n
 			Line.extend ass, l
@@ -776,6 +780,39 @@ ShaperyMacrosDialog = (macro) ->
 						ass\setLine l, s
 					else
 						ass\warning s, "Expected a shape"
+				when "Shape merge"
+					if l.isShape
+						{:color1, :color3, :color4, :alpha, :alpha1, :alpha2, :alpha3, :alpha4} = l.data
+						code = (alpha .. color1 .. alpha1 .. color3 .. alpha3 .. color4 .. alpha4)\gsub "[&hH]*", ""
+						Aegi.log code
+						if n < 2
+							ass\error s, "Expected one or more selected lines"
+						if info = mergeShapesObj[code]
+							clip = {}
+							Line.callBackExpand ass, l, nil, (line, j) ->
+								{x, y} = line.data.pos
+								table.insert clip, Path(line.shape)\move(x - info.pos[1], y - info.pos[2])\export!
+							info.shape ..= " " .. table.concat clip, " "
+							if i == n
+								mergeShapesArray = {}
+								for k, v in pairs mergeShapesObj
+									table.insert mergeShapesArray, v
+								table.sort mergeShapesArray, (a, b) -> a.i < b.i
+								if #mergeShapesArray > 0
+									ass\deleteLines l, sel
+									for k = 1, #mergeShapesArray
+										{:line, :shape} = mergeShapesArray[k]
+										line.shape = shape
+										ass\insertLine line, s
+						else
+							clip, lcopy = {}, nil
+							Line.callBackExpand ass, l, nil, (line, j) ->
+								if j == 1
+									lcopy = Table.copy line
+								table.insert clip, Path(line.shape)\export!
+							mergeShapesObj[code] = {:i, pos: l.data.pos, line: lcopy, shape: table.concat clip}
+					else
+						ass\warning s, "Expected a shape"
 				when "Shape to 0,0"
 					if l.isShape
 						{x, y} = l.data.pos
@@ -832,6 +869,7 @@ if haveDepCtrl
 		{"Shape clipper",      "", ShaperyMacrosDialog "Shape clipper"}
 		{"Clip to shape",      "", ShaperyMacrosDialog "Clip to shape"}
 		{"Shape to clip",      "", ShaperyMacrosDialog "Shape to clip"}
+		{"Shape merge",        "", ShaperyMacrosDialog "Shape merge"}
 		{"Shape to 0,0",       "", ShaperyMacrosDialog "Shape to 0,0"}
 		{"Shape to origin",    "", ShaperyMacrosDialog "Shape to origin"}
 		{"Shape to center",    "", ShaperyMacrosDialog "Shape to center"}
@@ -849,6 +887,8 @@ else
 	aegisub.register_macro ": Shapery macros :/Shape clipper",      "", ShaperyMacrosDialog "Shape clipper"
 	aegisub.register_macro ": Shapery macros :/Clip to shape",      "", ShaperyMacrosDialog "Clip to shape"
 	aegisub.register_macro ": Shapery macros :/Shape to clip",      "", ShaperyMacrosDialog "Shape to clip"
+	aegisub.register_macro ": Shapery macros :/Shape merge",        "", ShaperyMacrosDialog "Shape merge"
+	aegisub.register_macro ": Shapery macros :/Shape to 0,0",       "", ShaperyMacrosDialog "Shape to 0,0"
 	aegisub.register_macro ": Shapery macros :/Shape to origin",    "", ShaperyMacrosDialog "Shape to origin"
 	aegisub.register_macro ": Shapery macros :/Shape to center",    "", ShaperyMacrosDialog "Shape to center"
 	aegisub.register_macro ": Shapery macros :/Shape bounding box", "", ShaperyMacrosDialog "Shape bounding box"
