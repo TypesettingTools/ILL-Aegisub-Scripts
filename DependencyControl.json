@@ -77,11 +77,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.4.0",
+                    "version": "2.4.1",
                     "released": "2023-06-29",
                     "files": [
                         {
-                            "sha1": "4395aa49ee11bfacda8812cbe08daa5f2e57bc47",
+                            "sha1": "99edf651fa123a34cf5bae00264a7e0b6b33d943",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -135,6 +135,9 @@
                 ],
                 "2.4.0": [
                     "Update Shapery"
+                ],
+                "2.4.1": [
+                    "Remove unnecessary log"
                 ]
             },
             "name": "Shapery",
