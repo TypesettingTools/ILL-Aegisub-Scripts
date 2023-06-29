@@ -130,7 +130,7 @@ class Util
 		interpolate_table = (u, f, l, new = {}) ->
 			assert #f == #l, "The interpolation depends on tables with the same number of elements"
 			for i = 1, #f
-				new[i] = Util.interpolation u, nil, f[j], l[j]
+				new[i] = Util.interpolation u, nil, f[i], l[i]
 			return new
 		-- gets function from interpolation type
 		fn = switch interpolationType

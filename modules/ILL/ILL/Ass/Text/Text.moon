@@ -79,6 +79,10 @@ class Text
 
 	stripped: => @text\gsub "%b{}", ""
 
+	update: =>
+		@text = @__tostring!
+		return @
+
 	iter: =>
 		i = 0
 		{:tagsBlocks, :textBlocks, :n} = @
@@ -93,16 +97,14 @@ class Text
 			tags, text = fn tags, text, i, n
 			if tags and text
 				tagsBlocks[i], textBlocks[i] = tags, text
-		-- update text
-		@text = @__tostring!
+		@update!
 
 	-- modifies the value of the defined tag block
 	modifyBlock: (newTags, newText, i = 1) =>
 		@callBack (tags, text, j) ->
 			if i == j
 				return newTags, newText or text
-		-- update text
-		@text = @__tostring!
+		@update!
 
 	-- tags known as first category tags can only appear once in a line,
 	-- so to solve problems of repeated or misplaced tags, the functional
@@ -111,21 +113,19 @@ class Text
 	moveToFirstLayer: =>
 		firstCategory = {an: {}, pos: {}, move: {}, org: {}, clip: {}, iclip: {}, fad: {}, fade: {}}
 		@callBack (tags, text, i, n) ->
-			for name, value in pairs firstCategory
+			for name, obj in pairs firstCategory
 				tag = tags\getTag name
-				if tag and not value.state
-					value.state = true
-					value.value = tag.value
+				if tag and not obj.value
+					obj.value = tag.value
 				if i > 1
 					tags\animated "hide"
 					tags\remove name
 					tags\animated "unhide"
 			return tags, text
-		for name, value in pairs firstCategory
-			if v = value.value
+		for name, obj in pairs firstCategory
+			if v = obj.value
 				@tagsBlocks[1]\insert {{name, v}, true}
-		-- update text
-		@text = @__tostring!
+		@update!
 
 	-- inserts tags that do not exist in layers after the current layer
 	-- "{\fs100}ABC{\bord0.5}DEF" --> "{\fs100}ABC{\fs100\bord0.5}DEF"
@@ -146,8 +146,7 @@ class Text
 								continue
 							addt = raw .. addt
 			tagsBlocks[i]\insert {addt, true}
-		-- update text
-		@text = @__tostring!
+		@update!
 
 	-- checks if the tag exists in the tags blocks
 	existsTag: (...) =>

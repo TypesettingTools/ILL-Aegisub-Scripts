@@ -1,5 +1,7 @@
 import abs, acos, cos, floor, max, min, random, randomseed, sqrt, pi from math
 
+randomseed os.time! * 1e6
+
 class Math
 
 	-- returns the sign of the number
@@ -22,7 +24,6 @@ class Math
 
 	-- returns a random number in the range of b and c
 	random: (a, b) ->
-		randomseed os.time! * 1e6
 		return random! * (b - a) + a
 
 	-- generates natural random patterns

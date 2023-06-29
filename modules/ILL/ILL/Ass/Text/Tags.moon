@@ -1,5 +1,6 @@
 import Tag  from require "ILL.ILL.Ass.Text.Tag"
 import Util from require "ILL.ILL.Util"
+import Aegi from require "ILL.ILL.Aegi"
 
 class Tags
 
@@ -112,7 +113,7 @@ class Tags
 			@animated "hide"
 		a = Tag.getPattern name
 		b = Tag.getPattern name, true
-		if value = @tags\match a
+		if value = ASS_TAGS[name].first_category and @tags\match(a) or Util.lmatch(@tags, a)
 			res = Tag value, name, value\match(b), subTags\find value, 1, true
 			if notIsAnimated
 				@animated "unhide"

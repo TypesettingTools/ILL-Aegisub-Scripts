@@ -142,10 +142,18 @@ class Ass
 			@i -= 1
 			@activeLine -= 1
 
+	-- deletes a line in dialogs
+	deleteLine: (l, s) => @removeLine l, s
+
+	-- deletes a line or more in dialogs
+	deleteLines: (l, ...) =>
+		for i, n in ipairs type(...) == "table" and ... or {...}
+			@deleteLine l, n
+
 	-- gets the index values of the lines that were added
 	getNewSelection: =>
 		if #@newSelection > 0
-			return @newSelection, @activeLine
+			return @newSelection, @activeLine < @fi and 1 or @activeLine
 
 	-- the subtitle that will appear on the progress screen
 	progressLine: (s, i, n) =>
