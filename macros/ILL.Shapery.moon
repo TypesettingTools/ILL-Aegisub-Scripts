@@ -1,6 +1,6 @@
 export script_name        = "Shapery"
 export script_description = "Does several types of shape manipulations from the simplest to the most complex"
-export script_version     = "2.4.0"
+export script_version     = "2.4.1"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
@@ -784,7 +784,6 @@ ShaperyMacrosDialog = (macro) ->
 					if l.isShape
 						{:color1, :color3, :color4, :alpha, :alpha1, :alpha2, :alpha3, :alpha4} = l.data
 						code = (alpha .. color1 .. alpha1 .. color3 .. alpha3 .. color4 .. alpha4)\gsub "[&hH]*", ""
-						Aegi.log code
 						if n < 2
 							ass\error s, "Expected one or more selected lines"
 						if info = mergeShapesObj[code]
