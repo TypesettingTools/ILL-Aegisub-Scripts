@@ -343,13 +343,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.3.5",
-                    "released": "2023-04-28",
+                    "version": "1.3.6",
+                    "released": "2023-06-29",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "78277de65b7fbbfd71c212eb647f9d021ba019c6"
+                            "sha1": "1266b39cf6f2844b1226bb8b687db5a1bcead7a1"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -379,17 +379,17 @@
                         {
                             "name": "/Ass/Text/Tags.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "223df640021ffc853f74f4051cdb5d77ee7b9177"
+                            "sha1": "d93f55ccb567fe44ee156272bf75d4183d1e9a42"
                         },
                         {
                             "name": "/Ass/Text/Text.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "6dc82c339ea700750460b47cd3cd6c89a6435fed"
+                            "sha1": "8d27e05ea45128d3a538ab88e808bc0f49c1810a"
                         },
                         {
                             "name": "/Ass/Ass.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "21208a66700628e019b28524e8cbd078f24d623b"
+                            "sha1": "d0fc122128f1867fc10b885ccaa3faf8ff9fe7f9"
                         },
                         {
                             "name": "/Ass/Line.moon",
@@ -429,7 +429,7 @@
                         {
                             "name": "/Math.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "478543eff10f7d16b1c2471d384e7593d0e22039"
+                            "sha1": "68c921027d6841a187d7a5893a33f06e8f09bd0b"
                         },
                         {
                             "name": "/Table.moon",
@@ -439,7 +439,7 @@
                         {
                             "name": "/Util.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "be2990e8299a4be5a5d2ddc0fa4a219b61a94e75"
+                            "sha1": "df5579ee01f5331bccc32f55c8c15acac6d1f0b9"
                         }
                     ],
                     "requiredModules": [
@@ -511,6 +511,9 @@
                 ],
                 "1.3.5": [
                     "Update DepControl"
+                ],
+                "1.3.6": [
+                    "Update ILL"
                 ]
             }
         },
