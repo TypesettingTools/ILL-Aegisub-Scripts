@@ -77,11 +77,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.3.0",
-                    "released": "2023-04-28",
+                    "version": "2.4.0",
+                    "released": "2023-06-29",
                     "files": [
                         {
-                            "sha1": "53322e84a9de1bba0f2f5de22800080448444ed7",
+                            "sha1": "4395aa49ee11bfacda8812cbe08daa5f2e57bc47",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -132,6 +132,9 @@
                     "",
                     "- Fixed some bugs",
                     "- Add save system"
+                ],
+                "2.4.0": [
+                    "Update Shapery"
                 ]
             },
             "name": "Shapery",
