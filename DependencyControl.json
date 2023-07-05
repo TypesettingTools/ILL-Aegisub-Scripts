@@ -349,13 +349,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.3.6",
-                    "released": "2023-06-29",
+                    "version": "1.3.7",
+                    "released": "2023-07-05",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "1266b39cf6f2844b1226bb8b687db5a1bcead7a1"
+                            "sha1": "572d71c9edb5f00afe9b4c2279b923f3df35a806"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -365,7 +365,7 @@
                         {
                             "name": "/Ass/Shape/Path.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "69040413ed7d30a26b2b884a016f33a4e7c53e43"
+                            "sha1": "0408b63e3985cf5935cb2833d361d64a3af9558b"
                         },
                         {
                             "name": "/Ass/Shape/Point.moon",
@@ -520,6 +520,9 @@
                 ],
                 "1.3.6": [
                     "Update ILL"
+                ],
+                "1.3.7": [
+                    "Path.cleanContours now removes invisible polygons"
                 ]
             }
         },
