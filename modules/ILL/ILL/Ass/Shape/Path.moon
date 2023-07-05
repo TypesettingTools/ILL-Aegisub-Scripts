@@ -289,7 +289,9 @@ class Path
 
 	-- Removes the duplicate points in sequence on the contours
 	cleanContours: =>
-		for contour in *@path
+		i = 1
+		while i <= #@path
+			contour = @path[i]
 			j = 2
 			while j <= #contour
 				prev = contour[j-1]
@@ -303,6 +305,10 @@ class Path
 					remove contour, j
 					j -= 1
 				j += 1
+			if #contour < 3
+				remove @path, i
+			else
+				i += 1
 		return @
 
 	-- Converts all line segments to bezier segments
