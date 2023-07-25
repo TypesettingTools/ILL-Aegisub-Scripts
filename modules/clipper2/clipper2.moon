@@ -1,4 +1,4 @@
-module_version = "1.3.2"
+module_version = "1.4.0"
 
 haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
 
@@ -67,15 +67,15 @@ cdef [[
 	PathsD *PathsXor(PathsD *sbj, PathsD *clp, int fr);
 ]]
 
--- enums
-ClipType = {none: 0, intersection: 1, union: 2, difference: 3, xor: 4}
-FillRule = {even_odd: 0, non_zero: 1, positive: 2, negative: 3}
-JoinType = {square: 0, round: 1, miter: 2}
-EndType  = {polygon: 0, joined: 1, butt: 2, square: 3, round: 4}
-SetEnum  = (enum, enumName, n) ->
+Enums = {
+	FillRule: {even_odd: 0, non_zero: 1, positive: 2, negative: 3}
+	JoinType: {square: 0, round: 1, miter: 2}
+	EndType:  {polygon: 0, joined: 1, butt: 2, square: 3, round: 4}
+}
+
+SetEnum = (enumName, n) ->
 	if type(n) == "string"
-		n = enum[n]
-		assert n, "#{enumName} undefined"
+		assert Enums[enumName][n], "#{enumName} undefined"
 	return n
 
 -- lib
@@ -131,32 +131,32 @@ CPP.paths.map = (fn) =>
 		@get(i)\map fn
 
 CPP.paths.inflate = (delta, jt = 0, et = 0, mt = 2, at = 0) =>
-	jt = SetEnum JoinType, "JoinType", jt
-	et = SetEnum EndType, "EndType", et
+	jt = SetEnum "JoinType", jt
+	et = SetEnum "EndType", et
 	solution = pc.PathsInflate @, delta, jt, et, mt, at
 	assert solution != nil, CPP.viewError!
 	return gc solution, pc.PathsFree
 
 CPP.paths.intersection = (paths, fr = 1) =>
-	fr = SetEnum FillRule, "FillRule", fr
+	fr = SetEnum "FillRule", fr
 	solution = pc.PathsIntersect @, paths, fr
 	assert solution != nil, CPP.viewError!
 	return gc solution, pc.PathsFree
 
 CPP.paths.union = (paths, fr = 1) =>
-	fr = SetEnum FillRule, "FillRule", fr
+	fr = SetEnum "FillRule", fr
 	solution = pc.PathsUnion @, paths, fr
 	assert solution != nil, CPP.viewError!
 	return gc solution, pc.PathsFree
 
 CPP.paths.difference = (paths, fr = 1) =>
-	fr = SetEnum FillRule, "FillRule", fr
+	fr = SetEnum "FillRule", fr
 	solution = pc.PathsDifference @, paths, fr
 	assert solution != nil, CPP.viewError!
 	return gc solution, pc.PathsFree
 
 CPP.paths.xor = (paths, fr = 1) =>
-	fr = SetEnum FillRule, "FillRule", fr
+	fr = SetEnum "FillRule", fr
 	solution = pc.PathsXor @, paths, fr
 	assert solution != nil, CPP.viewError!
 	return gc solution, pc.PathsFree

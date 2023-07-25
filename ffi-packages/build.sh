@@ -5,7 +5,7 @@ if [ "$1" == "-all" ]; then
     [ ! -d ffi-packages/Clipper2/buildCP ] && mkdir -p ffi-packages/Clipper2/buildCP
 
     git clone https://github.com/AngusJohnson/Clipper2.git ffi-packages/Clipper2/Clipper2 && cd ffi-packages/Clipper2/Clipper2
-    git checkout e9bd409439bcb7a07a50f555c88e623986eea10f
+    git checkout 866e40201476b9af9fec5ce80de16bf0b03eff7a
 
     cmake .. -DCMAKE_CXX_COMPILER=g++ -G "Unix Makefiles" -B ../buildCP
     cd ../buildCP && make && cd ../../../
