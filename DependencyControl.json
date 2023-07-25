@@ -278,8 +278,8 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.3.2",
-                    "released": "2023-04-02",
+                    "version": "1.4.0",
+                    "released": "2023-07-25",
                     "platforms": [
                         "Windows-x64",
                         "OSX-x64",
@@ -287,7 +287,7 @@
                     ],
                     "files": [
                         {
-                            "sha1": "7f62bedfa7616c8074129fdeaf63c983d92b94e5",
+                            "sha1": "ebc60bdeabc898d6ad05d49164f80603ff89a3d0",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         },
@@ -337,6 +337,9 @@
                 ],
                 "1.3.2": [
                     "Fix Dependency Control feed"
+                ],
+                "1.4.0": [
+                    "Update Clipper2"
                 ]
             }
         },
