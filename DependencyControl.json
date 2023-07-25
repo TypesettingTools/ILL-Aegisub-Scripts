@@ -287,7 +287,7 @@
                     ],
                     "files": [
                         {
-                            "sha1": "ebc60bdeabc898d6ad05d49164f80603ff89a3d0",
+                            "sha1": "b14554ed5f4d67e96f720c0d691a6c1fa2d7b492",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         },
