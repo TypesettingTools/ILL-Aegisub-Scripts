@@ -75,7 +75,8 @@ Enums = {
 
 SetEnum = (enumName, n) ->
 	if type(n) == "string"
-		assert Enums[enumName][n], "#{enumName} undefined"
+		n = Enums[enumName][n]
+		assert n, "#{enumName} undefined"
 	return n
 
 -- lib
