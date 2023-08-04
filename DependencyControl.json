@@ -352,13 +352,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.3.7",
-                    "released": "2023-07-05",
+                    "version": "1.4.0",
+                    "released": "2023-08-04",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "572d71c9edb5f00afe9b4c2279b923f3df35a806"
+                            "sha1": "83de5252804398693fc43088a409b7016c83783d"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -368,12 +368,12 @@
                         {
                             "name": "/Ass/Shape/Path.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "0408b63e3985cf5935cb2833d361d64a3af9558b"
+                            "sha1": "a088a8864171a46e5449349f478a353d159253e0"
                         },
                         {
                             "name": "/Ass/Shape/Point.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "b486cfc7560ca001ec427f813021a32b7414938f"
+                            "sha1": "8ea0c0a39be5fb05d7496f60a3058a162f493d94"
                         },
                         {
                             "name": "/Ass/Shape/Segment.moon",
@@ -398,12 +398,12 @@
                         {
                             "name": "/Ass/Ass.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "d0fc122128f1867fc10b885ccaa3faf8ff9fe7f9"
+                            "sha1": "8d912b18d568d6ee4db85d434f06c5e707e278d0"
                         },
                         {
                             "name": "/Ass/Line.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "0083c7643d14e4c5c71da6147b3d3e72e8a8f7bc"
+                            "sha1": "802506042a4ffeec3946722f60f574248c492cb2"
                         },
                         {
                             "name": "/Font/Font.moon",
@@ -526,6 +526,9 @@
                 ],
                 "1.3.7": [
                     "Path.cleanContours now removes invisible polygons"
+                ],
+                "1.4.0": [
+                    "Update ILL"
                 ]
             }
         },
