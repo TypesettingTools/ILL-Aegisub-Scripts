@@ -49,7 +49,14 @@ class Point
 		return @
 
 	-- Rotate the object according the given params.
-	rotate: (angle) =>
+	rotate: (angle, c = Point!) =>
+		{:x, :y} = @
+		@x = x * math.cos(angle) - y * math.sin(angle)
+		@y = x * math.sin(angle) + y * math.cos(angle)
+		return @
+
+	-- Rotate the object according the given params.
+	rotatefrz: (angle) =>
 		{:x, :y} = @
 		angle = -math.rad(angle)
 		@x = x * math.cos(angle) - y * math.sin(angle)
@@ -86,7 +93,7 @@ class Point
 		return math.sqrt sq
 
 	-- Angle between two points
-	angle: (point) =>
+	angle: (point = Point!) =>
 		x = point.x - @x
 		y = point.y - @y
 		return math.atan2 y, x

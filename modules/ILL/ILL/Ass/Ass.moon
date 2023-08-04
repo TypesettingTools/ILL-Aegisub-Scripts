@@ -18,6 +18,8 @@ class Ass
 
 	get: (index) => index and @[index] or @
 
+	getActiveLine: => @activeLine
+
 	new: (...) => @set ...
 
 	-- iterates over all the lines of the ass file

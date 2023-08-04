@@ -113,10 +113,14 @@ class Path
 			p\move px, py
 
 	-- Rotates the @path by specified angle
-	-- Note: the angle is based on the \frz tag
-	rotate: (angle) =>
+	rotatefrz: (angle) =>
 		@map (x, y, p) ->
-			p\rotate angle
+			p\rotatefrz angle
+
+	-- Rotates the @path by specified angle
+	rotate: (angle, c) =>
+		@map (x, y, p) ->
+			p\rotate angle, c
 
 	-- Scales the @path by specified horizontal and vertical values
 	-- Note: the values are defined on a scale of 100

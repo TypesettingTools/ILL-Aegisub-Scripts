@@ -304,6 +304,14 @@ class Line
 		unless l.isShape
 			l.lines = Line.lineBreaks ass, l, noblank
 
+	-- updates line information
+	update: (ass, l, noblank) ->
+        l.lines = nil
+        l.data = nil
+        l.styleref = nil
+		l.text = l.text\__tostring!
+		Line.extend ass, l, noblank
+
 	-- callback to map between all possible lines of text
 	callBack: (ass, l, fn) ->
 		{:clip, :isIclip} = l.data
