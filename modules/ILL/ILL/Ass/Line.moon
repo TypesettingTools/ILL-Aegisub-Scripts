@@ -306,9 +306,9 @@ class Line
 
 	-- updates line information
 	update: (ass, l, noblank) ->
-        l.lines = nil
-        l.data = nil
-        l.styleref = nil
+		l.lines = nil
+		l.data = nil
+		l.styleref = nil
 		l.text = l.text\__tostring!
 		Line.extend ass, l, noblank
 
