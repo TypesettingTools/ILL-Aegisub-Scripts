@@ -1,6 +1,6 @@
 export script_name        = "Shapery"
 export script_description = "Does several types of shape manipulations from the simplest to the most complex"
-export script_version     = "2.4.1"
+export script_version     = "2.5.0"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
@@ -404,6 +404,13 @@ interfaces = {
 		{class: "label", label: "Rounding", x: 4, y: 2}
 		{class: "dropdown", items: {"Absolute", "Relative"}, x: 5, y: 2, name: "rounding", value: "Absolute"}
 	}
+	cutcontour: -> {
+		{class: "label", label: "Input Shape:", x: 0, y: 0}
+		{class: "textbox", x: 0, y: 1, width: 10, height: 5, name: "shape", value: ""}
+		{class: "label", label: "Tolerance:", x: 0, y: 6}
+		{class: "checkbox", label: "Mode Xor", x: 9, y: 6, name: "modeXor", value: false}
+		{class: "floatedit", x: 0, y: 7, name: "tol", min: 1, value: 10}
+	}
 }
 
 resetInterface = (name) ->
@@ -556,7 +563,7 @@ TransformDialog = (sub, sel, activeLine) ->
 				if horizontalScale != 0 or verticalScale != 0
 					path\scale horizontalScale, verticalScale
 				if angle != 0
-					path\rotate angle
+					path\rotatefrz angle
 				if xAxis != 0 or yAxis != 0
 					path\move xAxis, yAxis
 				if filter != ""
@@ -660,6 +667,41 @@ UtilitiesDialog = (sub, sel, activeLine) ->
 							table.insert newPath.path, newContour
 						line.shape = newPath\export!
 						ass\insertLine line, s
+		return ass\getNewSelection!
+
+CutContourDialog = (sub, sel, activeLine) ->
+	button, elements = Aegi.display interfaces.cutcontour!, {"Ok", "Cancel"}, {close: "Cancel"}, "CutContour"
+	{:tol, :shape, :modeXor} = elements
+	inputShape = elements.shape
+	if button != "Cancel" and inputShape != ""
+		inputShape = Path(inputShape)\toCenter!
+		cfg = getConfigElements!
+		ass = Ass sub, sel, activeLine, not cfg.saveLines
+		pi2 = math.pi * 0.5
+		tol = 1 / tol
+		for l, s, i, n in ass\iterSel!
+			ass\progressLine s, i, n
+			ass\removeLine l, s
+			Line.extend ass, l
+			Line.callBackExpand ass, l, nil, (line) ->
+				{:data} = line
+				path = Path(line.shape)\closeContours!
+				bbox = path\boundingBox!
+				copy = path\clone!
+				copy\toOrigin!
+				pathLen = math.floor path\getLength! * tol
+				for j = 0, pathLen - 1
+					tan, p = copy\getNormalized j / pathLen
+					ang = tan\angle! + pi2
+					shp = inputShape\clone!
+					shp = shp\rotate ang
+					shp = shp\move bbox.l + p.x, bbox.t + p.y
+					if elements.modeXor
+						path = path\exclude shp
+					else
+						path = path\difference shp
+				line.shape = path\export!
+				ass\insertLine line, s
 		return ass\getNewSelection!
 
 ConfigDialog = (sub, sel, activeLine) ->
@@ -855,12 +897,13 @@ ShaperyMacrosDialog = (macro) ->
 
 if haveDepCtrl
 	depctrl\registerMacros {
-		{"Pathfinder", "", PathfinderDialog}
-		{"Offsetting", "", OffsettingDialog}
-		{"Manipulate", "", ManipulateDialog}
-		{"Transform",  "", TransformDialog}
-		{"Utilities",  "", UtilitiesDialog}
-		{"Config",     "", ConfigDialog}
+		{"Pathfinder",  "", PathfinderDialog}
+		{"Offsetting",  "", OffsettingDialog}
+		{"Manipulate",  "", ManipulateDialog}
+		{"Transform",   "", TransformDialog}
+		{"Utilities",   "", UtilitiesDialog}
+		{"Cut Contour", "", CutContourDialog}
+		{"Config",      "", ConfigDialog}
 	}
 
 	depctrl\registerMacros {
@@ -875,12 +918,13 @@ if haveDepCtrl
 		{"Shape bounding box", "", ShaperyMacrosDialog "Shape bounding box"}
 	}, ": Shapery macros :"
 else
-	aegisub.register_macro "#{script_name}/Pathfinder", "", PathfinderDialog
-	aegisub.register_macro "#{script_name}/Offsetting", "", OffsettingDialog
-	aegisub.register_macro "#{script_name}/Manipulate", "", ManipulateDialog
-	aegisub.register_macro "#{script_name}/Transform",  "", TransformDialog
-	aegisub.register_macro "#{script_name}/Utilities",  "", UtilitiesDialog
-	aegisub.register_macro "#{script_name}/Config",     "", ConfigDialog
+	aegisub.register_macro "#{script_name}/Pathfinder",  "", PathfinderDialog
+	aegisub.register_macro "#{script_name}/Offsetting",  "", OffsettingDialog
+	aegisub.register_macro "#{script_name}/Manipulate",  "", ManipulateDialog
+	aegisub.register_macro "#{script_name}/Transform",   "", TransformDialog
+	aegisub.register_macro "#{script_name}/Utilities",   "", UtilitiesDialog
+	aegisub.register_macro "#{script_name}/Cut Contour", "", CutContourDialog
+	aegisub.register_macro "#{script_name}/Config",      "", ConfigDialog
 
 	aegisub.register_macro ": Shapery macros :/Shape expand",       "", ShaperyMacrosDialog "Shape expand"
 	aegisub.register_macro ": Shapery macros :/Shape clipper",      "", ShaperyMacrosDialog "Shape clipper"
