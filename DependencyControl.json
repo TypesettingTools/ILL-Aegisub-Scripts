@@ -355,13 +355,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.4.0",
-                    "released": "2023-08-04",
+                    "version": "1.4.1",
+                    "released": "2023-08-11",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "83de5252804398693fc43088a409b7016c83783d"
+                            "sha1": "0def579e15f51103e398ef8a27dbde5a758f39c8"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -386,7 +386,7 @@
                         {
                             "name": "/Ass/Text/Tag.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "962ad42b3ecd57e51c21e9764659e562c8c9c5dc"
+                            "sha1": "686869dc728ccc4be3dbcbb549b17c062ae933cf"
                         },
                         {
                             "name": "/Ass/Text/Tags.moon",
@@ -406,7 +406,7 @@
                         {
                             "name": "/Ass/Line.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "1e5866c248e3b11585fadad8daed0a4417c3fefa"
+                            "sha1": "c42c9f813ab787b190b4b1e43f11fb6f0d2571c1"
                         },
                         {
                             "name": "/Font/Font.moon",
@@ -532,6 +532,9 @@
                 ],
                 "1.4.0": [
                     "Update ILL"
+                ],
+                "1.4.1": [
+                    "Fix empty tags"
                 ]
             }
         },
