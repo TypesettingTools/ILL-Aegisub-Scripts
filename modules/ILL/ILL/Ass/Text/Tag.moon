@@ -437,7 +437,7 @@ class Tag
 	-- converts the tag back to string
 	__tostring: =>
 		{:ass, :value, :typer} = @tag
-		if typer == "string" or typer == "bool" or typer == "coords"
+		if value
 			if typer == "bool"
 				return ass .. (value and "1" or "0")
 			elseif typer == "coords"
@@ -453,6 +453,7 @@ class Tag
 				elseif not e and s
 					return "\\t(#{s},#{transform})"
 				return "\\t(#{transform})"
-		return ass .. value
+			return ass .. value
+		return ""
 
 {:Tag}

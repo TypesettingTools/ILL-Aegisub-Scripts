@@ -313,22 +313,23 @@ class Line
 		Line.extend ass, l, noblank
 
 	-- callback to map between all possible lines of text
-	callBack: (ass, l, fn) ->
-		{:clip, :isIclip} = l.data
-		j, isMove = 0, l.tags\existsTag "move"
-		for lineBreak in *l.lines
-			for lineBlock in *lineBreak
-				j += 1
-				-- gets the new position of the text
-				lineBlock.data.pos = Line.reallocate l, lineBlock
-				if isMove
-					lineBlock.tags\insert {{"move", Line.reallocate l, lineBlock, true}, true}
-				else
-					lineBlock.tags\insert {{"pos", lineBlock.data.pos}, true}
-				-- adds the values \clip or \iclip to all tag blocks
-				if clip
-					lineBlock.tags\insert {{isIclip and "iclip" or "clip", clip}}
-				fn lineBlock, j
+	callBackTags: (ass, l, fn) ->
+		unless l.isShape
+			{:clip, :isIclip} = l.data
+			j, isMove = 0, l.tags\existsTag "move"
+			for lineBreak in *l.lines
+				for lineBlock in *lineBreak
+					j += 1
+					-- gets the new position of the text
+					lineBlock.data.pos = Line.reallocate l, lineBlock
+					if isMove
+						lineBlock.tags\insert {{"move", Line.reallocate l, lineBlock, true}, true}
+					else
+						lineBlock.tags\insert {{"pos", lineBlock.data.pos}, true}
+					-- adds the values \clip or \iclip to all tag blocks
+					if clip
+						lineBlock.tags\insert {{isIclip and "iclip" or "clip", clip}}
+					fn lineBlock, j
 
 	-- callback to access the line values frame by frame
 	callBackFBF: (ass, l, fn) ->
@@ -429,7 +430,7 @@ class Line
 				line.tags\insert {{"pos", data.pos}, true}
 			fn line, 1
 		else
-			Line.callBack ass, line, (lineBlock, j) ->
+			Line.callBackTags ass, line, (lineBlock, j) ->
 				-- converts the text to shape and then converts the shape to Path
 				newShape = Line.toPath lineBlock
 				newShape\reallocate line.data.an, {width: lineBlock.width, height: lineBlock.height}
@@ -467,7 +468,7 @@ class Line
 			line.tags\insert {{"an", 7}, true}, "\\fscx100\\fscy100\\frz0\\p1"
 			fn line, 1
 		else
-			Line.callBack ass, line, (lineBlock, j) ->
+			Line.callBackTags ass, line, (lineBlock, j) ->
 				-- save old values
 				{:scale_x, :scale_y} = lineBlock.data
 				{:height} = lineBlock
