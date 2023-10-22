@@ -124,7 +124,8 @@ class Tags
 
 	-- separates all tags and gets all possible information about them
 	split: =>
-		split, copy = {}, Tags @tags
+		split = {}
+		copy = Tags @tags
 		-- does split processing on all the tags
 		process = (name) ->
 			if tag = copy\getTag name, @tags

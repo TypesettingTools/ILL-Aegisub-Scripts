@@ -331,6 +331,7 @@ export ASS_TAGS = {
 		["pattern"]: "%b()"
 		["pattern_value"]: "%((.+)%)"
 		["typer"]: "string"
+		["first_category"]: true
 	}
 	["q"]: {
 		["ass"]: "\\q"

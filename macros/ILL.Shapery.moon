@@ -1,6 +1,6 @@
 export script_name        = "Shapery"
 export script_description = "Does several types of shape manipulations from the simplest to the most complex"
-export script_version     = "2.5.0"
+export script_version     = "2.5.1"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
@@ -721,6 +721,7 @@ ShaperyMacrosDialog = (macro) ->
 		cfg = getConfigElements!
 		ass = Ass sub, sel, activeLine, not cfg.saveLines
 		mergeShapesObj = {}
+		lines = {}
 		for l, s, i, n in ass\iterSel!
 			ass\progressLine s, i, n
 			Line.extend ass, l
@@ -854,6 +855,25 @@ ShaperyMacrosDialog = (macro) ->
 							mergeShapesObj[code] = {:i, pos: l.data.pos, line: lcopy, shape: table.concat clip}
 					else
 						ass\warning s, "Expected a shape"
+				when "Shape trim"
+					if l.isShape
+						Line.callBackExpand ass, l, nil, (line, j) ->
+							{px, py} = line.data.pos
+							line.shape = Path(line.shape)\move(px, py)\export!
+							table.insert lines, line
+						if i == n and n > 1
+							for j = #lines, 1, -1
+								cut = Path lines[j].shape
+								for k = j - 1, 1, -1
+									newShape = Path(lines[k].shape)\difference cut
+									lines[k].shape = newShape\export!
+							ass\deleteLines l, sel
+							for line in *lines
+								{px, py} = line.data.pos
+								line.shape = Path(line.shape)\move(-px, -py)\export!
+								ass\insertLine line, s
+					else
+						ass\warning s, "Expected a shape"
 				when "Shape to 0,0"
 					if l.isShape
 						{x, y} = l.data.pos
@@ -912,6 +932,7 @@ if haveDepCtrl
 		{"Clip to shape",      "", ShaperyMacrosDialog "Clip to shape"}
 		{"Shape to clip",      "", ShaperyMacrosDialog "Shape to clip"}
 		{"Shape merge",        "", ShaperyMacrosDialog "Shape merge"}
+		{"Shape trim",         "", ShaperyMacrosDialog "Shape trim"}
 		{"Shape to 0,0",       "", ShaperyMacrosDialog "Shape to 0,0"}
 		{"Shape to origin",    "", ShaperyMacrosDialog "Shape to origin"}
 		{"Shape to center",    "", ShaperyMacrosDialog "Shape to center"}
@@ -931,6 +952,7 @@ else
 	aegisub.register_macro ": Shapery macros :/Clip to shape",      "", ShaperyMacrosDialog "Clip to shape"
 	aegisub.register_macro ": Shapery macros :/Shape to clip",      "", ShaperyMacrosDialog "Shape to clip"
 	aegisub.register_macro ": Shapery macros :/Shape merge",        "", ShaperyMacrosDialog "Shape merge"
+	aegisub.register_macro ": Shapery macros :/Shape trim",         "", ShaperyMacrosDialog "Shape trim"
 	aegisub.register_macro ": Shapery macros :/Shape to 0,0",       "", ShaperyMacrosDialog "Shape to 0,0"
 	aegisub.register_macro ": Shapery macros :/Shape to origin",    "", ShaperyMacrosDialog "Shape to origin"
 	aegisub.register_macro ": Shapery macros :/Shape to center",    "", ShaperyMacrosDialog "Shape to center"
