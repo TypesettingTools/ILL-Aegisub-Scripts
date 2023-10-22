@@ -77,11 +77,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.5.0",
-                    "released": "2023-08-04",
+                    "version": "2.5.1",
+                    "released": "2023-10-22",
                     "files": [
                         {
-                            "sha1": "4e2607fbc1de4427c6fe4db185704abaf4cdaa3b",
+                            "sha1": "61e300abfde95ea68341b75c1a39a277e5ccc18e",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -140,6 +140,9 @@
                     "Remove unnecessary log"
                 ],
                 "2.5.0": [
+                    "Update Shapery"
+                ],
+                "2.5.1": [
                     "Update Shapery"
                 ]
             },
@@ -355,13 +358,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.4.1",
-                    "released": "2023-08-11",
+                    "version": "1.4.2",
+                    "released": "2023-10-22",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "0def579e15f51103e398ef8a27dbde5a758f39c8"
+                            "sha1": "ec87975abd4734ccfe076b9a0e35d28515e63ff3"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -386,12 +389,12 @@
                         {
                             "name": "/Ass/Text/Tag.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "686869dc728ccc4be3dbcbb549b17c062ae933cf"
+                            "sha1": "6cbe306afb4f7e7db0bfadfd833283b70cb2fa72"
                         },
                         {
                             "name": "/Ass/Text/Tags.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "d93f55ccb567fe44ee156272bf75d4183d1e9a42"
+                            "sha1": "aa5ca3efb9ec5771b3e90274736243fb0388bb13"
                         },
                         {
                             "name": "/Ass/Text/Text.moon",
@@ -535,6 +538,9 @@
                 ],
                 "1.4.1": [
                     "Fix empty tags"
+                ],
+                "1.4.2": [
+                    "Update Shapery"
                 ]
             }
         },
