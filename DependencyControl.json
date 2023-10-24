@@ -18,11 +18,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.1.0",
-                    "released": "2023-04-28",
+                    "version": "1.1.1",
+                    "released": "2023-10-24",
                     "files": [
                         {
-                            "sha1": "c69ef145e8801d963a820ce41c0b33235402fcd0",
+                            "sha1": "72b14ed52607a8a9ff19fcee6a7dcfda42370b86",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -65,6 +65,9 @@
                     "",
                     "- Fixed some bugs",
                     "- Add save system"
+                ],
+                "1.1.1": [
+                    "Update Envelope Distort"
                 ]
             },
             "name": "Envelope Distort",
