@@ -1,6 +1,6 @@
 export script_name        = "Envelope Distort"
 export script_description = "Allows you to warp and manipulate shapes within a customizable envelope"
-export script_version     = "1.1.0"
+export script_version     = "1.1.1"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.EnvelopeDistort"
 
@@ -69,7 +69,7 @@ makeWithMesh = (sub, sel, activeLine) ->
 			else
 				{:org} = l.data
 				isMove = l.tags\existsTag "move"
-				Line.callBack ass, l, (line, j) ->
+				Line.callBackTags ass, l, (line, j) ->
 					line.text\callBack (tags, text) ->
 						line.tags\insert {{"clip", screen .. clips[j]}}
 						if line.data.angle != 0 or line.tags\existsTagOr "frx", "fry", "frz"
