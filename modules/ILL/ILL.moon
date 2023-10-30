@@ -1,4 +1,4 @@
-module_version = "1.4.2"
+module_version = "1.4.3"
 
 haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
 
@@ -28,6 +28,7 @@ import Config  from require "ILL.ILL.Config"
 import Math    from require "ILL.ILL.Math"
 import Table   from require "ILL.ILL.Table"
 import Util    from require "ILL.ILL.Util"
+import UTF8    from require "ILL.ILL.UTF8"
 import Ass     from require "ILL.ILL.Ass.Ass"
 import Curve   from require "ILL.ILL.Ass.Shape.Curve"
 import Path    from require "ILL.ILL.Ass.Shape.Path"
@@ -40,7 +41,7 @@ import Text    from require "ILL.ILL.Ass.Text.Text"
 import Font    from require "ILL.ILL.Font.Font"
 
 modules = {
-	:Aegi, :Config, :Math, :Table, :Util
+	:Aegi, :Config, :Math, :Table, :Util, :UTF8
 	:Curve, :Path, :Point, :Segment
 	:Tag, :Tags, :Text
 	:Ass, :Line

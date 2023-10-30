@@ -461,6 +461,11 @@
                             "name": "/Util.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "sha1": "df5579ee01f5331bccc32f55c8c15acac6d1f0b9"
+                        },
+                        {
+                            "name": "/UTF8.moon",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": "0260a9d8fc65b1d3ba7fc5c6a643405ab04189d5"
                         }
                     ],
                     "requiredModules": [

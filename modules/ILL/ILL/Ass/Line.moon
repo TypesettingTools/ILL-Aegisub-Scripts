@@ -7,6 +7,7 @@ import Aegi   from require "ILL.ILL.Aegi"
 import Math   from require "ILL.ILL.Math"
 import Table  from require "ILL.ILL.Table"
 import Util   from require "ILL.ILL.Util"
+import UTF8   from require "ILL.ILL.UTF8"
 import Tags   from require "ILL.ILL.Ass.Text.Tags"
 import Text   from require "ILL.ILL.Ass.Text.Text"
 import Path   from require "ILL.ILL.Ass.Shape.Path"
@@ -96,13 +97,23 @@ class Line
 				.shape = .text_stripped
 				.text_stripped = ""
 
+			font = Font .data
+
 			-- gets the metric values of the text
 			if textIsBlank
-				.width, .height, .descent, .external_leading = aegisub.text_extents .data, " "
+				textExtents = font\getTextExtents " "
 				.width = 0
+				.height = textExtents.height
 			else
-				.width, .height, .descent, .external_leading = aegisub.text_extents .data, .isShape and "" or .text_stripped
-				.width *= video_x_correct_factor
+				textValue = .isShape and "" or .text_stripped
+				textExtents = font\getTextExtents textValue
+				textMetrics = font\getMetrics textValue
+				.width = textExtents.width * video_x_correct_factor
+				.height = textExtents.height
+				.ascent = textMetrics.ascent
+				.descent = textMetrics.descent
+				.internal_leading = textMetrics.internal_leading
+				.external_leading = textMetrics.external_leading
 
 			-- text alignment
 			{:an} = .data
@@ -475,7 +486,9 @@ class Line
 				-- sets new values
 				lineBlock.data.scale_x = 100
 				lineBlock.data.scale_y = 100
-				lineBlock.width, lineBlock.height = aegisub.text_extents lineBlock.data, lineBlock.text_stripped
+				textExtents = Font(lineBlock.data)\getTextExtents lineBlock.text_stripped
+				lineBlock.width = textExtents.width
+				lineBlock.height = textExtents.height
 				-- converts the text to shape and then converts the shape to Path
 				newShape = Line.toPath lineBlock
 				-- makes the process of expanding shape
