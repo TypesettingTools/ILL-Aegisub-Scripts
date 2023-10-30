@@ -465,7 +465,7 @@
                         {
                             "name": "/UTF8.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "0260a9d8fc65b1d3ba7fc5c6a643405ab04189d5"
+                            "sha1": "5a97232f065db904e8758cd6c41a6602bb6a4d75"
                         }
                     ],
                     "requiredModules": [
