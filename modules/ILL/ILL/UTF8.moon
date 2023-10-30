@@ -20,7 +20,7 @@ class UTF8
                     charI += 1
                     return charI, s\sub currPos, sPos - 1
 
-    len: (s) ->
+    len: =>
         n = 0
         for ci in @chars!
             n += 1
