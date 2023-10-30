@@ -364,13 +364,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.4.2",
-                    "released": "2023-10-22",
+                    "version": "1.4.3",
+                    "released": "2023-10-30",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "ec87975abd4734ccfe076b9a0e35d28515e63ff3"
+                            "sha1": "82031386c221e615d838bbe4116e512619fa3691"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -415,7 +415,7 @@
                         {
                             "name": "/Ass/Line.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "c42c9f813ab787b190b4b1e43f11fb6f0d2571c1"
+                            "sha1": "2d75a1c2052998b37de6d4a47a2a36bdcc2de2b9"
                         },
                         {
                             "name": "/Font/Font.moon",
@@ -552,6 +552,9 @@
                 ],
                 "1.4.2": [
                     "Update Shapery"
+                ],
+                "1.4.3": [
+                    "Update ILL"
                 ]
             }
         },
