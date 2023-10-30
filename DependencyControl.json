@@ -80,11 +80,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.5.1",
-                    "released": "2023-10-22",
+                    "version": "2.5.2",
+                    "released": "2023-10-30",
                     "files": [
                         {
-                            "sha1": "61e300abfde95ea68341b75c1a39a277e5ccc18e",
+                            "sha1": "68a249c7eb1bb37ad458cdf343dc2f51008e9c83",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -146,6 +146,9 @@
                     "Update Shapery"
                 ],
                 "2.5.1": [
+                    "Update Shapery"
+                ],
+                "2.5.2": [
                     "Update Shapery"
                 ]
             },
