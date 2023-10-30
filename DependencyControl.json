@@ -364,13 +364,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.4.3",
+                    "version": "1.4.4",
                     "released": "2023-10-30",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "82031386c221e615d838bbe4116e512619fa3691"
+                            "sha1": "f6b5044454f8f56c07bd6e3d1ee296821e072d05"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -555,6 +555,9 @@
                 ],
                 "1.4.3": [
                     "Update ILL"
+                ],
+                "1.4.4": [
+                    "Update version"
                 ]
             }
         },
