@@ -1,6 +1,6 @@
 export script_name        = "Shapery"
 export script_description = "Does several types of shape manipulations from the simplest to the most complex"
-export script_version     = "2.5.1"
+export script_version     = "2.5.2"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
@@ -335,6 +335,14 @@ shadowInner = (shape, xshad, yshad) ->
 	pathB\move xshad, yshad
 	pathA\difference pathB
 	return pathA\export!
+
+checkPathClockWise = (path) ->
+	sum = 0
+	for i = 1, #path
+		currPoint = path[i]
+		nextPoint = path[(i % #path) + 1]
+		sum = sum + (nextPoint.x - currPoint.x) * (nextPoint.y + currPoint.y)
+	return sum < 0
 
 interfaces = {
 	config: -> {
@@ -855,6 +863,18 @@ ShaperyMacrosDialog = (macro) ->
 							mergeShapesObj[code] = {:i, pos: l.data.pos, line: lcopy, shape: table.concat clip}
 					else
 						ass\warning s, "Expected a shape"
+				when "Shape without holes"
+					if l.isShape
+						newShape = Path!
+						shapePath = Path l.shape
+						shapePathFlattened = Path(shapePath)\flatten!
+						for j = 1, #shapePath.path
+							if checkPathClockWise shapePathFlattened.path[j]
+								table.insert newShape.path, shapePath.path[j]
+						l.shape = newShape\export!
+						ass\setLine l, s
+					else
+						ass\warning s, "Expected a shape"
 				when "Shape trim"
 					if l.isShape
 						Line.callBackExpand ass, l, nil, (line, j) ->
@@ -927,16 +947,17 @@ if haveDepCtrl
 	}
 
 	depctrl\registerMacros {
-		{"Shape expand",       "", ShaperyMacrosDialog "Shape expand"}
-		{"Shape clipper",      "", ShaperyMacrosDialog "Shape clipper"}
-		{"Clip to shape",      "", ShaperyMacrosDialog "Clip to shape"}
-		{"Shape to clip",      "", ShaperyMacrosDialog "Shape to clip"}
-		{"Shape merge",        "", ShaperyMacrosDialog "Shape merge"}
-		{"Shape trim",         "", ShaperyMacrosDialog "Shape trim"}
-		{"Shape to 0,0",       "", ShaperyMacrosDialog "Shape to 0,0"}
-		{"Shape to origin",    "", ShaperyMacrosDialog "Shape to origin"}
-		{"Shape to center",    "", ShaperyMacrosDialog "Shape to center"}
-		{"Shape bounding box", "", ShaperyMacrosDialog "Shape bounding box"}
+		{"Shape expand",        "", ShaperyMacrosDialog "Shape expand"}
+		{"Shape clipper",       "", ShaperyMacrosDialog "Shape clipper"}
+		{"Clip to shape",       "", ShaperyMacrosDialog "Clip to shape"}
+		{"Shape to clip",       "", ShaperyMacrosDialog "Shape to clip"}
+		{"Shape merge",         "", ShaperyMacrosDialog "Shape merge"}
+		{"Shape trim",          "", ShaperyMacrosDialog "Shape trim"}
+		{"Shape to 0,0",        "", ShaperyMacrosDialog "Shape to 0,0"}
+		{"Shape to origin",     "", ShaperyMacrosDialog "Shape to origin"}
+		{"Shape to center",     "", ShaperyMacrosDialog "Shape to center"}
+		{"Shape without holes", "", ShaperyMacrosDialog "Shape without holes"}
+		{"Shape bounding box",  "", ShaperyMacrosDialog "Shape bounding box"}
 	}, ": Shapery macros :"
 else
 	aegisub.register_macro "#{script_name}/Pathfinder",  "", PathfinderDialog
@@ -947,13 +968,14 @@ else
 	aegisub.register_macro "#{script_name}/Cut Contour", "", CutContourDialog
 	aegisub.register_macro "#{script_name}/Config",      "", ConfigDialog
 
-	aegisub.register_macro ": Shapery macros :/Shape expand",       "", ShaperyMacrosDialog "Shape expand"
-	aegisub.register_macro ": Shapery macros :/Shape clipper",      "", ShaperyMacrosDialog "Shape clipper"
-	aegisub.register_macro ": Shapery macros :/Clip to shape",      "", ShaperyMacrosDialog "Clip to shape"
-	aegisub.register_macro ": Shapery macros :/Shape to clip",      "", ShaperyMacrosDialog "Shape to clip"
-	aegisub.register_macro ": Shapery macros :/Shape merge",        "", ShaperyMacrosDialog "Shape merge"
-	aegisub.register_macro ": Shapery macros :/Shape trim",         "", ShaperyMacrosDialog "Shape trim"
-	aegisub.register_macro ": Shapery macros :/Shape to 0,0",       "", ShaperyMacrosDialog "Shape to 0,0"
-	aegisub.register_macro ": Shapery macros :/Shape to origin",    "", ShaperyMacrosDialog "Shape to origin"
-	aegisub.register_macro ": Shapery macros :/Shape to center",    "", ShaperyMacrosDialog "Shape to center"
-	aegisub.register_macro ": Shapery macros :/Shape bounding box", "", ShaperyMacrosDialog "Shape bounding box"
+	aegisub.register_macro ": Shapery macros :/Shape expand",        "", ShaperyMacrosDialog "Shape expand"
+	aegisub.register_macro ": Shapery macros :/Shape clipper",       "", ShaperyMacrosDialog "Shape clipper"
+	aegisub.register_macro ": Shapery macros :/Clip to shape",       "", ShaperyMacrosDialog "Clip to shape"
+	aegisub.register_macro ": Shapery macros :/Shape to clip",       "", ShaperyMacrosDialog "Shape to clip"
+	aegisub.register_macro ": Shapery macros :/Shape merge",         "", ShaperyMacrosDialog "Shape merge"
+	aegisub.register_macro ": Shapery macros :/Shape trim",          "", ShaperyMacrosDialog "Shape trim"
+	aegisub.register_macro ": Shapery macros :/Shape to 0,0",        "", ShaperyMacrosDialog "Shape to 0,0"
+	aegisub.register_macro ": Shapery macros :/Shape to origin",     "", ShaperyMacrosDialog "Shape to origin"
+	aegisub.register_macro ": Shapery macros :/Shape to center",     "", ShaperyMacrosDialog "Shape to center"
+	aegisub.register_macro ": Shapery macros :/Shape without holes", "", ShaperyMacrosDialog "Shape without holes"
+	aegisub.register_macro ": Shapery macros :/Shape bounding box",  "", ShaperyMacrosDialog "Shape bounding box"
