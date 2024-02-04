@@ -1,6 +1,6 @@
 export script_name        = "Shapery"
 export script_description = "Does several types of shape manipulations from the simplest to the most complex"
-export script_version     = "2.5.2"
+export script_version     = "2.5.3"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
@@ -19,7 +19,7 @@ if haveDepCtrl
 			}
 			{
 				"ILL.ILL"
-				version: "1.3.6"
+				version: "1.4.4"
 				url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
 				feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}

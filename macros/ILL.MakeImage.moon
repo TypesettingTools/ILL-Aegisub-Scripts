@@ -1,6 +1,6 @@
 export script_name        = "Make Image"
 export script_description = "Does several procedures for converting images to the .ass"
-export script_version     = "2.1.0"
+export script_version     = "2.1.1"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.MakeImage"
 
@@ -19,7 +19,7 @@ if haveDepCtrl
 			}
 			{
 				"ILL.ILL"
-				version: "1.3.4"
+				version: "1.4.4"
 				url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts"
 				feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}
@@ -129,11 +129,11 @@ imageTracer = (sub, sel, activeLine) ->
 		return ass\getNewSelection!
 
 imagePixels = (sub, sel, activeLine) ->
-    items = {"All in one line", "On several lines - \"Rec\"", "Pixel by Pixel"}
-    interface = {
-        {class: "label", label: "Output Type:", x: 0, y: 0}
-        {class: "dropdown", name: "outputtype", :items , x: 0, y: 1, value: items[2]}
-    }
+	items = {"All in one line", "On several lines - \"Rec\"", "Pixel by Pixel"}
+	interface = {
+		{class: "label", label: "Output Type:", x: 0, y: 0}
+		{class: "dropdown", name: "outputtype", :items , x: 0, y: 1, value: items[2]}
+	}
 	img = getData!
 	button, elements = Aegi.display interface, {"Ok", "Cancel"}, {close: "Cancel"}, "Pixels"
 	if button == "Ok"
@@ -153,18 +153,18 @@ imagePixels = (sub, sel, activeLine) ->
 		return ass\getNewSelection!
 
 imagePotrace = (sub, sel, activeLine) ->
-    x, items = 0, {"right", "black", "white", "majority", "minority"}
-    interface = {
-        {class: "label", label: "Turnpolicy: #{(" ")\rep 30}", :x, y: 0}
-        {class: "dropdown", name: "tpy", :items, :x, y: 1, value: "minority"}
-        {class: "label", label: "Corner threshold:", :x, y: 2}
-        {class: "intedit", name: "apm", :x, y: 3, min: 0, value: 1}
-        {class: "label", label: "Delete until:", :x, y: 4}
-        {class: "floatedit", name: "tdz", :x, y: 5, value: 2}
-        {class: "label", label: "Tolerance:", :x, y: 6}
-        {class: "floatedit", name: "opt", :x, y: 7, min: 0, value: 0.2}
-        {class: "checkbox", label: "Curve optimization?", name: "opc", :x, y: 8, value: true}
-    }
+	x, items = 0, {"right", "black", "white", "majority", "minority"}
+	interface = {
+		{class: "label", label: "Turnpolicy: #{(" ")\rep 30}", :x, y: 0}
+		{class: "dropdown", name: "tpy", :items, :x, y: 1, value: "minority"}
+		{class: "label", label: "Corner threshold:", :x, y: 2}
+		{class: "intedit", name: "apm", :x, y: 3, min: 0, value: 1}
+		{class: "label", label: "Delete until:", :x, y: 4}
+		{class: "floatedit", name: "tdz", :x, y: 5, value: 2}
+		{class: "label", label: "Tolerance:", :x, y: 6}
+		{class: "floatedit", name: "opt", :x, y: 7, min: 0, value: 0.2}
+		{class: "checkbox", label: "Curve optimization?", name: "opc", :x, y: 8, value: true}
+	}
 	img = getData!
 	button, elements = Aegi.display interface, {"Ok", "Cancel"}, {close: "Cancel"}, "Potrace"
 	if button == "Ok"
