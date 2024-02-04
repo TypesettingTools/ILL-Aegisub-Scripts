@@ -18,11 +18,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.1.1",
-                    "released": "2023-10-24",
+                    "version": "1.1.2",
+                    "released": "2024-02-04",
                     "files": [
                         {
-                            "sha1": "72b14ed52607a8a9ff19fcee6a7dcfda42370b86",
+                            "sha1": "666e2068ba4ab166a771b562bfde512daae5ff43",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -68,6 +68,9 @@
                 ],
                 "1.1.1": [
                     "Update Envelope Distort"
+                ],
+                "1.1.2": [
+                    "Update ILL dependency version in macros"
                 ]
             },
             "name": "Envelope Distort",
@@ -80,11 +83,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.5.2",
-                    "released": "2023-10-30",
+                    "version": "2.5.3",
+                    "released": "2024-02-04",
                     "files": [
                         {
-                            "sha1": "68a249c7eb1bb37ad458cdf343dc2f51008e9c83",
+                            "sha1": "9d7c4539ca95f31be12a25d41586bddd91125074",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -150,6 +153,9 @@
                 ],
                 "2.5.2": [
                     "Update Shapery"
+                ],
+                "2.5.3": [
+                    "Update ILL dependency version in macros"
                 ]
             },
             "name": "Shapery",
@@ -162,11 +168,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.1.0",
-                    "released": "2023-04-28",
+                    "version": "2.1.1",
+                    "released": "2024-02-04",
                     "files": [
                         {
-                            "sha1": "847371812f0ec266c481365597b6d3de44e83e9b",
+                            "sha1": "e70cb345fb76721ebfd4ca8e7850208653007a39",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -214,6 +220,9 @@
                     "",
                     "- Fixed some bugs",
                     "- Add save system"
+                ],
+                "2.1.1": [
+                    "Update ILL dependency version in macros"
                 ]
             },
             "name": "Make Image",
@@ -226,11 +235,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.1.0",
-                    "released": "2023-04-28",
+                    "version": "1.1.1",
+                    "released": "2024-02-04",
                     "files": [
                         {
-                            "sha1": "cc8ed9d3be7da6318ec5ce4c8dccc0eb5145cf82",
+                            "sha1": "cd7193824cd3e23c021b190a66e8d179530f4379",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -273,6 +282,9 @@
                     "",
                     "- Fixed some bugs",
                     "- Add save system"
+                ],
+                "1.1.1": [
+                    "Update ILL dependency version in macros"
                 ]
             },
             "name": "ILL - Change Alignment",
