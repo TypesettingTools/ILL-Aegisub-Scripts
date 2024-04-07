@@ -104,7 +104,7 @@ class Path
 	-- Simplifies the number of path points
 	simplify: (tolerance = 0.5, highestQuality = true, recreateBezier = true, angleThreshold = 170) =>
 		@cleanContours!
-		@path = Path.PathSimplifier(@path, tolerance, highestQuality, recreateBezier, angleThreshold)
+		@path = Path.Simplifier(@path, tolerance, highestQuality, recreateBezier, angleThreshold)
 		return @
 
 	-- Move the @path by specified distance
@@ -463,6 +463,43 @@ class Path
 				insert path.path[i], Point x, y
 		return path
 
+	shadow: (xshad, yshad, shadowType = "3D") =>
+		sortPointsToClockWise = (points) ->
+			cx, cy, n = 0, 0, #points
+			for {:x, :y} in *points
+				cx += x
+				cy += y
+			cx /= n
+			cy /= n
+			table.sort points, (a, b) ->
+				a1 = (math.deg(math.atan2(a.x - cx, a.y - cy)) + 360) % 360
+				a2 = (math.deg(math.atan2(b.x - cx, b.y - cy)) + 360) % 360
+				return a1 < a2
+			return unpack points
+		local pathA, pathB
+		if shadowType == "inner"
+			pathA = @clone!
+			pathB = pathA\clone!
+			pathB\move xshad, yshad
+			@path = pathA\difference pathB
+		else
+			pathA = @clone!
+			pathA\closeContours!
+			pathA\flatten!
+			pathB = pathA\clone!
+			pathB\move xshad, yshad
+			pathsClipperA = pathA\convertToClipper!
+			newPathsClipper = CPP.paths.new!
+			for i = 1, #pathA.path
+				pa = pathA.path[i]
+				pb = pathB.path[i]
+				for j = 1, #pa - 1
+					newPathClipper = CPP.path.new!
+					newPathClipper\push sortPointsToClockWise {pa[j], pa[j + 1], pb[j + 1], pb[j]}
+					newPathsClipper\add newPathClipper
+			@path = Path.convertFromClipper(pathsClipperA\union newPathsClipper).path
+		return @
+
 	-- (Clipper function)
 	-- Join @path with another path object 
 	unite: (clip) =>
@@ -503,7 +540,351 @@ class Path
 		@path = Path.convertFromClipper(subj).path
 		return @
 
-Path.PathSimplifier = (points, tolerance = 0.1, highestQuality, recreateBezier, angleThreshold) ->
+Path.Shadow = (path, sx, sy, shadowType = "3D") ->
+
+	sortPointsToClockWise = (points) ->
+		cx, cy, n = 0, 0, #points
+		for {:x, :y} in *points
+			cx += x
+			cy += y
+		cx /= n
+		cy /= n
+		table.sort points, (a, b) ->
+			a1 = (math.deg(math.atan2(a.x - cx, a.y - cy)) + 360) % 360
+			a2 = (math.deg(math.atan2(b.x - cx, b.y - cy)) + 360) % 360
+			return a1 < a2
+		return unpack points
+
+	local pathA, pathB
+	if shadowType == "inner"
+		pathA = Path shape
+		pathB = pathA\clone!
+		pathB\move xshad, yshad
+		pathA\difference pathB
+		return pathA\export!
+
+	pathA = Path shape
+	pathA\closeContours!
+	pathA\flatten!
+	pathB = pathA\clone!
+	pathB\move xshad, yshad
+	pathsClipperA = pathA\convertToClipper!
+	newPathsClipper = Clipper.paths.new!
+	for i = 1, #pathA.path
+		pa = pathA.path[i]
+		pb = pathB.path[i]
+		for j = 1, #pa - 1
+			newPathClipper = Clipper.path.new!
+			newPathClipper\push toClockWise {pa[j], pa[j + 1], pb[j + 1], pb[j]}
+			newPathsClipper\add newPathClipper
+	return Path.convertFromClipper(pathsClipperA\union newPathsClipper)\export!
+
+Path.RoundingPath = (path, radius, inverted = false, cornerStyle = "Rounded", rounding = "Absolute") ->
+	path = Path path if type(path) == "string"
+	path\openContours!
+
+	-- https://github.com/colinmeinke/svg-arc-to-cubic-bezier
+	arc2CubicBezier = (info) ->
+		TAU = math.pi * 2
+
+		mapToEllipse = (p, rx, ry, cosphi, sinphi, centerx, centery) ->
+			p.x *= rx
+			p.y *= ry
+			xp = cosphi * p.x - sinphi * p.y
+			yp = sinphi * p.x + cosphi * p.y
+			return Point xp + centerx, yp + centery
+
+		approxUnitArc = (ang1, ang2) ->
+			-- If 90 degree circular arc, use a constant
+			-- as derived from http://spencermortensen.com/articles/bezier-circle
+			a = ang2 == 1.5707963267948966 and 0.551915024494 or (ang2 == -1.5707963267948966 and -0.551915024494 or 4 / 3 * math.tan(ang2 / 4))
+
+			x1 = math.cos ang1
+			y1 = math.sin ang1
+			x2 = math.cos ang1 + ang2
+			y2 = math.sin ang1 + ang2
+
+			return {
+				Point x1 - y1 * a, y1 + x1 * a
+				Point x2 + y2 * a, y2 - x2 * a
+				Point x2, y2
+			}
+
+		vectorAngle = (ux, uy, vx, vy) ->
+			sign = (ux * vy - uy * vx < 0) and -1 or 1
+			dot = ux * vx + uy * vy
+			if dot > 1
+				dot = 1
+			if dot < -1
+				dot = -1
+			return sign * math.acos dot
+
+		getArcCenter = (px, py, cx, cy, rx, ry, largeArcFlag, sweepFlag, sinphi, cosphi, pxp, pyp) ->
+			rxsq = rx ^ 2
+			rysq = ry ^ 2
+			pxpsq = pxp ^ 2
+			pypsq = pyp ^ 2
+
+			radicant = rxsq * rysq - rxsq * pypsq - rysq * pxpsq
+			if radicant < 0
+				radicant = 0
+
+			radicant = radicant / (rxsq * pypsq + rysq * pxpsq)
+			radicant = math.sqrt(radicant) * (largeArcFlag == sweepFlag and -1 or 1)
+
+			centerxp = radicant * rx / ry * pyp
+			centeryp = radicant * -ry / rx * pxp
+
+			centerx = cosphi * centerxp - sinphi * centeryp + (px + cx) / 2
+			centery = sinphi * centerxp + cosphi * centeryp + (py + cy) / 2
+
+			vx1 = (pxp - centerxp) / rx
+			vy1 = (pyp - centeryp) / ry
+			vx2 = (-pxp - centerxp) / rx
+			vy2 = (-pyp - centeryp) / ry
+
+			ang1 = vectorAngle 1, 0, vx1, vy1
+			ang2 = vectorAngle vx1, vy1, vx2, vy2
+
+			if sweepFlag == 0 and ang2 > 0
+				ang2 -= TAU
+
+			if sweepFlag == 1 and ang2 < 0
+				ang2 += TAU
+
+			return {centerx, centery, ang1, ang2}
+
+		{:px, :py, :cx, :cy, :rx, :ry, :xAxisRotation, :largeArcFlag, :sweepFlag} = info
+		xAxisRotation or= 0
+		largeArcFlag or= 0
+		sweepFlag or= 0
+
+		if rx == 0 or ry == 0
+			return {}
+
+		sinphi = math.sin xAxisRotation * TAU / 360
+		cosphi = math.cos xAxisRotation * TAU / 360
+
+		pxp = cosphi * (px - cx) / 2 + sinphi * (py - cy) / 2
+		pyp = -sinphi * (px - cx) / 2 + cosphi * (py - cy) / 2
+
+		if pxp == 0 and pyp == 0
+			return {}
+
+		rx = math.abs rx
+		ry = math.abs ry
+
+		lambda = (pxp ^ 2) / (rx ^ 2) + (pyp ^ 2) / (ry ^ 2)
+		if lambda > 1
+			rx *= math.sqrt lambda
+			ry *= math.sqrt lambda
+
+		{centerx, centery, ang1, ang2} = getArcCenter px, py, cx, cy, rx, ry, largeArcFlag, sweepFlag, sinphi, cosphi, pxp, pyp
+
+		ratio = math.abs(ang2) / (TAU / 4)
+		if math.abs(1 - ratio) < 1e-7
+			ratio = 1
+
+		segments = math.max math.ceil(ratio), 1
+
+		ang2 /= segments
+
+		curves = {}
+		for i = 1, segments
+			insert curves, approxUnitArc ang1, ang2
+			ang1 += ang2
+
+		result = {}
+		for i = 1, #curves
+			curve = curves[i]
+			{x: x1, y: y1} = mapToEllipse curve[1], rx, ry, cosphi, sinphi, centerx, centery
+			{x: x2, y: y2} = mapToEllipse curve[2], rx, ry, cosphi, sinphi, centerx, centery
+			{:x, :y} = mapToEllipse curve[3], rx, ry, cosphi, sinphi, centerx, centery
+			insert result, {x1, y1, x2, y2, x, y}
+
+		return result
+
+	sweepAngularPoint = (a, b, c) ->
+		center = a\lerp c, 0.5
+
+		cos_pi = math.cos math.pi
+		sin_pi = math.sin math.pi
+
+		p = Point!
+		p.x = cos_pi * (b.x - center.x) - sin_pi * (b.y - center.y) + center.x
+		p.y = sin_pi * (b.x - center.x) + cos_pi * (b.y - center.y) + center.y
+		return p
+
+	-- https://stackoverflow.com/a/40444735
+	getSweepFlag = (S, V, E) ->
+		getAngle = (a, b, c) ->
+			angle_1 = math.atan2 a.y - b.y, a.x - b.x
+			angle_2 = math.atan2 c.y - b.y, c.x - b.x
+			angle_3 = angle_2 - angle_1
+			return (angle_3 + 3 * math.pi) % (2 * math.pi) - math.pi
+		return getAngle(E, S, V) > 0 and 0 or 1
+
+	-- https://stackoverflow.com/a/24780108
+	getProportionPoint = (point, segment, length, d) ->
+		factor = segment / length
+		return Point point.x - d.x * factor, point.y - d.y * factor
+
+	modeRoundingAbsolute = (radius, p1, angularPoint, p2) ->
+		-- Vector 1
+		v1 = Point angularPoint.x - p1.x, angularPoint.y - p1.y
+
+		-- Vector 2
+		v2 = Point angularPoint.x - p2.x, angularPoint.y - p2.y
+
+		-- Angle between vector 1 and vector 2
+		angle = math.atan2(v1.y, v1.x) - math.atan2(v2.y, v2.x)
+
+		-- The length of segment between angular point and the
+		-- points of intersection with the circle of a given radius
+		abs_tan = math.abs math.tan angle / 2
+		segment = radius / abs_tan
+
+		-- Check the segment
+		length1 = v1\vecMagnitude!
+		length2 = v2\vecMagnitude!
+
+		length = math.min(length1, length2) / 2
+		if segment > length
+			segment = length
+			radius = length * abs_tan
+
+		-- Points of intersection are calculated by the proportion between 
+		-- the coordinates of the vector, length of vector and the length of the segment.
+		p1Cross = getProportionPoint angularPoint, segment, length1, v1
+		p2Cross = getProportionPoint angularPoint, segment, length2, v2
+
+		-- Calculation of the coordinates of the circle 
+		-- center by the addition of angular vectors.
+		c = Point!
+		c.x = angularPoint.x * 2 - p1Cross.x - p2Cross.x
+		c.y = angularPoint.y * 2 - p1Cross.y - p2Cross.y
+
+		L = c\vecMagnitude!
+		d = Point(segment, radius)\vecMagnitude!
+
+		circlePoint = getProportionPoint angularPoint, d, L, c
+
+		-- StartAngle and EndAngle of arc
+		startAngle = math.atan2 p1Cross.y - circlePoint.y, p1Cross.x - circlePoint.x
+		endAngle = math.atan2 p2Cross.y - circlePoint.y, p2Cross.x - circlePoint.x
+
+		-- Sweep angle
+		sweepAngle = endAngle - startAngle
+
+		-- Some additional checks
+		if sweepAngle < 0
+			startAngle = endAngle
+			sweepAngle = -sweepAngle
+
+		if sweepAngle > math.pi
+			sweepAngle = -(2 * math.pi - sweepAngle)
+
+		degreeFactor = 180 / math.pi
+		sweepFlag = getSweepFlag p1Cross, angularPoint, p2Cross
+
+		return {
+			line1: {p1, p1Cross}
+			line2: {p2, p2Cross}
+			arc: {
+				:sweepFlag
+				rx: radius
+				ry: radius
+				start_angle: startAngle * degreeFactor
+				end_angle: sweepAngle * degreeFactor
+			}
+		}
+
+	modeRoundingRelative = (radius, inverted, a, b, c) ->
+		{:line1, :line2} = modeRoundingAbsolute radius, a, b, c
+		p1 = line1[2]
+		p2 = b\clone!
+		p3 = line2[2]
+		if inverted
+			p2 = sweepAngularPoint p1, p2, p3
+		c1 = p1\lerp p2, 0.5
+		c2 = p2\lerp p3, 0.5
+		return p1, c1, c2, p3
+
+	modeSpike = (radius, a, b, c, path) ->
+		{:line1, :line2} = modeRoundingAbsolute radius, a, b, c
+		p1 = line1[2]
+		p3 = line2[2]
+		p2 = sweepAngularPoint p1, b, p3
+		insert path, p1
+		insert path, p2
+		insert path, p3
+
+	modeChamfer = (radius, a, b, c, path) ->
+		{:line1, :line2} = modeRoundingAbsolute radius, a, b, c
+		p1 = line1[2]
+		p3 = line2[2]
+		insert path, p1
+		insert path, p3
+
+	makeRoundingAbsolute = (r, inverted, a, b, c, path) ->
+		{:line1, :line2, :arc} = modeRoundingAbsolute r, a, b, c
+		curves = arc2CubicBezier {
+			px: line1[2].x
+			py: line1[2].y
+			cx: line2[2].x
+			cy: line2[2].y
+			rx: arc.rx
+			ry: arc.ry
+			sweepFlag: inverted and 1 - arc.sweepFlag or arc.sweepFlag
+		}
+		insert path, Point line1[2].x, line1[2].y
+		for curve in *curves
+			insert path, Point curve[1], curve[2], "b"
+			insert path, Point curve[3], curve[4], "b"
+			insert path, Point curve[5], curve[6], "b"
+
+	makeRoundingRelative = (r, inverted, a, b, c, path) ->
+		p1, c1, c2, p4 = modeRoundingRelative r, inverted, a, b, c
+		insert path, Point p1.x, p1.y
+		insert path, Point c1.x, c1.y, "b"
+		insert path, Point c2.x, c2.y, "b"
+		insert path, Point p4.x, p4.y, "b"
+
+	newPath = Path!
+	for contour in *path.path
+		newContour, len = {}, #contour
+		for i = 1, len
+			j = i % len + 1
+			k = (i + 1) % len + 1
+			-- points that form a possible corner
+			a = contour[i]
+			b = contour[j]
+			c = contour[k]
+			-- checks if the start point is equal to the end point of the last segment, if it is a bezier segment
+			-- for example, this happens for the letter S with the Arial font
+			if i == len and a.id == "b" and b.id == "l" and a\equals b
+				insert newContour, 1, a
+			-- if the id value of point b(angle point) is "l", this means it is a corner
+			elseif b.id == "l" and c.id == "l"
+				if cornerStyle == "Rounded" or inverted
+					if rounding == "Absolute"
+						makeRoundingAbsolute radius, inverted, a, b, c, newContour
+					elseif rounding == "Relative"
+						makeRoundingRelative radius, inverted, a, b, c, newContour
+				elseif cornerStyle == "Spike"
+					modeSpike radius, a, b, c, newContour
+				elseif cornerStyle == "Chamfer"
+					modeChamfer radius, a, b, c, newContour
+			-- this is not a corner, add the angle point and continue
+			else
+				if i == 1 and not b.id == "l"
+					insert newContour, a
+				insert newContour, b
+		insert newPath.path, newContour
+
+	return newPath
+
+Path.Simplifier = (points, tolerance = 0.1, highestQuality, recreateBezier, angleThreshold) ->
 	simplifyRadialDist = (points, sqTolerance) ->
 		prevPoint = points[1]
 		newPoints = {prevPoint}
@@ -513,11 +894,11 @@ Path.PathSimplifier = (points, tolerance = 0.1, highestQuality, recreateBezier, 
 			point = points[i]
 
 			if point\sqDistance(prevPoint) > sqTolerance
-				table.insert newPoints, point
+				insert newPoints, point
 				prevPoint = point
 
 		if (prevPoint.x != point.x) and (prevPoint.y != point.y)
-			table.insert newPoints, point
+			insert newPoints, point
 
 		return newPoints
 
@@ -534,7 +915,7 @@ Path.PathSimplifier = (points, tolerance = 0.1, highestQuality, recreateBezier, 
 		if (maxSqDist > sqTolerance)
 			if (index - first > 1)
 				simplifyDPStep(points, first, index, sqTolerance, simplified)
-			table.insert simplified, points[index]
+			insert simplified, points[index]
 
 			if (last - index > 1)
 				simplifyDPStep(points, index, last, sqTolerance, simplified)
@@ -544,7 +925,7 @@ Path.PathSimplifier = (points, tolerance = 0.1, highestQuality, recreateBezier, 
 		simplified = {points[1]}
 
 		simplifyDPStep(points, 1, last, sqTolerance, simplified)
-		table.insert simplified, points[last]
+		insert simplified, points[last]
 
 		return simplified
 
@@ -713,7 +1094,7 @@ Path.PathSimplifier = (points, tolerance = 0.1, highestQuality, recreateBezier, 
 		if b[#b]\equals bez[1]
 			table.remove bez, 1
 		for i = 1, #bez
-			table.insert(b, bez[i])
+			insert(b, bez[i])
 		
 	fitCubic = (b, d, first, last, tHat1, tHat2, _error) ->
 		u, uPrime, maxIterations, tHatCenter = {}, {}, 4, Point!
@@ -778,7 +1159,7 @@ Path.PathSimplifier = (points, tolerance = 0.1, highestQuality, recreateBezier, 
 
 		if #selected <= 4
 			for i = 1, #selected
-				table.insert final, selected[i]
+				insert final, selected[i]
 			return
 		
 		b = {selected[1]}
@@ -786,7 +1167,7 @@ Path.PathSimplifier = (points, tolerance = 0.1, highestQuality, recreateBezier, 
 		fitCurve(b, selected, #selected, tolerance)
 		
 		for i = 1, #b
-			table.insert final, b[i]
+			insert final, b[i]
 
 	isInRange = (cs, ls) ->
 		if not (cs > ls * 2) and not (cs < ls / 2)
@@ -798,8 +1179,8 @@ Path.PathSimplifier = (points, tolerance = 0.1, highestQuality, recreateBezier, 
 		final = {}
 
 		-- first and last points are duplicated for checks but ignored
-		table.insert points, 1, points[#points]
-		table.insert points, points[2]
+		insert points, 1, points[#points]
+		insert points, points[2]
 
 		lastSegmentLength = 0
 		selected = {points[1]}
@@ -815,7 +1196,7 @@ Path.PathSimplifier = (points, tolerance = 0.1, highestQuality, recreateBezier, 
 				points[i].id = "l"
 				selected = {points[i]}
 				continue
-			table.insert selected, points[i]
+			insert selected, points[i]
 			
 			currSegmentLength = points[i]\distance(points[i + 1])
 			if not isInRange(currSegmentLength, lastSegmentLength)
