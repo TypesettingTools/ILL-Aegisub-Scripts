@@ -83,11 +83,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.5.3",
-                    "released": "2024-02-04",
+                    "version": "2.5.4",
+                    "released": "2024-04-07",
                     "files": [
                         {
-                            "sha1": "9d7c4539ca95f31be12a25d41586bddd91125074",
+                            "sha1": "462865b458defb545e5a87daa6a88f84040afcad",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -156,6 +156,9 @@
                 ],
                 "2.5.3": [
                     "Update ILL dependency version in macros"
+                ],
+                "2.5.4": [
+                    "Update Shapery"
                 ]
             },
             "name": "Shapery",
