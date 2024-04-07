@@ -384,6 +384,44 @@ class Path
 			py = pnt.y + (sy + y) * tan.y
 			return px, py
 
+	-- Creates an inner shadow or 3D shadow on the Path
+	shadow: (xshad, yshad, shadowType = "3D") =>
+		sortPointsToClockWise = (points) ->
+			cx, cy, n = 0, 0, #points
+			for {:x, :y} in *points
+				cx += x
+				cy += y
+			cx /= n
+			cy /= n
+			table.sort points, (a, b) ->
+				a1 = (math.deg(math.atan2(a.x - cx, a.y - cy)) + 360) % 360
+				a2 = (math.deg(math.atan2(b.x - cx, b.y - cy)) + 360) % 360
+				return a1 < a2
+			return unpack points
+		local pathA, pathB
+		if shadowType == "inner"
+			pathA = @clone!
+			pathB = pathA\clone!
+			pathB\move xshad, yshad
+			@path = pathA\difference(pathB).path
+		else
+			pathA = @clone!
+			pathA\closeContours!
+			pathA\flatten!
+			pathB = pathA\clone!
+			pathB\move xshad, yshad
+			pathsClipperA = pathA\convertToClipper!
+			newPathsClipper = CPP.paths.new!
+			for i = 1, #pathA.path
+				pa = pathA.path[i]
+				pb = pathB.path[i]
+				for j = 1, #pa - 1
+					newPathClipper = CPP.path.new!
+					newPathClipper\push sortPointsToClockWise {pa[j], pa[j + 1], pb[j + 1], pb[j]}
+					newPathsClipper\add newPathClipper
+			@path = Path.convertFromClipper(pathsClipperA\union newPathsClipper).path
+		return @
+
 	-- Create the @path table for the given string
 	import: (shape) =>
 		@path = {}
@@ -463,43 +501,6 @@ class Path
 				insert path.path[i], Point x, y
 		return path
 
-	shadow: (xshad, yshad, shadowType = "3D") =>
-		sortPointsToClockWise = (points) ->
-			cx, cy, n = 0, 0, #points
-			for {:x, :y} in *points
-				cx += x
-				cy += y
-			cx /= n
-			cy /= n
-			table.sort points, (a, b) ->
-				a1 = (math.deg(math.atan2(a.x - cx, a.y - cy)) + 360) % 360
-				a2 = (math.deg(math.atan2(b.x - cx, b.y - cy)) + 360) % 360
-				return a1 < a2
-			return unpack points
-		local pathA, pathB
-		if shadowType == "inner"
-			pathA = @clone!
-			pathB = pathA\clone!
-			pathB\move xshad, yshad
-			@path = pathA\difference pathB
-		else
-			pathA = @clone!
-			pathA\closeContours!
-			pathA\flatten!
-			pathB = pathA\clone!
-			pathB\move xshad, yshad
-			pathsClipperA = pathA\convertToClipper!
-			newPathsClipper = CPP.paths.new!
-			for i = 1, #pathA.path
-				pa = pathA.path[i]
-				pb = pathB.path[i]
-				for j = 1, #pa - 1
-					newPathClipper = CPP.path.new!
-					newPathClipper\push sortPointsToClockWise {pa[j], pa[j + 1], pb[j + 1], pb[j]}
-					newPathsClipper\add newPathClipper
-			@path = Path.convertFromClipper(pathsClipperA\union newPathsClipper).path
-		return @
-
 	-- (Clipper function)
 	-- Join @path with another path object 
 	unite: (clip) =>
@@ -539,45 +540,6 @@ class Path
 		subj = subj\inflate delta, join_type, end_type, miter_limit, arc_tolerance, preserve_collinear, reverse_solution
 		@path = Path.convertFromClipper(subj).path
 		return @
-
-Path.Shadow = (path, sx, sy, shadowType = "3D") ->
-
-	sortPointsToClockWise = (points) ->
-		cx, cy, n = 0, 0, #points
-		for {:x, :y} in *points
-			cx += x
-			cy += y
-		cx /= n
-		cy /= n
-		table.sort points, (a, b) ->
-			a1 = (math.deg(math.atan2(a.x - cx, a.y - cy)) + 360) % 360
-			a2 = (math.deg(math.atan2(b.x - cx, b.y - cy)) + 360) % 360
-			return a1 < a2
-		return unpack points
-
-	local pathA, pathB
-	if shadowType == "inner"
-		pathA = Path shape
-		pathB = pathA\clone!
-		pathB\move xshad, yshad
-		pathA\difference pathB
-		return pathA\export!
-
-	pathA = Path shape
-	pathA\closeContours!
-	pathA\flatten!
-	pathB = pathA\clone!
-	pathB\move xshad, yshad
-	pathsClipperA = pathA\convertToClipper!
-	newPathsClipper = Clipper.paths.new!
-	for i = 1, #pathA.path
-		pa = pathA.path[i]
-		pb = pathB.path[i]
-		for j = 1, #pa - 1
-			newPathClipper = Clipper.path.new!
-			newPathClipper\push toClockWise {pa[j], pa[j + 1], pb[j + 1], pb[j]}
-			newPathsClipper\add newPathClipper
-	return Path.convertFromClipper(pathsClipperA\union newPathsClipper)\export!
 
 Path.RoundingPath = (path, radius, inverted = false, cornerStyle = "Rounded", rounding = "Absolute") ->
 	path = Path path if type(path) == "string"
