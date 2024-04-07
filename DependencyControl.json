@@ -379,13 +379,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.4.5",
+                    "version": "1.4.6",
                     "released": "2024-04-07",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "1d2bbaee4ff2e3b85e2122a63511fb23826fbdb5"
+                            "sha1": "e7933a986a236bab2e90dc4b650511d83c7c6506"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -395,7 +395,7 @@
                         {
                             "name": "/Ass/Shape/Path.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "cfce6034db5f5ca80ab1ba7c5e5a3d890d29b795"
+                            "sha1": "a3e72133bb3cef4f2d883b51ec1127f63c34e540"
                         },
                         {
                             "name": "/Ass/Shape/Point.moon",
@@ -576,6 +576,9 @@
                 ],
                 "1.4.5": [
                     "Add shadow and rounding effects to Path"
+                ],
+                "1.4.6": [
+                    "Fix shadow path"
                 ]
             }
         },
