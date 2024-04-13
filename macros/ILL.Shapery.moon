@@ -1,6 +1,6 @@
 export script_name        = "Shapery"
 export script_description = "Does several types of shape manipulations from the simplest to the most complex"
-export script_version     = "2.5.4"
+export script_version     = "2.5.5"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
@@ -569,6 +569,23 @@ ShaperyMacrosDialog = (macro) ->
 						ass\setLine l, s
 					else
 						ass\warning s, "Expected a shape"
+				when "Shape to pos"
+					if l.isShape and l.tags\existsTag "clip"
+						local cx, cy, fn
+						fn = (x, y) ->
+							cx = tonumber x
+							cy = tonumber y
+							return x, y
+						l.tags\getTag("clip").value\gsub "(%d%-?[%.%d]*)%s+(%d%-?[%.%d]*)", fn, 1
+						{x, y} = l.data.pos
+						newPath = Path l.shape
+						newPath\move x - cx, y - cy
+						l.tags\remove "move", "clip"
+						l.tags\insert {{"pos", {cx, cy}}, true}
+						l.shape = newPath\export!
+						ass\setLine l, s
+					else
+						ass\warning s, "Expected a shape"
 				when "Shape to origin", "Shape to center"
 					if l.isShape
 						too = macro == "Shape to origin"
@@ -618,6 +635,7 @@ if haveDepCtrl
 		{"Shape merge",         "", ShaperyMacrosDialog "Shape merge"}
 		{"Shape trim",          "", ShaperyMacrosDialog "Shape trim"}
 		{"Shape to 0,0",        "", ShaperyMacrosDialog "Shape to 0,0"}
+		{"Shape to pos",        "", ShaperyMacrosDialog "Shape to pos"}
 		{"Shape to origin",     "", ShaperyMacrosDialog "Shape to origin"}
 		{"Shape to center",     "", ShaperyMacrosDialog "Shape to center"}
 		{"Shape without holes", "", ShaperyMacrosDialog "Shape without holes"}
@@ -639,6 +657,7 @@ else
 	aegisub.register_macro ": Shapery macros :/Shape merge",         "", ShaperyMacrosDialog "Shape merge"
 	aegisub.register_macro ": Shapery macros :/Shape trim",          "", ShaperyMacrosDialog "Shape trim"
 	aegisub.register_macro ": Shapery macros :/Shape to 0,0",        "", ShaperyMacrosDialog "Shape to 0,0"
+	aegisub.register_macro ": Shapery macros :/Shape to pos",        "", ShaperyMacrosDialog "Shape to pos"
 	aegisub.register_macro ": Shapery macros :/Shape to origin",     "", ShaperyMacrosDialog "Shape to origin"
 	aegisub.register_macro ": Shapery macros :/Shape to center",     "", ShaperyMacrosDialog "Shape to center"
 	aegisub.register_macro ": Shapery macros :/Shape without holes", "", ShaperyMacrosDialog "Shape without holes"
