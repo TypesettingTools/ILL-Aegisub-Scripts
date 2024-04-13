@@ -83,11 +83,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.5.4",
-                    "released": "2024-04-07",
+                    "version": "2.5.5",
+                    "released": "2024-04-13",
                     "files": [
                         {
-                            "sha1": "462865b458defb545e5a87daa6a88f84040afcad",
+                            "sha1": "c0561f669618ed4b9624ad2984c9b85f45a08750",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -159,6 +159,9 @@
                 ],
                 "2.5.4": [
                     "Update Shapery"
+                ],
+                "2.5.5": [
+                    "Add Shape to pos"
                 ]
             },
             "name": "Shapery",
