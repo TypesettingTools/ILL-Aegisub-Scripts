@@ -1,6 +1,6 @@
 export script_name        = "Shapery"
 export script_description = "Does several types of shape manipulations from the simplest to the most complex"
-export script_version     = "2.5.5"
+export script_version     = "2.5.6"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
@@ -97,6 +97,7 @@ interfaces = {
 		{class: "floatedit", x: 9, y: 2, name: "verticalScale", min: 1, max: 500, step: 0.1, value: 100}
 		{class: "label", label: "- Filter -----", x: 0, y: 3}
 		{class: "textbox", x: 0, y: 4, width: 10, height: 8, name: "filter", value: ""}
+		{class: "label", label: "- Global Variables --> ILL | left | right | top | botton | width | height | x | y", x: 0, y: 12}
 	}
 	utilities: -> {
 		{class: "label", label: "Shadow Effect", x: 0, y: 0}
@@ -275,14 +276,14 @@ TransformDialog = (sub, sel, activeLine) ->
 					raw = [[
 						local ILL = require "ILL.ILL"
 						local s, i, n = %d, %d, %d
+						local left, top, right, bottom = %s, %s, %s, %s
+						local width, height = %s, %s
 						return function(x, y)
-							left, top, right, bottom = %s, %s, %s, %s
-							width, height = right - left, bottom - top
 							%s
 							return x, y
 						end
 					]]
-					path\map loadstring(raw\format(s, i, n, box.l, box.t, box.r, box.b, filter))!
+					path\map loadstring(raw\format(s, i, n, box.l, box.t, box.r, box.b, box.width, box.height, filter))!
 				l.shape = path\export!
 				ass\insertLine l, s
 			else
@@ -576,7 +577,7 @@ ShaperyMacrosDialog = (macro) ->
 							cx = tonumber x
 							cy = tonumber y
 							return x, y
-						l.tags\getTag("clip").value\gsub "(%d%-?[%.%d]*)%s+(%d%-?[%.%d]*)", fn, 1
+						l.tags\getTag("clip").value\gsub "(%d[%.%d]*)%s+(%d[%.%d]*)", fn, 1
 						{x, y} = l.data.pos
 						newPath = Path l.shape
 						newPath\move x - cx, y - cy
