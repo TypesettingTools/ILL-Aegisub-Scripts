@@ -8,7 +8,6 @@
     "fileBaseUrl": "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/@{channel}/",
     "knownFeeds": {
         "ILL": "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json",
-        "SubInspector": "https://raw.githubusercontent.com/TypesettingTools/SubInspector/master/DependencyControl.json",
         "ffi-experiments": "https://raw.githubusercontent.com/TypesettingTools/ffi-experiments/master/DependencyControl.json"
     },
     "macros": {
@@ -495,11 +494,6 @@
                         },
                         {
                             "moduleName": "json"
-                        },
-                        {
-                            "moduleName": "SubInspector.Inspector",
-                            "feed": "@{feed:SubInspector}",
-                            "version": "0.7.2"
                         },
                         {
                             "moduleName": "clipper2.clipper2",
