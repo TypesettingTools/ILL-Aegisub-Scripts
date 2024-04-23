@@ -21,12 +21,13 @@
 -- Font scale values for increased size & later downscaling to produce floating point coordinates
 export FONT_UPSCALE = 64
 export FONT_DOWNSCALE = 1 / FONT_UPSCALE
+export IS_UNIX = jit.os != "Windows"
 
-if jit.os == "Windows"
+unless IS_UNIX
 	-- if the operating system is windows
 	import WindowsGDI from require "ILL.ILL.Font.Win"
 	return {Font: WindowsGDI}
 
 -- if the operating system is unix
-import PangoCairo from require "ILL.ILL.Font.Unx"
-return {Font: PangoCairo}
+import FreeType from require "ILL.ILL.Font.Unx"
+return {Font: FreeType}

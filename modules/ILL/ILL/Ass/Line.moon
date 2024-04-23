@@ -115,6 +115,8 @@ class Line
 				.internal_leading = textMetrics.internal_leading
 				.external_leading = textMetrics.external_leading
 
+			font\free! if IS_UNIX
+
 			-- text alignment
 			{:an} = .data
 
@@ -486,7 +488,9 @@ class Line
 				-- sets new values
 				lineBlock.data.scale_x = 100
 				lineBlock.data.scale_y = 100
-				textExtents = Font(lineBlock.data)\getTextExtents lineBlock.text_stripped
+				font = Font lineBlock.data
+				textExtents = font\getTextExtents lineBlock.text_stripped
+				font\free! if IS_UNIX
 				lineBlock.width = textExtents.width
 				lineBlock.height = textExtents.height
 				-- converts the text to shape and then converts the shape to Path
@@ -718,7 +722,11 @@ class Line
 			return x * w, y * w
 
 	-- converts the text to shape
-	toShape: (l) -> Font(l.data)\getTextToShape l.text_stripped
+	toShape: (l) ->
+		font = Font l.data
+		shape = font\getTextToShape l.text_stripped
+		font\free! if IS_UNIX
+		return shape
 
 	-- converts the text to Path
 	toPath: (l) -> Path Line.toShape l

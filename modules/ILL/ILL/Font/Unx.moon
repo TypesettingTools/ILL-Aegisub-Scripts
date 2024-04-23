@@ -1,255 +1,689 @@
 ffi = require "ffi"
 
--- Extension must be appended because of dot already in filename
-has_pangocairo, pangocairo = pcall ffi.load, "pangocairo-1.0.so"
+has_freetype, freetype = pcall ffi.load, "freetype"
+has_fontconfig, fontconfig = pcall ffi.load, "fontconfig"
+
 import C, cdef, gc, new from ffi
 
--- Set C definitions for pangocairo
+-- Set C definitions for freetype / taken from https://github.com/luapower/freetype/blob/master/freetype_h.lua
 cdef [[
-	typedef enum{
-		CAIRO_FORMAT_INVALID   = -1,
-		CAIRO_FORMAT_ARGB32    = 0,
-		CAIRO_FORMAT_RGB24     = 1,
-		CAIRO_FORMAT_A8        = 2,
-		CAIRO_FORMAT_A1        = 3,
-		CAIRO_FORMAT_RGB16_565 = 4,
-		CAIRO_FORMAT_RGB30     = 5
-	}cairo_format_t;
-	typedef void cairo_surface_t;
-	typedef void cairo_t;
-	typedef void PangoLayout;
-	typedef void* gpointer;
-	static const int PANGO_SCALE = 1024;
-	typedef void PangoFontDescription;
-	typedef enum{
-		PANGO_WEIGHT_THIN	= 100,
-		PANGO_WEIGHT_ULTRALIGHT = 200,
-		PANGO_WEIGHT_LIGHT = 300,
-		PANGO_WEIGHT_NORMAL = 400,
-		PANGO_WEIGHT_MEDIUM = 500,
-		PANGO_WEIGHT_SEMIBOLD = 600,
-		PANGO_WEIGHT_BOLD = 700,
-		PANGO_WEIGHT_ULTRABOLD = 800,
-		PANGO_WEIGHT_HEAVY = 900,
-		PANGO_WEIGHT_ULTRAHEAVY = 1000
-	}PangoWeight;
-	typedef enum{
-		PANGO_STYLE_NORMAL,
-		PANGO_STYLE_OBLIQUE,
-		PANGO_STYLE_ITALIC
-	}PangoStyle;
-	typedef void PangoAttrList;
-	typedef void PangoAttribute;
-	typedef enum{
-		PANGO_UNDERLINE_NONE,
-		PANGO_UNDERLINE_SINGLE,
-		PANGO_UNDERLINE_DOUBLE,
-		PANGO_UNDERLINE_LOW,
-		PANGO_UNDERLINE_ERROR
-	}PangoUnderline;
-	typedef int gint;
-	typedef gint gboolean;
-	typedef void PangoContext;
-	typedef unsigned int guint;
+	void* memset(void *s, int c, size_t n);
+
+	typedef signed int     FT_Int32;
+	typedef unsigned int   FT_UInt32;
+
+	typedef signed char    FT_Char;
+	typedef unsigned char  FT_Byte;
+	typedef char           FT_String;
+	typedef signed short   FT_Short;
+	typedef unsigned short FT_UShort;
+	typedef signed int     FT_Int;
+	typedef unsigned int   FT_UInt;
+	typedef signed long    FT_Long;
+	typedef unsigned long  FT_ULong;
+	typedef signed long    FT_Fixed;
+	typedef int            FT_Error;
+
+	typedef struct FT_Matrix_ {
+		FT_Fixed xx, xy;
+		FT_Fixed yx, yy;
+	} FT_Matrix;
+
+	typedef void (*FT_Generic_Finalizer)( void* object );
+
+	typedef struct FT_Generic_ {
+		void* data;
+		FT_Generic_Finalizer finalizer;
+	} FT_Generic;
+
+	typedef signed long FT_Pos;
+
+	typedef struct FT_Vector_ {
+		FT_Pos x;
+		FT_Pos y;
+	} FT_Vector;
+
+	typedef struct FT_BBox_ {
+		FT_Pos xMin, yMin;
+		FT_Pos xMax, yMax;
+	} FT_BBox;
+
+	typedef struct FT_Bitmap_ {
+		unsigned int rows;
+		unsigned int width;
+		int pitch;
+		unsigned char* buffer;
+		unsigned short num_grays;
+		unsigned char pixel_mode;
+		unsigned char palette_mode;
+		void* palette;
+	} FT_Bitmap;
+
+	typedef struct FT_Outline_ {
+		short n_contours;
+		short n_points;
+		FT_Vector* points;
+		char* tags;
+		short* contours;
+		int flags;
+	} FT_Outline;
+
+	typedef int (*FT_Outline_MoveToFunc) ( const FT_Vector* to, void* user );
+	typedef int (*FT_Outline_LineToFunc) ( const FT_Vector* to, void* user );
+	typedef int (*FT_Outline_ConicToFunc)( const FT_Vector* control, const FT_Vector* to, void* user );
+	typedef int (*FT_Outline_CubicToFunc)( const FT_Vector* control1, const FT_Vector* control2, const FT_Vector* to, void* user );
+
+	typedef struct FT_Outline_Funcs_ {
+		FT_Outline_MoveToFunc move_to;
+		FT_Outline_LineToFunc line_to;
+		FT_Outline_ConicToFunc conic_to;
+		FT_Outline_CubicToFunc cubic_to;
+		int shift;
+		FT_Pos delta;
+	} FT_Outline_Funcs;
+
+	typedef enum FT_Glyph_Format_ {
+		FT_GLYPH_FORMAT_NONE = ( ( (unsigned long)0 << 24 ) | ( (unsigned long)0 << 16 ) | ( (unsigned long)0 << 8 ) | (unsigned long)0 ),
+		FT_GLYPH_FORMAT_COMPOSITE = ( ( (unsigned long)'c' << 24 ) | ( (unsigned long)'o' << 16 ) | ( (unsigned long)'m' << 8 ) | (unsigned long)'p' ),
+		FT_GLYPH_FORMAT_BITMAP = ( ( (unsigned long)'b' << 24 ) | ( (unsigned long)'i' << 16 ) | ( (unsigned long)'t' << 8 ) | (unsigned long)'s' ),
+		FT_GLYPH_FORMAT_OUTLINE = ( ( (unsigned long)'o' << 24 ) | ( (unsigned long)'u' << 16 ) | ( (unsigned long)'t' << 8 ) | (unsigned long)'l' ),
+		FT_GLYPH_FORMAT_PLOTTER = ( ( (unsigned long)'p' << 24 ) | ( (unsigned long)'l' << 16 ) | ( (unsigned long)'o' << 8 ) | (unsigned long)'t' )
+	} FT_Glyph_Format;
+
+	typedef struct FT_Glyph_Metrics_ {
+		FT_Pos width;
+		FT_Pos height;
+		FT_Pos horiBearingX;
+		FT_Pos horiBearingY;
+		FT_Pos horiAdvance;
+		FT_Pos vertBearingX;
+		FT_Pos vertBearingY;
+		FT_Pos vertAdvance;
+	} FT_Glyph_Metrics;
+
+	typedef struct FT_Bitmap_Size_ {
+		FT_Short height;
+		FT_Short width;
+		FT_Pos size;
+		FT_Pos x_ppem;
+		FT_Pos y_ppem;
+	} FT_Bitmap_Size;
+
+	typedef struct FT_LibraryRec_ *FT_Library;
+	typedef struct FT_DriverRec_* FT_Driver;
+	typedef struct FT_FaceRec_* FT_Face;
+	typedef struct FT_SizeRec_* FT_Size;
+	typedef struct FT_GlyphSlotRec_* FT_GlyphSlot;
+	typedef struct FT_CharMapRec_* FT_CharMap;
+
+	typedef enum FT_Encoding_ {
+		FT_ENCODING_NONE = ( ( (FT_UInt32)(0) << 24 ) | ( (FT_UInt32)(0) << 16 ) | ( (FT_UInt32)(0) << 8 ) | (FT_UInt32)(0) ),
+		FT_ENCODING_MS_SYMBOL = ( ( (FT_UInt32)('s') << 24 ) | ( (FT_UInt32)('y') << 16 ) | ( (FT_UInt32)('m') << 8 ) | (FT_UInt32)('b') ),
+		FT_ENCODING_UNICODE = ( ( (FT_UInt32)('u') << 24 ) | ( (FT_UInt32)('n') << 16 ) | ( (FT_UInt32)('i') << 8 ) | (FT_UInt32)('c') ),
+		FT_ENCODING_SJIS = ( ( (FT_UInt32)('s') << 24 ) | ( (FT_UInt32)('j') << 16 ) | ( (FT_UInt32)('i') << 8 ) | (FT_UInt32)('s') ),
+		FT_ENCODING_PRC = ( ( (FT_UInt32)('g') << 24 ) | ( (FT_UInt32)('b') << 16 ) | ( (FT_UInt32)(' ') << 8 ) | (FT_UInt32)(' ') ),
+		FT_ENCODING_BIG5 = ( ( (FT_UInt32)('b') << 24 ) | ( (FT_UInt32)('i') << 16 ) | ( (FT_UInt32)('g') << 8 ) | (FT_UInt32)('5') ),
+		FT_ENCODING_WANSUNG = ( ( (FT_UInt32)('w') << 24 ) | ( (FT_UInt32)('a') << 16 ) | ( (FT_UInt32)('n') << 8 ) | (FT_UInt32)('s') ),
+		FT_ENCODING_JOHAB = ( ( (FT_UInt32)('j') << 24 ) | ( (FT_UInt32)('o') << 16 ) | ( (FT_UInt32)('h') << 8 ) | (FT_UInt32)('a') ),
+		FT_ENCODING_GB2312 = FT_ENCODING_PRC,
+		FT_ENCODING_MS_SJIS = FT_ENCODING_SJIS,
+		FT_ENCODING_MS_GB2312 = FT_ENCODING_PRC,
+		FT_ENCODING_MS_BIG5 = FT_ENCODING_BIG5,
+		FT_ENCODING_MS_WANSUNG = FT_ENCODING_WANSUNG,
+		FT_ENCODING_MS_JOHAB = FT_ENCODING_JOHAB,
+		FT_ENCODING_ADOBE_STANDARD = ( ( (FT_UInt32)('A') << 24 ) | ( (FT_UInt32)('D') << 16 ) | ( (FT_UInt32)('O') << 8 ) | (FT_UInt32)('B') ),
+		FT_ENCODING_ADOBE_EXPERT = ( ( (FT_UInt32)('A') << 24 ) | ( (FT_UInt32)('D') << 16 ) | ( (FT_UInt32)('B') << 8 ) | (FT_UInt32)('E') ),
+		FT_ENCODING_ADOBE_CUSTOM = ( ( (FT_UInt32)('A') << 24 ) | ( (FT_UInt32)('D') << 16 ) | ( (FT_UInt32)('B') << 8 ) | (FT_UInt32)('C') ),
+		FT_ENCODING_ADOBE_LATIN_1 = ( ( (FT_UInt32)('l') << 24 ) | ( (FT_UInt32)('a') << 16 ) | ( (FT_UInt32)('t') << 8 ) | (FT_UInt32)('1') ),
+		FT_ENCODING_OLD_LATIN_2 = ( ( (FT_UInt32)('l') << 24 ) | ( (FT_UInt32)('a') << 16 ) | ( (FT_UInt32)('t') << 8 ) | (FT_UInt32)('2') ),
+		FT_ENCODING_APPLE_ROMAN = ( ( (FT_UInt32)('a') << 24 ) | ( (FT_UInt32)('r') << 16 ) | ( (FT_UInt32)('m') << 8 ) | (FT_UInt32)('n') )
+	} FT_Encoding;
+
+	typedef struct FT_CharMapRec_ {
+		FT_Face face;
+		union {
+			FT_Encoding encoding;
+			char _encoding_str[4];
+		};
+		FT_UShort platform_id;
+		FT_UShort encoding_id;
+	} FT_CharMapRec;
+
+	typedef struct FT_Face_InternalRec_* FT_Face_Internal;
+
+	typedef struct FT_FaceRec_ {
+		FT_Long num_faces;
+		FT_Long face_index;
+		FT_Long face_flags;
+		FT_Long style_flags;
+		FT_Long num_glyphs;
+		FT_String* family_name;
+		FT_String* style_name;
+		FT_Int num_fixed_sizes;
+		FT_Bitmap_Size* available_sizes;
+		FT_Int num_charmaps;
+		FT_CharMap* charmaps;
+		FT_Generic generic;
+		FT_BBox bbox;
+		FT_UShort units_per_EM;
+		FT_Short ascender;
+		FT_Short descender;
+		FT_Short height;
+		FT_Short max_advance_width;
+		FT_Short max_advance_height;
+		FT_Short underline_position;
+		FT_Short underline_thickness;
+		FT_GlyphSlot glyph;
+		FT_Size size;
+		FT_CharMap charmap;
+		FT_Driver driver;
+		FT_Generic autohint;
+		void* extensions;
+		FT_Face_Internal internal;
+	} FT_FaceRec;
+
+	typedef struct FT_Size_InternalRec_* FT_Size_Internal;
+
+	typedef struct FT_Size_Metrics_ {
+		FT_UShort x_ppem;
+		FT_UShort y_ppem;
+		FT_Fixed x_scale;
+		FT_Fixed y_scale;
+		FT_Pos ascender;
+		FT_Pos descender;
+		FT_Pos height;
+		FT_Pos max_advance;
+	} FT_Size_Metrics;
+
+	typedef struct FT_SizeRec_ {
+		FT_Face face;
+		FT_Generic generic;
+		FT_Size_Metrics metrics;
+		FT_Size_Internal internal;
+	} FT_SizeRec;
+
+	typedef struct FT_SubGlyphRec_* FT_SubGlyph;
+	typedef struct FT_Slot_InternalRec_* FT_Slot_Internal;
+
+	typedef struct FT_GlyphSlotRec_ {
+		FT_Library library;
+		FT_Face face;
+		FT_GlyphSlot next;
+		FT_UInt reserved;
+		FT_Generic generic;
+		FT_Glyph_Metrics metrics;
+		FT_Fixed linearHoriAdvance;
+		FT_Fixed linearVertAdvance;
+		FT_Vector advance;
+		FT_Glyph_Format format;
+		FT_Bitmap bitmap;
+		FT_Int bitmap_left;
+		FT_Int bitmap_top;
+		FT_Outline outline;
+		FT_UInt num_subglyphs;
+		FT_SubGlyph subglyphs;
+		void* control_data;
+		long control_len;
+		FT_Pos lsb_delta;
+		FT_Pos rsb_delta;
+		void* other;
+		FT_Slot_Internal internal;
+	} FT_GlyphSlotRec;
+
+	FT_Error FT_Init_FreeType( FT_Library *alibrary );
+	FT_Error FT_Done_FreeType( FT_Library library );
+
+	FT_Error FT_New_Face(FT_Library library, const char* filepathname, FT_Long face_index, FT_Face *aface);
+	FT_Error FT_Done_Face(FT_Face face);
+
+	typedef enum FT_Size_Request_Type_ {
+		FT_SIZE_REQUEST_TYPE_NOMINAL,
+		FT_SIZE_REQUEST_TYPE_REAL_DIM,
+		FT_SIZE_REQUEST_TYPE_BBOX,
+		FT_SIZE_REQUEST_TYPE_CELL,
+		FT_SIZE_REQUEST_TYPE_SCALES,
+		FT_SIZE_REQUEST_TYPE_MAX
+	} FT_Size_Request_Type;
+
+	typedef struct FT_Size_RequestRec_ {
+		FT_Size_Request_Type type;
+		FT_Long width;
+		FT_Long height;
+		FT_UInt horiResolution;
+		FT_UInt vertResolution;
+	} FT_Size_RequestRec;
+
+	typedef struct FT_Size_RequestRec_ *FT_Size_Request;
+
+	FT_Error FT_Request_Size(FT_Face face, FT_Size_Request req);
+	FT_Error FT_Load_Glyph(FT_Face face, FT_UInt glyph_index, FT_Int32 load_flags);
+
+	enum {FT_LOAD_DEFAULT = 0x0};
+
+	FT_UInt  FT_Get_Char_Index( FT_Face face, FT_ULong charcode );
+	FT_Long  FT_MulFix( FT_Long a, FT_Long b );
+
+	FT_Error FT_Outline_Decompose     ( FT_Outline* outline, const FT_Outline_Funcs* func_interface, void* user );
+	void     FT_Outline_Transform     ( const FT_Outline* outline, const FT_Matrix* matrix );
+	FT_Error FT_Outline_Embolden      ( FT_Outline* outline, FT_Pos strength );
+
+	// Necessary for the future implementation of the underline and strikeout
+
+	typedef enum FT_Orientation_ {
+		FT_ORIENTATION_TRUETYPE = 0,
+		FT_ORIENTATION_POSTSCRIPT = 1,
+		FT_ORIENTATION_FILL_RIGHT = FT_ORIENTATION_TRUETYPE,
+		FT_ORIENTATION_FILL_LEFT = FT_ORIENTATION_POSTSCRIPT,
+		FT_ORIENTATION_NONE
+	} FT_Orientation;
+
+	FT_Orientation FT_Outline_Get_Orientation( FT_Outline* outline );
+
+	typedef enum  FT_Sfnt_Tag_ {
+		FT_SFNT_HEAD,
+		FT_SFNT_MAXP,
+		FT_SFNT_OS2,
+		FT_SFNT_HHEA,
+		FT_SFNT_VHEA,
+		FT_SFNT_POST,
+		FT_SFNT_PCLT,
+
+		FT_SFNT_MAX
+	} FT_Sfnt_Tag;
+
+	void* FT_Get_Sfnt_Table( FT_Face face, FT_Sfnt_Tag tag );
+
+	typedef struct  TT_OS2_ {
+		FT_UShort  version;                /* 0x0001 - more or 0xFFFF */
+		FT_Short   xAvgCharWidth;
+		FT_UShort  usWeightClass;
+		FT_UShort  usWidthClass;
+		FT_UShort  fsType;
+		FT_Short   ySubscriptXSize;
+		FT_Short   ySubscriptYSize;
+		FT_Short   ySubscriptXOffset;
+		FT_Short   ySubscriptYOffset;
+		FT_Short   ySuperscriptXSize;
+		FT_Short   ySuperscriptYSize;
+		FT_Short   ySuperscriptXOffset;
+		FT_Short   ySuperscriptYOffset;
+		FT_Short   yStrikeoutSize;
+		FT_Short   yStrikeoutPosition;
+		FT_Short   sFamilyClass;
+
+		FT_Byte    panose[10];
+
+		FT_ULong   ulUnicodeRange1;        /* Bits 0-31   */
+		FT_ULong   ulUnicodeRange2;        /* Bits 32-63  */
+		FT_ULong   ulUnicodeRange3;        /* Bits 64-95  */
+		FT_ULong   ulUnicodeRange4;        /* Bits 96-127 */
+
+		FT_Char    achVendID[4];
+
+		FT_UShort  fsSelection;
+		FT_UShort  usFirstCharIndex;
+		FT_UShort  usLastCharIndex;
+		FT_Short   sTypoAscender;
+		FT_Short   sTypoDescender;
+		FT_Short   sTypoLineGap;
+		FT_UShort  usWinAscent;
+		FT_UShort  usWinDescent;
+
+		/* only version 1 and higher: */
+
+		FT_ULong   ulCodePageRange1;       /* Bits 0-31   */
+		FT_ULong   ulCodePageRange2;       /* Bits 32-63  */
+
+		/* only version 2 and higher: */
+
+		FT_Short   sxHeight;
+		FT_Short   sCapHeight;
+		FT_UShort  usDefaultChar;
+		FT_UShort  usBreakChar;
+		FT_UShort  usMaxContext;
+
+		/* only version 5 and higher: */
+
+		FT_UShort  usLowerOpticalPointSize;       /* in twips (1/20 points) */
+		FT_UShort  usUpperOpticalPointSize;       /* in twips (1/20 points) */
+	} TT_OS2;
+]]
+
+-- Set C definitions for fontconfig
+cdef [[
+	typedef void FcConfig;
+	typedef void FcPattern;
 	typedef struct{
-		guint ref_count;
-		int ascent;
-		int descent;
-		int approximate_char_width;
-		int approximate_digit_width;
-		int underline_position;
-		int underline_thickness;
-		int strikethrough_position;
-		int strikethrough_thickness;
-	}PangoFontMetrics;
-	typedef void PangoLanguage;
+		int nobject;
+		int sobject;
+		const char** objects;
+	}FcObjectSet;
 	typedef struct{
-		int x;
-		int y;
-		int width;
-		int height;
-	}PangoRectangle;
+		int nfont;
+		int sfont;
+		FcPattern** fonts;
+	}FcFontSet;
 	typedef enum{
-		CAIRO_STATUS_SUCCESS = 0
-	}cairo_status_t;
-	typedef enum{
-		CAIRO_PATH_MOVE_TO,
-		CAIRO_PATH_LINE_TO,
-		CAIRO_PATH_CURVE_TO,
-		CAIRO_PATH_CLOSE_PATH
-	}cairo_path_data_type_t;
-	typedef union{
-		struct{
-			cairo_path_data_type_t type;
-			int length;
-		}header;
-		struct{
-			double x, y;
-		}point;
-	}cairo_path_data_t;
-	typedef struct{
-		cairo_status_t status;
-		cairo_path_data_t* data;
-		int num_data;
-	}cairo_path_t;
-	cairo_surface_t* cairo_image_surface_create(cairo_format_t, int, int);
-	void cairo_surface_destroy(cairo_surface_t*);
-	cairo_t* cairo_create(cairo_surface_t*);
-	void cairo_destroy(cairo_t*);
-	PangoLayout* pango_cairo_create_layout(cairo_t*);
-	void g_object_unref(gpointer);
-	PangoFontDescription* pango_font_description_new(void);
-	void pango_font_description_free(PangoFontDescription*);
-	void pango_font_description_set_family(PangoFontDescription*, const char*);
-	void pango_font_description_set_weight(PangoFontDescription*, PangoWeight);
-	void pango_font_description_set_style(PangoFontDescription*, PangoStyle);
-	void pango_font_description_set_absolute_size(PangoFontDescription*, double);
-	void pango_layout_set_font_description(PangoLayout*, PangoFontDescription*);
-	PangoAttrList* pango_attr_list_new(void);
-	void pango_attr_list_unref(PangoAttrList*);
-	void pango_attr_list_insert(PangoAttrList*, PangoAttribute*);
-	PangoAttribute* pango_attr_underline_new(PangoUnderline);
-	PangoAttribute* pango_attr_strikethrough_new(gboolean);
-	PangoAttribute* pango_attr_letter_spacing_new(int);
-	void pango_layout_set_attributes(PangoLayout*, PangoAttrList*);
-	PangoContext* pango_layout_get_context(PangoLayout*);
-	const PangoFontDescription* pango_layout_get_font_description(PangoLayout*);
-	PangoFontMetrics* pango_context_get_metrics(PangoContext*, const PangoFontDescription*, PangoLanguage*);
-	void pango_font_metrics_unref(PangoFontMetrics*);
-	int pango_font_metrics_get_ascent(PangoFontMetrics*);
-	int pango_font_metrics_get_descent(PangoFontMetrics*);
-	int pango_layout_get_spacing(PangoLayout*);
-	void pango_layout_set_text(PangoLayout*, const char*, int);
-	void pango_layout_get_pixel_extents(PangoLayout*, PangoRectangle*, PangoRectangle*);
-	void cairo_save(cairo_t*);
-	void cairo_restore(cairo_t*);
-	void cairo_scale(cairo_t*, double, double);
-	void pango_cairo_layout_path(cairo_t*, PangoLayout*);
-	void cairo_new_path(cairo_t*);
-	cairo_path_t* cairo_copy_path(cairo_t*);
-	void cairo_path_destroy(cairo_path_t*);
+		FcResultMatch,
+		FcResultNoMatch,
+		FcResultTypeMismatch,
+		FcResultNoId,
+		FcResultOutOfMemory
+	}FcResult;
+	typedef unsigned char FcChar8;
+	typedef int FcBool;
+
+	FcConfig* FcInitLoadConfigAndFonts(void);
+	FcPattern* FcPatternCreate(void);
+	void FcPatternDestroy(FcPattern*);
+	FcObjectSet* FcObjectSetBuild(const char*, ...);
+	void FcObjectSetDestroy(FcObjectSet*);
+	FcFontSet* FcFontList(FcConfig*, FcPattern*, FcObjectSet*);
+	void FcFontSetDestroy(FcFontSet*);
+	FcResult FcPatternGetString(FcPattern*, const char*, int, FcChar8**);
+	FcResult FcPatternGetBool(FcPattern*, const char*, int, FcBool*);
 ]]
 
 import Math from require "ILL.ILL.Math"
+import UTF8 from require "ILL.ILL.UTF8"
 import Init from require "ILL.ILL.Font.Init"
 
-class PangoCairo extends Init
+-- https://github.com/libass/libass/blob/17cb8da964c852835881658d0d7af35ef2d92f9e/libass/ass_font.c#L502
+set_font_metrics = (face) ->
+    -- Mimicking GDI's behavior for asc/desc/height.
+    -- These fields are (apparently) sometimes used for signed values,
+    -- despite being unsigned in the spec.
+    os2 = ffi.cast "TT_OS2*", C.FT_Get_Sfnt_Table face, C.FT_SFNT_OS2
+    if os2 and (tonumber(os2.usWinAscent) + tonumber(os2.usWinDescent) != 0)
+        face.ascender = tonumber os2.usWinAscent
+        face.descender = -tonumber os2.usWinDescent
+        face.height = face.ascender - face.descender
 
-	LIBASS_FONTHACK: true
+    -- If we didn't have usable Win values in the OS/2 table,
+    -- then the values from FreeType will still be in these fields.
+    -- It'll use either the OS/2 typo metrics or the hhea ones.
+    -- If the font has typo metrics but FreeType didn't use them
+    -- (either old FT or USE_TYPO_METRICS not set), we'll try those.
+    -- In the case of a very broken font that has none of those options,
+    -- we fall back on using face.bbox.
+    -- Anything without valid OS/2 Win values isn't supported by VSFilter,
+    -- so at this point compatibility's out the window and we're just
+    -- trying to render _something_ readable.
+    if face.ascender - face.descender == 0 or face.height == 0
+        if os2 and (tonumber(os2.sTypoAscender) - tonumber(os2.sTypoDescender) != 0)
+            face.ascender = tonumber os2.sTypoAscender
+            face.descender = tonumber os2.sTypoDescender
+            face.height = face.ascender - face.descender
+        else
+            face.ascender = tonumber face.bbox.yMax
+            face.descender = tonumber face.bbox.yMin
+            face.height = face.ascender - face.descender
+
+-- https://github.com/libass/libass/blob/17cb8da964c852835881658d0d7af35ef2d92f9e/libass/ass_font.c#L502
+ass_face_set_size = (face, size) ->
+    rq = ffi.new "FT_Size_RequestRec"
+    ffi.C.memset rq, 0, ffi.sizeof rq
+    rq.type = ffi.C.FT_SIZE_REQUEST_TYPE_REAL_DIM
+    rq.width = 0
+    rq.height = size * FONT_UPSCALE
+    rq.horiResolution = 0
+    rq.vertResolution = 0
+    freetype.FT_Request_Size face, rq
+
+-- https://github.com/libass/libass/blob/17cb8da964c852835881658d0d7af35ef2d92f9e/libass/ass_font.c#L502
+ass_font_get_asc_desc = (face) ->
+	y_scale = face.size.metrics.y_scale
+	ascender = freetype.FT_MulFix face.ascender, y_scale
+	descender = freetype.FT_MulFix -face.descender, y_scale
+	return tonumber(ascender) / FONT_UPSCALE, tonumber(descender) / FONT_UPSCALE
+
+ass_face_get_weight = (face) ->
+    os2 = ffi.cast "TT_OS2*", freetype.FT_Get_Sfnt_Table face, C.FT_SFNT_OS2
+    os2Weight = os2 and tonumber(os2.usWeightClass) or 0
+    styleFlags = tonumber face.style_flags
+    if os2Weight == 0
+        return 300 * (styleFlags != 0x1) + 400
+    elseif os2Weight >= 1 and os2Weight <= 9
+        return os2Weight * 100
+    else
+        return os2Weight
+
+-- https://github.com/libass/libass/blob/ffe070bbfbc77e3ab731aac5ec24fa63aeb461af/libass/ass_font.c#L561C1-L572C2
+ass_glyph_embolden = (slot) ->
+    if slot.format != ffi.C.FT_GLYPH_FORMAT_OUTLINE
+        return
+    str = freetype.FT_MulFix(slot.face.units_per_EM, slot.face.size.metrics.y_scale) / FONT_UPSCALE
+    freetype.FT_Outline_Embolden slot.outline, str
+	return
+
+-- https://github.com/libass/libass/blob/ffe070bbfbc77e3ab731aac5ec24fa63aeb461af/libass/ass_font.c#L577
+ass_glyph_italicize = (slot) ->
+    xfrm = ffi.new "FT_Matrix", {
+        xx: 0x10000
+        xy: 0x05700
+        yx: 0x00000
+        yy: 0x10000
+    }
+    freetype.FT_Outline_Transform slot.outline, xfrm
+	return
+
+class FreeType extends Init
 
 	init: =>
-		-- Check whether or not the pangocairo library was loaded
-		unless has_pangocairo
-			error "pangocairo library couldn't be loaded", 2
+		unless has_freetype
+			error "freetype library couldn't be loaded", 2
 
-		-- Create surface, context & layout
-		surface = pangocairo.cairo_image_surface_create C.CAIRO_FORMAT_A8, 1, 1
-		@context = pangocairo.cairo_create surface
+		-- Check that the font has a bold and italic variant if necessary
+		@found_bold, @found_italic = false, false
 
-		local layout
-		layout = gc pangocairo.pango_cairo_create_layout(@context), ->
-			pangocairo.g_object_unref layout
-			pangocairo.cairo_destroy @context
-			pangocairo.cairo_surface_destroy surface
-			return
+		-- Get the font path
+		font_path = @getFontPath!
+		unless font_path
+			error "Couldn't find #{@family} among your fonts"
 
-		-- Set font to layout
-		font_desc = gc pangocairo.pango_font_description_new!, pangocairo.pango_font_description_free
-		pangocairo.pango_font_description_set_family font_desc, @family
-		pangocairo.pango_font_description_set_weight font_desc, @bold and C.PANGO_WEIGHT_BOLD or C.PANGO_WEIGHT_NORMAL
-		pangocairo.pango_font_description_set_style font_desc, @italic and C.PANGO_STYLE_ITALIC or C.PANGO_STYLE_NORMAL
-		pangocairo.pango_font_description_set_absolute_size font_desc, @size * C.PANGO_SCALE * FONT_UPSCALE
-		pangocairo.pango_layout_set_font_description layout, font_desc
+		-- Init FreeType
+		@library = ffi.new "FT_Library[1]"
+		err = freetype.FT_Init_FreeType @library
 
-		attr = gc pangocairo.pango_attr_list_new!, pangocairo.pango_attr_list_unref
-		pangocairo.pango_attr_list_insert attr, pangocairo.pango_attr_underline_new @underline and C.PANGO_UNDERLINE_SINGLE or C.PANGO_UNDERLINE_NONE
-		pangocairo.pango_attr_list_insert attr, pangocairo.pango_attr_strikethrough_new @strikeout
-		pangocairo.pango_attr_list_insert attr, pangocairo.pango_attr_letter_spacing_new @hspace * C.PANGO_SCALE * FONT_UPSCALE
-		pangocairo.pango_layout_set_attributes layout, attr
+		if err != 0
+			error "Failed to load freetype library"
 
-		-- Scale factor for resulting font data
-		if PangoCairo.LIBASS_FONTHACK 
-			metrics = gc pangocairo.pango_context_get_metrics(pangocairo.pango_layout_get_context(layout), pangocairo.pango_layout_get_font_description(layout), nil), pangocairo.pango_font_metrics_unref
-			@fonthack_scale = @size / ((pangocairo.pango_font_metrics_get_ascent(metrics) + pangocairo.pango_font_metrics_get_descent(metrics)) / C.PANGO_SCALE * FONT_DOWNSCALE)
-		else
-			@fonthack_scale = 1
+		-- Load font face
+		@face = ffi.new "FT_Face[1]"
+		err = freetype.FT_New_Face @library[0], font_path, 0, @face
 
-		@layout = layout
-		@offset_x = @xscale * @fonthack_scale
-		@offset_y = @yscale * @fonthack_scale
+		if err != 0
+			error "Failed to load freetype face"
+
+		set_font_metrics @face[0]
+		ass_face_set_size @face[0], @size
+		@ascender, @descender = ass_font_get_asc_desc @face[0]
+		@height = @ascender + @descender
+		@weight = tonumber ass_face_get_weight @face[0]
+
+	-- Callback to access the glyphs for each character
+	callBackChars: (text, callback) =>
+		face_size = @face[0].size.face
+		width, height = 0, 0
+		for ci, char in UTF8(text)\chars!
+			glyph_index = freetype.FT_Get_Char_Index face_size, UTF8.charcodepoint char
+			err = freetype.FT_Load_Glyph face_size, glyph_index, ffi.C.FT_LOAD_DEFAULT
+			if err != 0
+				error "Failed to load the freetype glyph", 2
+			callback ci, char, face_size.glyph
+		return true
 
 	-- Get font metrics
 	getMetrics: =>
-		metrics = gc pangocairo.pango_context_get_metrics(pangocairo.pango_layout_get_context(@layout), pangocairo.pango_layout_get_font_description(@layout), nil), pangocairo.pango_font_metrics_unref
-		ascent = pangocairo.pango_font_metrics_get_ascent(metrics) / C.PANGO_SCALE * FONT_DOWNSCALE
-		descent = pangocairo.pango_font_metrics_get_descent(metrics) / C.PANGO_SCALE * FONT_DOWNSCALE
 		{
-			height: (ascent + descent) * @offset_y
-			ascent: ascent * @offset_y
-			descent: descent * @offset_y
-			internal_leading: 0
-			external_leading: pangocairo.pango_layout_get_spacing(@layout) / C.PANGO_SCALE * FONT_DOWNSCALE * @offset_y
+			ascent: @ascender * @yscale
+			descent: @descender * @yscale
+			height: @height * @yscale
+			internal_leading: @ascender - @descender - (@face[0].units_per_EM / FONT_UPSCALE)
+			external_leading: 0
 		}
 
 	-- Get text extents
 	getTextExtents: (text) =>
-		-- Set text to layout
-		pangocairo.pango_layout_set_text @layout, text, -1
-		-- Get text extents with this font
-		rect = new "PangoRectangle[1]"
-		pangocairo.pango_layout_get_pixel_extents @layout, nil, rect
-		{:width, :height} = rect[0]
+		face_size, width = @face[0].size.face, 0
+		@callBackChars text, (ci, char, glyph) ->
+			width += tonumber(glyph.metrics.horiAdvance) + (ci > 1 and @hspace * FONT_UPSCALE or 0)
 		{
-			width: width * FONT_DOWNSCALE * @offset_x
-			height: height * FONT_DOWNSCALE * @offset_y
+			width: width / FONT_UPSCALE
+			height: @height * @yscale
 		}
 
 	-- Converts text to ASS shape
-	getTextToShape: (text, precision = 3) =>
-		-- Initialize shape as table
-		shape, insert, round = {}, table.insert, Math.round
+	getTextToShape: (text) =>
+		paths, x = {}, 0
+		@callBackChars text, (ci, char, glyph) ->
+			build, path = {}, {}
+			-- FIXME
+			if @bold and @weight < 700 and not @found_bold
+				ass_glyph_embolden glyph
+			if @italic and not @found_italic
+				ass_glyph_italicize glyph
+			-- move the outline points to the correct position
+			for i = 0, glyph.outline.n_points - 1
+				glyph.outline.points[i].x += x
+				glyph.outline.points[i].y = (glyph.outline.points[i].y * -1) + @ascender * FONT_UPSCALE
+			-- callbacks for point decomposition
+			move_to = (to, user) ->
+				table.insert build, {"m", tonumber(to.x) / FONT_UPSCALE, tonumber(to.y) / FONT_UPSCALE}
+				return 0
+			line_to = (to, user) ->
+				table.insert build, {"l", tonumber(to.x) / FONT_UPSCALE, tonumber(to.y) / FONT_UPSCALE}
+				return 0
+			conic_to = (control, to, user) ->
+				table.insert build, {"c", tonumber(control.x) / FONT_UPSCALE, tonumber(control.y) / FONT_UPSCALE, tonumber(to.x) / FONT_UPSCALE, tonumber(to.y) / FONT_UPSCALE}
+				return 0
+			cubic_to = (control1, control2, to, user) ->
+				table.insert build, {"b", tonumber(control1.x) / FONT_UPSCALE, tonumber(control1.y) / FONT_UPSCALE, tonumber(control2.x) / FONT_UPSCALE, tonumber(control2.y) / FONT_UPSCALE, tonumber(to.x) / FONT_UPSCALE, tonumber(to.y) / FONT_UPSCALE}
+				return 0
+			-- Define outline functions
+			outline_funcs = ffi.new "FT_Outline_Funcs[1]"
+			outline_funcs[0].move_to = ffi.cast "FT_Outline_MoveToFunc", move_to
+			outline_funcs[0].line_to = ffi.cast "FT_Outline_LineToFunc", line_to
+			outline_funcs[0].conic_to = ffi.cast "FT_Outline_ConicToFunc", conic_to
+			outline_funcs[0].cubic_to = ffi.cast "FT_Outline_CubicToFunc", cubic_to
+			-- Decompose outline
+			err = freetype.FT_Outline_Decompose glyph.outline, outline_funcs, nil
+			if err != 0
+				error "Failed to load the freetype outline decompose", 2
+			-- Converts quadratic curves to bezier
+			for i = 1, #build
+				val = build[i]
+				if val[1] == "c"
+					lst = build[i - 1]
+					p1x = lst[#lst - 1]
+					p1y = lst[#lst]
+					p4x = val[4]
+					p4y = val[5]
+					p2x = p1x + 2/3 * (val[2] - p1x)
+					p2y = p1y + 2/3 * (val[3] - p1y)
+					p3x = p4x + 2/3 * (val[2] - p4x)
+					p3y = p4y + 2/3 * (val[3] - p4y)
+					build[i] = {"b", p2x, p2y, p3x, p3y, p4x, p4y}
+				path[i] = table.concat build[i], " "
+			table.insert paths, table.concat path, " "
+			x += tonumber(glyph.metrics.horiAdvance) + (@hspace * FONT_UPSCALE)
+		return table.concat paths, " "
 
-		-- Set text path to layout
-		pangocairo.cairo_save @context
-		pangocairo.cairo_scale @context, FONT_DOWNSCALE * @offset_x, FONT_DOWNSCALE * @offset_y
-		pangocairo.pango_layout_set_text @layout, text, -1
-		pangocairo.pango_cairo_layout_path @context, @layout
-		pangocairo.cairo_restore @context
+	getFonts: =>
+		-- Check whether or not the fontconfig library was loaded
+		unless has_fontconfig
+			error "fontconfig library couldn't be loaded", 2
+		-- Get fonts list from fontconfig
+		fontset = ffi.gc fontconfig.FcFontList(fontconfig.FcInitLoadConfigAndFonts(), ffi.gc(fontconfig.FcPatternCreate(), fontconfig.FcPatternDestroy), ffi.gc(fontconfig.FcObjectSetBuild("family", "fullname", "style", "outline", "file", nil), fontconfig.FcObjectSetDestroy)),fontconfig.FcFontSetDestroy
+		local font, family, fullname, style, outline, file, cstr, cbool
+		cstr = ffi.new "FcChar8*[1]"
+		cbool = ffi.new "FcBool[1]"
+		fonts = {n: 0}
+		for i = 0, fontset[0].nfont - 1
+			font = fontset[0].fonts[i]
+			family, fullname, style, outline, file = nil, nil, nil, nil, nil
+			if fontconfig.FcPatternGetString(font, "family", 0, cstr) == ffi.C.FcResultMatch
+				family = ffi.string cstr[0]
+			if fontconfig.FcPatternGetString(font, "fullname", 0, cstr) == ffi.C.FcResultMatch
+				fullname = ffi.string cstr[0]
+			if fontconfig.FcPatternGetString(font, "style", 0, cstr) == ffi.C.FcResultMatch
+				style = ffi.string cstr[0]
+			if fontconfig.FcPatternGetBool(font, "outline", 0, cbool) == ffi.C.FcResultMatch
+				outline = cbool[0]
+			if fontconfig.FcPatternGetString(font, "file", 0, cstr) == ffi.C.FcResultMatch
+				file = ffi.string cstr[0]
+			if family and fullname and style and outline
+				fonts.n += 1
+				fonts[fonts.n] = {
+					name: family,
+					longname: fullname,
+					style: style,
+					type: outline == 0 and "Raster" or "Outline",
+					path: file
+				}
+		-- Order fonts by name & style
+		table.sort fonts, (font1, font2) ->
+			if font1.name == font2.name
+				return font1.style < font2.style
+			else
+				return font1.name < font2.name
+		-- Return collected fonts
+		return fonts
 
-		-- Convert path to shape
-		path = gc(pangocairo.cairo_copy_path(@context), pangocairo.cairo_path_destroy)[0]
-		if path.status == C.CAIRO_STATUS_SUCCESS
-			i, curr_type, last_type = 0
-			while i < path.num_data
-				curr_type = path.data[i].header.type
-				switch curr_type
-					when C.CAIRO_PATH_MOVE_TO
-						if curr_type != last_type
-							insert shape, "m"
-						{:x, :y} = path.data[i + 1].point
-						insert shape, round x, precision
-						insert shape, round y, precision
-					when C.CAIRO_PATH_LINE_TO
-						if curr_type != last_type
-							insert shape, "l"
-						{:x, :y} = path.data[i + 1].point
-						insert shape, round x, precision
-						insert shape, round y, precision
-					when C.CAIRO_PATH_CURVE_TO
-						if curr_type != last_type
-							insert shape, "b"
-						{:x, :y} = path.data[i + 1].point
-						insert shape, round x, precision
-						insert shape, round y, precision
-						{:x, :y} = path.data[i + 2].point
-						insert shape, round x, precision
-						insert shape, round y, precision
-						{:x, :y} = path.data[i + 3].point
-						insert shape, round x, precision
-						insert shape, round y, precision
-				last_type = curr_type
-				i += path.data[i].header.length
-		pangocairo.cairo_new_path @context
-		return table.concat shape, " "
+	-- Gets the directory path of the fonts
+	getFontPath: =>
+		i, font_variants, fonts = 1, {}, @getFonts!
+		-- checks if the font has a certain type
+		find_font_path_by_type_single = (fonts, font_type) ->
+			for font in *fonts
+				if font.style\lower! == font_type
+					return font.path
+		-- checks if the font has certain types
+		find_font_path_by_type_multi = (fonts, ...) ->
+			font_types = {...}
+			check_and = (font_style) ->
+				for font_type in *font_types
+					unless font_style\match font_type
+						return false
+				return true
+			for font in *fonts
+				if check_and font.style\lower!
+					return font.path
+			return false
+		-- searches for the font path among all the system fonts
+		while i <= #fonts
+			if fonts[i].name == @family
+				while fonts[i].name == @family
+					table.insert font_variants, fonts[i]
+					i += 1
+				font_variants_len = #font_variants
+				if font_variants_len > 1
+					if @bold and @italic
+						if path = find_font_path_by_type_multi font_variants, "bold", "italic"
+							@found_bold, @found_italic = true, true
+							return path
+						if path = find_font_path_by_type_multi font_variants, "bold", "oblique"
+							@found_bold, @found_italic = true, true
+							return path
+					elseif @bold and not @italic
+						if path = find_font_path_by_type_single font_variants, "bold"
+							@found_bold = true
+							return path
+					elseif not @bold and @italic
+						if path = find_font_path_by_type_single font_variants, "italic"
+							@found_italic = true
+							return path
+					else
+						return font_variants[font_variants_len].path
+				else
+					return font_variants[1].path
+				break
+			i += 1
+		return false
 
-{:PangoCairo}
+	-- free memory
+	free: =>
+		freetype.FT_Done_Face @face[0]
+		freetype.FT_Done_FreeType @library[0]
+
+{:FreeType}
