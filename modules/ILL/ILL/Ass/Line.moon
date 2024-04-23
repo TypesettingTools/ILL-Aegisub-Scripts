@@ -1,7 +1,7 @@
 -- https://github.com/Aegisub/Aegisub/blob/master/automation/include/karaskel-auto4.lua
 
+-- Uses WinGDI and FreeType to capture metrics
 -- This is a copy of "karaskel-auto4.lua" in order to further explore the metrics
--- provided by the Aegisub API
 
 import Aegi   from require "ILL.ILL.Aegi"
 import Math   from require "ILL.ILL.Math"
@@ -75,10 +75,6 @@ class Line
 				for name in *{"an", "pos", "move", "org", "fad", "fade"}
 					if value = .reset.data[name]
 						.data[name] = value
-
-			-- resizes the font size value according to the set ratio
-			if .ratio
-				.data.fontsize *= .ratio
 
 			-- if it's a shape, this information are irrelevant
 			unless .isShape

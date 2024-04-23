@@ -357,22 +357,21 @@ cdef [[
 		int nobject;
 		int sobject;
 		const char** objects;
-	}FcObjectSet;
+	} FcObjectSet;
 	typedef struct{
 		int nfont;
 		int sfont;
 		FcPattern** fonts;
-	}FcFontSet;
+	} FcFontSet;
 	typedef enum{
-		FcResultMatch,
-		FcResultNoMatch,
-		FcResultTypeMismatch,
-		FcResultNoId,
-		FcResultOutOfMemory
-	}FcResult;
+		FcResultMatchILL,
+		FcResultNoMatchILL,
+		FcResultTypeMismatchILL,
+		FcResultNoIdILL,
+		FcResultOutOfMemoryILL
+	} FcResult;
 	typedef unsigned char FcChar8;
 	typedef int FcBool;
-
 	FcConfig* FcInitLoadConfigAndFonts(void);
 	FcPattern* FcPatternCreate(void);
 	void FcPatternDestroy(FcPattern*);
@@ -388,84 +387,83 @@ import Math from require "ILL.ILL.Math"
 import UTF8 from require "ILL.ILL.UTF8"
 import Init from require "ILL.ILL.Font.Init"
 
--- https://github.com/libass/libass/blob/17cb8da964c852835881658d0d7af35ef2d92f9e/libass/ass_font.c#L502
+-- https://github.com/libass/libass/blob/db83d6770ba11cb9ef72f4a9de7a0e2b1dd7baa3/libass/ass_font.c#L277
 set_font_metrics = (face) ->
-    -- Mimicking GDI's behavior for asc/desc/height.
-    -- These fields are (apparently) sometimes used for signed values,
-    -- despite being unsigned in the spec.
-    os2 = ffi.cast "TT_OS2*", C.FT_Get_Sfnt_Table face, C.FT_SFNT_OS2
-    if os2 and (tonumber(os2.usWinAscent) + tonumber(os2.usWinDescent) != 0)
-        face.ascender = tonumber os2.usWinAscent
-        face.descender = -tonumber os2.usWinDescent
-        face.height = face.ascender - face.descender
+	-- Mimicking GDI's behavior for asc/desc/height.
+	-- These fields are (apparently) sometimes used for signed values,
+	-- despite being unsigned in the spec.
+	os2 = ffi.cast "TT_OS2*", C.FT_Get_Sfnt_Table face, C.FT_SFNT_OS2
+	if os2 and (tonumber(os2.usWinAscent) + tonumber(os2.usWinDescent) != 0)
+		face.ascender = tonumber os2.usWinAscent
+		face.descender = -tonumber os2.usWinDescent
+		face.height = face.ascender - face.descender
 
-    -- If we didn't have usable Win values in the OS/2 table,
-    -- then the values from FreeType will still be in these fields.
-    -- It'll use either the OS/2 typo metrics or the hhea ones.
-    -- If the font has typo metrics but FreeType didn't use them
-    -- (either old FT or USE_TYPO_METRICS not set), we'll try those.
-    -- In the case of a very broken font that has none of those options,
-    -- we fall back on using face.bbox.
-    -- Anything without valid OS/2 Win values isn't supported by VSFilter,
-    -- so at this point compatibility's out the window and we're just
-    -- trying to render _something_ readable.
-    if face.ascender - face.descender == 0 or face.height == 0
-        if os2 and (tonumber(os2.sTypoAscender) - tonumber(os2.sTypoDescender) != 0)
-            face.ascender = tonumber os2.sTypoAscender
-            face.descender = tonumber os2.sTypoDescender
-            face.height = face.ascender - face.descender
-        else
-            face.ascender = tonumber face.bbox.yMax
-            face.descender = tonumber face.bbox.yMin
-            face.height = face.ascender - face.descender
+	-- If we didn't have usable Win values in the OS/2 table,
+	-- then the values from FreeType will still be in these fields.
+	-- It'll use either the OS/2 typo metrics or the hhea ones.
+	-- If the font has typo metrics but FreeType didn't use them
+	-- (either old FT or USE_TYPO_METRICS not set), we'll try those.
+	-- In the case of a very broken font that has none of those options,
+	-- we fall back on using face.bbox.
+	-- Anything without valid OS/2 Win values isn't supported by VSFilter,
+	-- so at this point compatibility's out the window and we're just
+	-- trying to render _something_ readable.
+	if face.ascender - face.descender == 0 or face.height == 0
+		if os2 and (tonumber(os2.sTypoAscender) - tonumber(os2.sTypoDescender) != 0)
+			face.ascender = tonumber os2.sTypoAscender
+			face.descender = tonumber os2.sTypoDescender
+			face.height = face.ascender - face.descender
+		else
+			face.ascender = tonumber face.bbox.yMax
+			face.descender = tonumber face.bbox.yMin
+			face.height = face.ascender - face.descender
 
 -- https://github.com/libass/libass/blob/17cb8da964c852835881658d0d7af35ef2d92f9e/libass/ass_font.c#L502
 ass_face_set_size = (face, size) ->
-    rq = ffi.new "FT_Size_RequestRec"
-    ffi.C.memset rq, 0, ffi.sizeof rq
-    rq.type = ffi.C.FT_SIZE_REQUEST_TYPE_REAL_DIM
-    rq.width = 0
-    rq.height = size * FONT_UPSCALE
-    rq.horiResolution = 0
-    rq.vertResolution = 0
-    freetype.FT_Request_Size face, rq
+	rq = ffi.new "FT_Size_RequestRec"
+	ffi.C.memset rq, 0, ffi.sizeof rq
+	rq.type = ffi.C.FT_SIZE_REQUEST_TYPE_REAL_DIM
+	rq.width = 0
+	rq.height = size * FONT_UPSCALE
+	rq.horiResolution = 0
+	rq.vertResolution = 0
+	freetype.FT_Request_Size face, rq
 
--- https://github.com/libass/libass/blob/17cb8da964c852835881658d0d7af35ef2d92f9e/libass/ass_font.c#L502
+-- https://github.com/libass/libass/blob/db83d6770ba11cb9ef72f4a9de7a0e2b1dd7baa3/libass/ass_font.c#L502
 ass_font_get_asc_desc = (face) ->
 	y_scale = face.size.metrics.y_scale
 	ascender = freetype.FT_MulFix face.ascender, y_scale
 	descender = freetype.FT_MulFix -face.descender, y_scale
 	return tonumber(ascender) / FONT_UPSCALE, tonumber(descender) / FONT_UPSCALE
 
+-- https://github.com/libass/libass/blob/db83d6770ba11cb9ef72f4a9de7a0e2b1dd7baa3/libass/ass_font.c#L516
 ass_face_get_weight = (face) ->
-    os2 = ffi.cast "TT_OS2*", freetype.FT_Get_Sfnt_Table face, C.FT_SFNT_OS2
-    os2Weight = os2 and tonumber(os2.usWeightClass) or 0
-    styleFlags = tonumber face.style_flags
-    if os2Weight == 0
-        return 300 * (styleFlags != 0x1) + 400
-    elseif os2Weight >= 1 and os2Weight <= 9
-        return os2Weight * 100
-    else
-        return os2Weight
+	os2 = ffi.cast "TT_OS2*", freetype.FT_Get_Sfnt_Table face, C.FT_SFNT_OS2
+	os2Weight = os2 and tonumber(os2.usWeightClass) or 0
+	styleFlags = tonumber face.style_flags
+	if os2Weight == 0
+		return 300 * (styleFlags != 0x1) + 400
+	elseif os2Weight >= 1 and os2Weight <= 9
+		return os2Weight * 100
+	else
+		return os2Weight
 
--- https://github.com/libass/libass/blob/ffe070bbfbc77e3ab731aac5ec24fa63aeb461af/libass/ass_font.c#L561C1-L572C2
+-- https://github.com/libass/libass/blob/db83d6770ba11cb9ef72f4a9de7a0e2b1dd7baa3/libass/ass_font.c#L561
 ass_glyph_embolden = (slot) ->
-    if slot.format != ffi.C.FT_GLYPH_FORMAT_OUTLINE
-        return
-    str = freetype.FT_MulFix(slot.face.units_per_EM, slot.face.size.metrics.y_scale) / FONT_UPSCALE
-    freetype.FT_Outline_Embolden slot.outline, str
-	return
+	if slot.format != ffi.C.FT_GLYPH_FORMAT_OUTLINE
+		return
+	str = freetype.FT_MulFix(slot.face.units_per_EM, slot.face.size.metrics.y_scale) / FONT_UPSCALE
+	freetype.FT_Outline_Embolden slot.outline, str
 
--- https://github.com/libass/libass/blob/ffe070bbfbc77e3ab731aac5ec24fa63aeb461af/libass/ass_font.c#L577
+-- https://github.com/libass/libass/blob/db83d6770ba11cb9ef72f4a9de7a0e2b1dd7baa3/libass/ass_font.c#L577
 ass_glyph_italicize = (slot) ->
-    xfrm = ffi.new "FT_Matrix", {
-        xx: 0x10000
-        xy: 0x05700
-        yx: 0x00000
-        yy: 0x10000
-    }
-    freetype.FT_Outline_Transform slot.outline, xfrm
-	return
+	xfrm = ffi.new "FT_Matrix", {
+		xx: 0x10000
+		xy: 0x05700
+		yx: 0x00000
+		yy: 0x10000
+	}
+	freetype.FT_Outline_Transform slot.outline, xfrm
 
 class FreeType extends Init
 
@@ -519,7 +517,7 @@ class FreeType extends Init
 			ascent: @ascender * @yscale
 			descent: @descender * @yscale
 			height: @height * @yscale
-			internal_leading: @ascender - @descender - (@face[0].units_per_EM / FONT_UPSCALE)
+			internal_leading: (@ascender - @descender - (@face[0].units_per_EM / FONT_UPSCALE)) * @yscale
 			external_leading: 0
 		}
 
@@ -529,7 +527,7 @@ class FreeType extends Init
 		@callBackChars text, (ci, char, glyph) ->
 			width += tonumber(glyph.metrics.horiAdvance) + (ci > 1 and @hspace * FONT_UPSCALE or 0)
 		{
-			width: width / FONT_UPSCALE
+			width: (width / FONT_UPSCALE) * @xscale
 			height: @height * @yscale
 		}
 
@@ -570,6 +568,11 @@ class FreeType extends Init
 			err = freetype.FT_Outline_Decompose glyph.outline, outline_funcs, nil
 			if err != 0
 				error "Failed to load the freetype outline decompose", 2
+			-- Frees up memory stored for callbacks
+			outline_funcs[0].move_to\free!
+			outline_funcs[0].line_to\free!
+			outline_funcs[0].conic_to\free!
+			outline_funcs[0].cubic_to\free!
 			-- Converts quadratic curves to bezier
 			for i = 1, #build
 				val = build[i]
@@ -602,15 +605,15 @@ class FreeType extends Init
 		for i = 0, fontset[0].nfont - 1
 			font = fontset[0].fonts[i]
 			family, fullname, style, outline, file = nil, nil, nil, nil, nil
-			if fontconfig.FcPatternGetString(font, "family", 0, cstr) == ffi.C.FcResultMatch
+			if fontconfig.FcPatternGetString(font, "family", 0, cstr) == ffi.C.FcResultMatchILL
 				family = ffi.string cstr[0]
-			if fontconfig.FcPatternGetString(font, "fullname", 0, cstr) == ffi.C.FcResultMatch
+			if fontconfig.FcPatternGetString(font, "fullname", 0, cstr) == ffi.C.FcResultMatchILL
 				fullname = ffi.string cstr[0]
-			if fontconfig.FcPatternGetString(font, "style", 0, cstr) == ffi.C.FcResultMatch
+			if fontconfig.FcPatternGetString(font, "style", 0, cstr) == ffi.C.FcResultMatchILL
 				style = ffi.string cstr[0]
-			if fontconfig.FcPatternGetBool(font, "outline", 0, cbool) == ffi.C.FcResultMatch
+			if fontconfig.FcPatternGetBool(font, "outline", 0, cbool) == ffi.C.FcResultMatchILL
 				outline = cbool[0]
-			if fontconfig.FcPatternGetString(font, "file", 0, cstr) == ffi.C.FcResultMatch
+			if fontconfig.FcPatternGetString(font, "file", 0, cstr) == ffi.C.FcResultMatchILL
 				file = ffi.string cstr[0]
 			if family and fullname and style and outline
 				fonts.n += 1
