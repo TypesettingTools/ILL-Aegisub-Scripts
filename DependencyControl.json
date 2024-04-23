@@ -384,13 +384,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.4.6",
-                    "released": "2024-04-07",
+                    "version": "1.4.7",
+                    "released": "2024-04-23",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "e7933a986a236bab2e90dc4b650511d83c7c6506"
+                            "sha1": "8726fcfa79366141805693bbb28375e62ad36ffe"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -435,12 +435,12 @@
                         {
                             "name": "/Ass/Line.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "2d75a1c2052998b37de6d4a47a2a36bdcc2de2b9"
+                            "sha1": "19bfc0f0a0273682763fb7c12dd440299c1ab1bf"
                         },
                         {
                             "name": "/Font/Font.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "f8b4ff142c945e7a97c0a5ba5a5e5a7590f7840f"
+                            "sha1": "8dbbd0956bef391f249fd3ca5dca40416e8574cd"
                         },
                         {
                             "name": "/Font/Init.moon",
@@ -450,7 +450,7 @@
                         {
                             "name": "/Font/Unx.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "74d4ed96ee3dbfbedb59a0706442807710d407da"
+                            "sha1": "47c96d0d6710c3790b8d8bdf17ce3e30c46a164d"
                         },
                         {
                             "name": "/Font/Win.moon",
@@ -485,7 +485,7 @@
                         {
                             "name": "/UTF8.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "5a97232f065db904e8758cd6c41a6602bb6a4d75"
+                            "sha1": "dc685029133b60b5aa4bbbdb2c9c4c53faa8b810"
                         }
                     ],
                     "requiredModules": [
@@ -579,6 +579,9 @@
                 ],
                 "1.4.6": [
                     "Fix shadow path"
+                ],
+                "1.4.7": [
+                    "Replace pangocairo with freetype"
                 ]
             }
         },
