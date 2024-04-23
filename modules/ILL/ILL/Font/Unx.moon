@@ -3,7 +3,7 @@ ffi = require "ffi"
 has_freetype, freetype = pcall ffi.load, "freetype"
 has_fontconfig, fontconfig = pcall ffi.load, "fontconfig"
 
-import C, cdef, gc, new from ffi
+import C, cast, cdef, gc, new from ffi
 
 -- Set C definitions for freetype / taken from https://github.com/luapower/freetype/blob/master/freetype_h.lua
 cdef [[
@@ -392,7 +392,7 @@ set_font_metrics = (face) ->
 	-- Mimicking GDI's behavior for asc/desc/height.
 	-- These fields are (apparently) sometimes used for signed values,
 	-- despite being unsigned in the spec.
-	os2 = ffi.cast "TT_OS2*", C.FT_Get_Sfnt_Table face, C.FT_SFNT_OS2
+	os2 = cast "TT_OS2*", C.FT_Get_Sfnt_Table face, C.FT_SFNT_OS2
 	if os2 and (tonumber(os2.usWinAscent) + tonumber(os2.usWinDescent) != 0)
 		face.ascender = tonumber os2.usWinAscent
 		face.descender = -tonumber os2.usWinDescent
@@ -420,9 +420,9 @@ set_font_metrics = (face) ->
 
 -- https://github.com/libass/libass/blob/17cb8da964c852835881658d0d7af35ef2d92f9e/libass/ass_font.c#L502
 ass_face_set_size = (face, size) ->
-	rq = ffi.new "FT_Size_RequestRec"
-	ffi.C.memset rq, 0, ffi.sizeof rq
-	rq.type = ffi.C.FT_SIZE_REQUEST_TYPE_REAL_DIM
+	rq = new "FT_Size_RequestRec"
+	C.memset rq, 0, ffi.sizeof rq
+	rq.type = C.FT_SIZE_REQUEST_TYPE_REAL_DIM
 	rq.width = 0
 	rq.height = size * FONT_UPSCALE
 	rq.horiResolution = 0
@@ -438,7 +438,7 @@ ass_font_get_asc_desc = (face) ->
 
 -- https://github.com/libass/libass/blob/db83d6770ba11cb9ef72f4a9de7a0e2b1dd7baa3/libass/ass_font.c#L516
 ass_face_get_weight = (face) ->
-	os2 = ffi.cast "TT_OS2*", freetype.FT_Get_Sfnt_Table face, C.FT_SFNT_OS2
+	os2 = cast "TT_OS2*", freetype.FT_Get_Sfnt_Table face, C.FT_SFNT_OS2
 	os2Weight = os2 and tonumber(os2.usWeightClass) or 0
 	styleFlags = tonumber face.style_flags
 	if os2Weight == 0
@@ -450,14 +450,14 @@ ass_face_get_weight = (face) ->
 
 -- https://github.com/libass/libass/blob/db83d6770ba11cb9ef72f4a9de7a0e2b1dd7baa3/libass/ass_font.c#L561
 ass_glyph_embolden = (slot) ->
-	if slot.format != ffi.C.FT_GLYPH_FORMAT_OUTLINE
+	if slot.format != C.FT_GLYPH_FORMAT_OUTLINE
 		return
 	str = freetype.FT_MulFix(slot.face.units_per_EM, slot.face.size.metrics.y_scale) / FONT_UPSCALE
 	freetype.FT_Outline_Embolden slot.outline, str
 
 -- https://github.com/libass/libass/blob/db83d6770ba11cb9ef72f4a9de7a0e2b1dd7baa3/libass/ass_font.c#L577
 ass_glyph_italicize = (slot) ->
-	xfrm = ffi.new "FT_Matrix", {
+	xfrm = new "FT_Matrix", {
 		xx: 0x10000
 		xy: 0x05700
 		yx: 0x00000
@@ -480,14 +480,14 @@ class FreeType extends Init
 			error "Couldn't find #{@family} among your fonts"
 
 		-- Init FreeType
-		@library = ffi.new "FT_Library[1]"
+		@library = new "FT_Library[1]"
 		err = freetype.FT_Init_FreeType @library
 
 		if err != 0
 			error "Failed to load freetype library"
 
 		-- Load font face
-		@face = ffi.new "FT_Face[1]"
+		@face = new "FT_Face[1]"
 		err = freetype.FT_New_Face @library[0], font_path, 0, @face
 
 		if err != 0
@@ -495,6 +495,7 @@ class FreeType extends Init
 
 		set_font_metrics @face[0]
 		ass_face_set_size @face[0], @size
+
 		@ascender, @descender = ass_font_get_asc_desc @face[0]
 		@height = @ascender + @descender
 		@weight = tonumber ass_face_get_weight @face[0]
@@ -505,7 +506,7 @@ class FreeType extends Init
 		width, height = 0, 0
 		for ci, char in UTF8(text)\chars!
 			glyph_index = freetype.FT_Get_Char_Index face_size, UTF8.charcodepoint char
-			err = freetype.FT_Load_Glyph face_size, glyph_index, ffi.C.FT_LOAD_DEFAULT
+			err = freetype.FT_Load_Glyph face_size, glyph_index, C.FT_LOAD_DEFAULT
 			if err != 0
 				error "Failed to load the freetype glyph", 2
 			callback ci, char, face_size.glyph
@@ -545,25 +546,47 @@ class FreeType extends Init
 			for i = 0, glyph.outline.n_points - 1
 				glyph.outline.points[i].x += x
 				glyph.outline.points[i].y = (glyph.outline.points[i].y * -1) + @ascender * FONT_UPSCALE
-			-- callbacks for point decomposition
+			-- callbacks for outline decomposition
 			move_to = (to, user) ->
-				table.insert build, {"m", tonumber(to.x) / FONT_UPSCALE, tonumber(to.y) / FONT_UPSCALE}
+				table.insert build, {
+					"m"
+					tonumber(to.x) * FONT_DOWNSCALE
+					tonumber(to.y) * FONT_DOWNSCALE
+				}
 				return 0
 			line_to = (to, user) ->
-				table.insert build, {"l", tonumber(to.x) / FONT_UPSCALE, tonumber(to.y) / FONT_UPSCALE}
+				table.insert build, {
+					"l"
+					tonumber(to.x) * FONT_DOWNSCALE
+					tonumber(to.y) * FONT_DOWNSCALE
+				}
 				return 0
 			conic_to = (control, to, user) ->
-				table.insert build, {"c", tonumber(control.x) / FONT_UPSCALE, tonumber(control.y) / FONT_UPSCALE, tonumber(to.x) / FONT_UPSCALE, tonumber(to.y) / FONT_UPSCALE}
+				table.insert build, {
+					"c"
+					tonumber(control.x) * FONT_DOWNSCALE
+					tonumber(control.y) * FONT_DOWNSCALE
+					tonumber(to.x) * FONT_DOWNSCALE
+					tonumber(to.y) * FONT_DOWNSCALE
+				}
 				return 0
 			cubic_to = (control1, control2, to, user) ->
-				table.insert build, {"b", tonumber(control1.x) / FONT_UPSCALE, tonumber(control1.y) / FONT_UPSCALE, tonumber(control2.x) / FONT_UPSCALE, tonumber(control2.y) / FONT_UPSCALE, tonumber(to.x) / FONT_UPSCALE, tonumber(to.y) / FONT_UPSCALE}
+				table.insert build, {
+					"b"
+					tonumber(control1.x) * FONT_DOWNSCALE
+					tonumber(control1.y) * FONT_DOWNSCALE
+					tonumber(control2.x) * FONT_DOWNSCALE
+					tonumber(control2.y) * FONT_DOWNSCALE
+					tonumber(to.x) * FONT_DOWNSCALE
+					tonumber(to.y) * FONT_DOWNSCALE
+				}
 				return 0
 			-- Define outline functions
-			outline_funcs = ffi.new "FT_Outline_Funcs[1]"
-			outline_funcs[0].move_to = ffi.cast "FT_Outline_MoveToFunc", move_to
-			outline_funcs[0].line_to = ffi.cast "FT_Outline_LineToFunc", line_to
-			outline_funcs[0].conic_to = ffi.cast "FT_Outline_ConicToFunc", conic_to
-			outline_funcs[0].cubic_to = ffi.cast "FT_Outline_CubicToFunc", cubic_to
+			outline_funcs = new "FT_Outline_Funcs[1]"
+			outline_funcs[0].move_to = cast "FT_Outline_MoveToFunc", move_to
+			outline_funcs[0].line_to = cast "FT_Outline_LineToFunc", line_to
+			outline_funcs[0].conic_to = cast "FT_Outline_ConicToFunc", conic_to
+			outline_funcs[0].cubic_to = cast "FT_Outline_CubicToFunc", cubic_to
 			-- Decompose outline
 			err = freetype.FT_Outline_Decompose glyph.outline, outline_funcs, nil
 			if err != 0
@@ -592,36 +615,37 @@ class FreeType extends Init
 			x += tonumber(glyph.metrics.horiAdvance) + (@hspace * FONT_UPSCALE)
 		return table.concat paths, " "
 
+	-- Gets the complete list of fonts available on the system
 	getFonts: =>
 		-- Check whether or not the fontconfig library was loaded
 		unless has_fontconfig
 			error "fontconfig library couldn't be loaded", 2
 		-- Get fonts list from fontconfig
-		fontset = ffi.gc fontconfig.FcFontList(fontconfig.FcInitLoadConfigAndFonts(), ffi.gc(fontconfig.FcPatternCreate(), fontconfig.FcPatternDestroy), ffi.gc(fontconfig.FcObjectSetBuild("family", "fullname", "style", "outline", "file", nil), fontconfig.FcObjectSetDestroy)),fontconfig.FcFontSetDestroy
+		fontset = ffi.gc fontconfig.FcFontList(fontconfig.FcInitLoadConfigAndFonts(), ffi.gc(fontconfig.FcPatternCreate(), fontconfig.FcPatternDestroy), ffi.gc(fontconfig.FcObjectSetBuild("family", "fullname", "style", "outline", "file", nil), fontconfig.FcObjectSetDestroy)), fontconfig.FcFontSetDestroy
 		local font, family, fullname, style, outline, file, cstr, cbool
-		cstr = ffi.new "FcChar8*[1]"
-		cbool = ffi.new "FcBool[1]"
+		cstr = new "FcChar8*[1]"
+		cbool = new "FcBool[1]"
 		fonts = {n: 0}
 		for i = 0, fontset[0].nfont - 1
 			font = fontset[0].fonts[i]
 			family, fullname, style, outline, file = nil, nil, nil, nil, nil
-			if fontconfig.FcPatternGetString(font, "family", 0, cstr) == ffi.C.FcResultMatchILL
+			if fontconfig.FcPatternGetString(font, "family", 0, cstr) == C.FcResultMatchILL
 				family = ffi.string cstr[0]
-			if fontconfig.FcPatternGetString(font, "fullname", 0, cstr) == ffi.C.FcResultMatchILL
+			if fontconfig.FcPatternGetString(font, "fullname", 0, cstr) == C.FcResultMatchILL
 				fullname = ffi.string cstr[0]
-			if fontconfig.FcPatternGetString(font, "style", 0, cstr) == ffi.C.FcResultMatchILL
+			if fontconfig.FcPatternGetString(font, "style", 0, cstr) == C.FcResultMatchILL
 				style = ffi.string cstr[0]
-			if fontconfig.FcPatternGetBool(font, "outline", 0, cbool) == ffi.C.FcResultMatchILL
+			if fontconfig.FcPatternGetBool(font, "outline", 0, cbool) == C.FcResultMatchILL
 				outline = cbool[0]
-			if fontconfig.FcPatternGetString(font, "file", 0, cstr) == ffi.C.FcResultMatchILL
+			if fontconfig.FcPatternGetString(font, "file", 0, cstr) == C.FcResultMatchILL
 				file = ffi.string cstr[0]
 			if family and fullname and style and outline
 				fonts.n += 1
 				fonts[fonts.n] = {
-					name: family,
-					longname: fullname,
-					style: style,
-					type: outline == 0 and "Raster" or "Outline",
+					name: family
+					longname: fullname
+					style: style
+					type: outline == 0 and "Raster" or "Outline"
 					path: file
 				}
 		-- Order fonts by name & style
