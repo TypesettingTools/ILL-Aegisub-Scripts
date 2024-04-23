@@ -384,13 +384,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.4.8",
+                    "version": "1.4.9",
                     "released": "2024-04-23",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "c8a5e42626842f43105d732eabd9a60cb3b4cedc"
+                            "sha1": "2464da43a970be2db8d4b86ad0a76ff84b79388e"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -450,7 +450,7 @@
                         {
                             "name": "/Font/Unx.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "ecf72238235a4d9130e9981676585b5c59b22945"
+                            "sha1": "e038e8c883d73f6a2e0cfed1338f988770e09c59"
                         },
                         {
                             "name": "/Font/Win.moon",
@@ -585,6 +585,9 @@
                 ],
                 "1.4.8": [
                     "Fix some bugs on unix font"
+                ],
+                "1.4.9": [
+                    "Update ILL"
                 ]
             }
         },
