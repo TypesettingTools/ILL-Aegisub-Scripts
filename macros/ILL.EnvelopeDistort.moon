@@ -1,6 +1,6 @@
 export script_name        = "Envelope Distort"
 export script_description = "Allows you to warp and manipulate shapes within a customizable envelope"
-export script_version     = "1.1.2"
+export script_version     = "1.1.3"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.EnvelopeDistort"
 
@@ -32,7 +32,7 @@ interface = -> {
 	{class: "label", label: "Columns", x: 0, y: 3}
 	{class: "intedit", min: 1, x: 1, y: 3, name: "cols", value: 1}
 	{class: "label", label: "Tolerance", x: 0, y: 4}
-	{class: "floatedit", min: 0, x: 1, y: 4, name: "tolerance", value: 0}
+	{class: "floatedit", min: 0, x: 1, y: 4, name: "tolerance", value: 1}
 	{class: "checkbox", label: "Perspective", x: 0, y: 6, name: "perspective", value: false}
 	{class: "checkbox", label: "Keep Mesh", x: 1, y: 6, name: "keepMesh", value: false}
 }
@@ -68,7 +68,6 @@ makeWithMesh = (sub, sel, activeLine) ->
 				ass\insertLine l, s
 			else
 				{:org} = l.data
-				isMove = l.tags\existsTag "move"
 				Line.callBackTags ass, l, (line, j) ->
 					line.text\callBack (tags, text) ->
 						line.tags\insert {{"clip", screen .. clips[j]}}
@@ -98,9 +97,10 @@ makeWithMesh = (sub, sel, activeLine) ->
 					if perspective
 						path\perspective mesh.path[1], real.path[1]
 					else
+						path\closeContours!
 						path\allCurve!
 						path\envelopeDistort mesh, real, tolerance
-					unless maintainMesh
+					unless keepMesh
 						line.tags\remove "clip", "iclip"
 					line.shape = path\move(-x, -y)\export!
 					ass\insertLine line, s
