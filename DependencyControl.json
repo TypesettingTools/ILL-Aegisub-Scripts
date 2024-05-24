@@ -17,11 +17,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.1.2",
-                    "released": "2024-02-04",
+                    "version": "1.1.3",
+                    "released": "2024-05-24",
                     "files": [
                         {
-                            "sha1": "666e2068ba4ab166a771b562bfde512daae5ff43",
+                            "sha1": "43e2e735f16f81a7d78521de25f591966c026c8d",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -70,6 +70,9 @@
                 ],
                 "1.1.2": [
                     "Update ILL dependency version in macros"
+                ],
+                "1.1.3": [
+                    "fix default tolerance value"
                 ]
             },
             "name": "Envelope Distort",
