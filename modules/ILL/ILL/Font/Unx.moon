@@ -3,7 +3,7 @@ ffi = require "ffi"
 has_freetype, freetype = pcall ffi.load, "freetype"
 has_fontconfig, fontconfig = pcall ffi.load, "fontconfig"
 
-import C, cast, cdef, gc, new from ffi
+import C, cast, cdef, new from ffi
 
 -- Set C definitions for freetype / taken from https://github.com/luapower/freetype/blob/master/freetype_h.lua
 cdef [[
@@ -23,6 +23,7 @@ cdef [[
 	typedef unsigned long  FT_ULong;
 	typedef signed long    FT_Fixed;
 	typedef int            FT_Error;
+	typedef unsigned char  FT_Bool;
 
 	typedef struct FT_Matrix_ {
 		FT_Fixed xx, xy;
@@ -287,7 +288,6 @@ cdef [[
 		FT_SFNT_VHEA,
 		FT_SFNT_POST,
 		FT_SFNT_PCLT,
-
 		FT_SFNT_MAX
 	} FT_Sfnt_Tag;
 
@@ -347,6 +347,50 @@ cdef [[
 		FT_UShort  usLowerOpticalPointSize;       /* in twips (1/20 points) */
 		FT_UShort  usUpperOpticalPointSize;       /* in twips (1/20 points) */
 	} TT_OS2;
+
+	typedef struct  TT_Postscript_
+	{
+		FT_Fixed  FormatType;
+		FT_Fixed  italicAngle;
+		FT_Short  underlinePosition;
+		FT_Short  underlineThickness;
+		FT_ULong  isFixedPitch;
+		FT_ULong  minMemType42;
+		FT_ULong  maxMemType42;
+		FT_ULong  minMemType1;
+		FT_ULong  maxMemType1;
+
+		/* Glyph names follow in the 'post' table, but we don't */
+		/* load them by default.                                */
+
+	} TT_Postscript;
+
+	typedef struct PS_FontInfoRec_
+	{
+		FT_String*  version;
+		FT_String*  notice;
+		FT_String*  full_name;
+		FT_String*  family_name;
+		FT_String*  weight;
+		FT_Long     italic_angle;
+		FT_Bool     is_fixed_pitch;
+		FT_Short    underline_position;
+		FT_UShort   underline_thickness;
+	} PS_FontInfoRec;
+
+	FT_Error FT_Get_PS_Font_Info(FT_Face face, PS_FontInfoRec *afont_info);
+
+	enum {
+		FT_FACE_FLAG_KERNING = 1 << 6
+	};
+
+	enum {
+		FT_KERNING_DEFAULT = 0,
+		FT_KERNING_UNFITTED = 1,
+		FT_KERNING_UNSCALED = 2
+	};
+
+	FT_Error FT_Get_Kerning( FT_Face face, FT_UInt left_glyph, FT_UInt right_glyph, FT_UInt kern_mode, FT_Vector* akerning );
 ]]
 
 -- Set C definitions for fontconfig
@@ -387,7 +431,9 @@ import Math from require "ILL.ILL.Math"
 import UTF8 from require "ILL.ILL.UTF8"
 import Init from require "ILL.ILL.Font.Init"
 
--- https://github.com/libass/libass/blob/db83d6770ba11cb9ef72f4a9de7a0e2b1dd7baa3/libass/ass_font.c#L277
+OUTLINE_MAX = bit.lshift(1, 28) - 1
+
+-- https://github.com/libass/libass/blob/5298859c298d3c570d8d7e3b883a0d63490659b8/libass/ass_font.c#L278
 set_font_metrics = (face) ->
 	-- Mimicking GDI's behavior for asc/desc/height.
 	-- These fields are (apparently) sometimes used for signed values,
@@ -418,7 +464,7 @@ set_font_metrics = (face) ->
 			face.descender = tonumber face.bbox.yMin
 			face.height = face.ascender - face.descender
 
--- https://github.com/libass/libass/blob/17cb8da964c852835881658d0d7af35ef2d92f9e/libass/ass_font.c#L502
+-- https://github.com/libass/libass/blob/5298859c298d3c570d8d7e3b883a0d63490659b8/libass/ass_font.c#L507
 ass_face_set_size = (face, size) ->
 	rq = new "FT_Size_RequestRec"
 	C.memset rq, 0, ffi.sizeof rq
@@ -429,14 +475,14 @@ ass_face_set_size = (face, size) ->
 	rq.vertResolution = 0
 	freetype.FT_Request_Size face, rq
 
--- https://github.com/libass/libass/blob/db83d6770ba11cb9ef72f4a9de7a0e2b1dd7baa3/libass/ass_font.c#L502
+-- https://github.com/libass/libass/blob/5298859c298d3c570d8d7e3b883a0d63490659b8/libass/ass_font.c#L583
 ass_font_get_asc_desc = (face) ->
 	y_scale = face.size.metrics.y_scale
 	ascender = freetype.FT_MulFix face.ascender, y_scale
 	descender = freetype.FT_MulFix -face.descender, y_scale
 	return tonumber(ascender) / FONT_UPSCALE, tonumber(descender) / FONT_UPSCALE
 
--- https://github.com/libass/libass/blob/db83d6770ba11cb9ef72f4a9de7a0e2b1dd7baa3/libass/ass_font.c#L516
+-- https://github.com/libass/libass/blob/5298859c298d3c570d8d7e3b883a0d63490659b8/libass/ass_font.c#L527
 ass_face_get_weight = (face) ->
 	os2 = cast "TT_OS2*", freetype.FT_Get_Sfnt_Table face, C.FT_SFNT_OS2
 	os2Weight = os2 and tonumber(os2.usWeightClass) or 0
@@ -448,57 +494,122 @@ ass_face_get_weight = (face) ->
 	else
 		return os2Weight
 
--- https://github.com/libass/libass/blob/db83d6770ba11cb9ef72f4a9de7a0e2b1dd7baa3/libass/ass_font.c#L561
+-- https://github.com/libass/libass/blob/5298859c298d3c570d8d7e3b883a0d63490659b8/libass/ass_font.c#L595
 ass_glyph_embolden = (slot) ->
 	if slot.format != C.FT_GLYPH_FORMAT_OUTLINE
 		return
 	str = freetype.FT_MulFix(slot.face.units_per_EM, slot.face.size.metrics.y_scale) / FONT_UPSCALE
 	freetype.FT_Outline_Embolden slot.outline, str
 
--- https://github.com/libass/libass/blob/db83d6770ba11cb9ef72f4a9de7a0e2b1dd7baa3/libass/ass_font.c#L577
+-- https://github.com/libass/libass/blob/5298859c298d3c570d8d7e3b883a0d63490659b8/libass/ass_font.c#L518
+ass_face_is_postscript = (face) ->
+    postscript_info = new "PS_FontInfoRec[1]"
+    err = freetype.FT_Get_PS_Font_Info face, postscript_info
+    return err == 0
+
+-- https://github.com/libass/libass/blob/5298859c298d3c570d8d7e3b883a0d63490659b8/libass/ass_font.c#L611
 ass_glyph_italicize = (slot) ->
 	xfrm = new "FT_Matrix", {
 		xx: 0x10000
-		xy: 0x05700
+		xy: ass_face_is_postscript(slot.face) and 0x02d24 or 0x05700
 		yx: 0x00000
 		yy: 0x10000
 	}
 	freetype.FT_Outline_Transform slot.outline, xfrm
 
+-- https://github.com/libass/libass/blob/5298859c298d3c570d8d7e3b883a0d63490659b8/libass/ass_font.c#L755
+ass_get_glyph_outline = (face, has_underline, has_strikeout, addx, addy) ->
+	y_scale = tonumber face.size.metrics.y_scale
+	adv = tonumber face.glyph.advance.x
+	source = face.glyph.outline
+	local underline, strikeout
+	if adv > 0 and has_underline
+		ps = cast "TT_Postscript*", C.FT_Get_Sfnt_Table face, C.FT_SFNT_POST
+		if ps and tonumber(ps.underlinePosition) <= 0 and tonumber(ps.underlineThickness) > 0
+			underlinePosition = tonumber ps.underlinePosition
+			underlineThickness = tonumber ps.underlineThickness
+			pos = ((underlinePosition * y_scale) + 0x8000) / 65536
+			size = ((underlineThickness * y_scale) + 0x8000) / 65536
+			pos = -pos - bit.rshift size, 1
+			if pos >= -OUTLINE_MAX and (pos + size) <= OUTLINE_MAX
+				underline = {(pos + addy) * FONT_DOWNSCALE, (pos + size + addy) * FONT_DOWNSCALE}
+	if adv > 0 and has_strikeout
+		os2 = cast "TT_OS2*", C.FT_Get_Sfnt_Table face, C.FT_SFNT_OS2
+		if os2 and tonumber(os2.yStrikeoutPosition) >= 0 and tonumber(os2.yStrikeoutSize) > 0
+			yStrikeoutPosition = tonumber os2.yStrikeoutPosition
+			yStrikeoutSize = tonumber os2.yStrikeoutSize
+			pos = ((yStrikeoutPosition * y_scale) + 0x8000) / 65536
+			size = ((yStrikeoutSize * y_scale) + 0x8000) / 65536
+			pos = -pos - bit.rshift size, 1
+			if pos >= -OUTLINE_MAX and (pos + size) <= OUTLINE_MAX
+				strikeout = {(pos + addy) * FONT_DOWNSCALE, (pos + size + addy) * FONT_DOWNSCALE}
+	dir = freetype.FT_Outline_Get_Orientation source
+	iy = dir == C.FT_ORIENTATION_TRUETYPE and 0 or 1
+	path = " "
+	if underline != nil
+		path ..= table.concat {
+			"m",
+			addx * FONT_DOWNSCALE,
+			underline[iy == 0 and 2 or 1],
+			(addx + adv) * FONT_DOWNSCALE,
+			underline[iy == 0 and 2 or 1],
+			(addx + adv) * FONT_DOWNSCALE,
+			underline[iy == 0 and 1 or 2],
+			addx * FONT_DOWNSCALE,
+			underline[iy == 0 and 1 or 2],
+		}, " "
+	if strikeout != nil
+		path ..= table.concat {
+			"m",
+			addx * FONT_DOWNSCALE,
+			strikeout[iy == 0 and 2 or 1],
+			(addx + adv) * FONT_DOWNSCALE,
+			strikeout[iy == 0 and 2 or 1],
+			(addx + adv) * FONT_DOWNSCALE,
+			strikeout[iy == 0 and 1 or 2],
+			addx * FONT_DOWNSCALE,
+			strikeout[iy == 0 and 1 or 2],
+		}, " "
+	return path
+
 class FreeType extends Init
 
-	init: =>
-		unless has_freetype
-			error "freetype library couldn't be loaded", 2
+    init: =>
+        unless has_freetype
+            error "freetype library couldn't be loaded", 2
 
-		-- Check that the font has a bold and italic variant if necessary
-		@found_bold, @found_italic = false, false
+        -- Check that the font has a bold and italic variant if necessary
+        @found_bold, @found_italic = false, false
 
-		-- Get the font path
-		font_path = @getFontPath!
-		unless font_path
-			error "Couldn't find #{@family} among your fonts"
+        -- Get the font path
+        font_path = @getFontPath!
+        unless font_path
+            error "Couldn't find #{@family} among your fonts"
 
-		-- Init FreeType
-		@library = new "FT_Library[1]"
-		err = freetype.FT_Init_FreeType @library
+        -- Init FreeType
+        @library = new "FT_Library[1]"
+        err = freetype.FT_Init_FreeType @library
 
-		if err != 0
-			error "Failed to load freetype library"
+        if err != 0
+            error "Failed to load freetype library"
 
-		-- Load font face
-		@face = new "FT_Face[1]"
-		err = freetype.FT_New_Face @library[0], font_path, 0, @face
+        ffi.gc @library, (lib) -> freetype.FT_Done_FreeType lib[0]
 
-		if err != 0
-			error "Failed to load freetype face"
+        -- Load font face
+        @face = new "FT_Face[1]"
+        err = freetype.FT_New_Face @library[0], font_path, 0, @face
 
-		set_font_metrics @face[0]
-		ass_face_set_size @face[0], @size
+        if err != 0
+            error "Failed to load freetype face"
 
-		@ascender, @descender = ass_font_get_asc_desc @face[0]
-		@height = @ascender + @descender
-		@weight = tonumber ass_face_get_weight @face[0]
+        ffi.gc @face, (face) -> freetype.FT_Done_Face face[0]
+
+        set_font_metrics @face[0]
+        ass_face_set_size @face[0], @size
+
+        @ascender, @descender = ass_font_get_asc_desc @face[0]
+        @height = @ascender + @descender
+        @weight = tonumber ass_face_get_weight @face[0]
 
 	-- Callback to access the glyphs for each character
 	callBackChars: (text, callback) =>
@@ -612,6 +723,8 @@ class FreeType extends Init
 					build[i] = {"b", p2x, p2y, p3x, p3y, p4x, p4y}
 				path[i] = table.concat build[i], " "
 			table.insert paths, table.concat path, " "
+			if @underline or @strikeout
+				table.insert paths, ass_get_glyph_outline @face[0], @underline, @strikeout, x, @ascender * FONT_UPSCALE
 			x += tonumber(glyph.metrics.horiAdvance) + (@hspace * FONT_UPSCALE)
 		return table.concat paths, " "
 
@@ -659,58 +772,49 @@ class FreeType extends Init
 
 	-- Gets the directory path of the fonts
 	getFontPath: =>
-		i, font_variants, fonts = 1, {}, @getFonts!
-		-- checks if the font has a certain type
-		find_font_path_by_type_single = (fonts, font_type) ->
-			for font in *fonts
-				if font.style\lower! == font_type
-					return font.path
-		-- checks if the font has certain types
-		find_font_path_by_type_multi = (fonts, ...) ->
-			font_types = {...}
-			check_and = (font_style) ->
-				for font_type in *font_types
-					unless font_style\match font_type
-						return false
-				return true
-			for font in *fonts
-				if check_and font.style\lower!
-					return font.path
-			return false
-		-- searches for the font path among all the system fonts
-		while i <= #fonts
-			if fonts[i].name == @family
-				while fonts[i].name == @family
-					table.insert font_variants, fonts[i]
-					i += 1
-				font_variants_len = #font_variants
-				if font_variants_len > 1
-					if @bold and @italic
-						if path = find_font_path_by_type_multi font_variants, "bold", "italic"
-							@found_bold, @found_italic = true, true
-							return path
-						if path = find_font_path_by_type_multi font_variants, "bold", "oblique"
-							@found_bold, @found_italic = true, true
-							return path
-					elseif @bold and not @italic
-						if path = find_font_path_by_type_single font_variants, "bold"
-							@found_bold = true
-							return path
-					elseif not @bold and @italic
-						if path = find_font_path_by_type_single font_variants, "italic"
-							@found_italic = true
-							return path
-					else
-						return font_variants[font_variants_len].path
-				else
-					return font_variants[1].path
-				break
-			i += 1
-		return false
+        fonts = @getFonts!
+        font_variants = {}
 
-	-- free memory
-	free: =>
-		freetype.FT_Done_Face @face[0]
-		freetype.FT_Done_FreeType @library[0]
+		-- Collect all fonts matching the requested family
+        for font in *fonts
+            if font.name\lower! == @family\lower!
+                table.insert font_variants, font
+
+        if #font_variants == 0
+            return false
+
+		style_preference = {
+            ["bold italic"]: 1
+            ["bold oblique"]: 2
+            ["italic"]: 3
+            ["oblique"]: 4
+            ["bold"]: 5
+            ["regular"]: 6
+            ["normal"]: 7
+        }
+
+		-- Sort fonts by style preference
+        table.sort font_variants, (a, b) ->
+            a_style = a.style\lower!
+            b_style = b.style\lower!
+            a_pref = style_preference[a_style] or 99
+            b_pref = style_preference[b_style] or 99
+            return a_pref < b_pref
+
+        -- Find the best match based on requested styles
+        for font in *font_variants
+            style = font.style\lower!
+            is_bold = style\find("bold") != nil
+            is_italic = (style\find("italic") or style\find("oblique")) != nil
+            if @bold == is_bold and @italic == is_italic
+                @found_bold = is_bold
+                @found_italic = is_italic
+                return font.path
+
+        -- If no exact match, return the first variant
+        first_font = font_variants[1]
+		@found_bold = first_font.style\lower!\find("bold") != nil
+		@found_italic = first_font.style\lower!\find("italic") != nil or first_font.style\lower!\find("oblique") != nil
+        return first_font.path
 
 {:FreeType}

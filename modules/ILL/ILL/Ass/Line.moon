@@ -76,10 +76,12 @@ class Line
 					if value = .reset.data[name]
 						.data[name] = value
 
+			font = Font .data
+
 			-- if it's a shape, this information are irrelevant
 			unless .isShape
 				-- gets the value of the width of a space
-				.space_width = aegisub.text_extents .data, " "
+				.space_width = font\getTextExtents(" ").width
 				.space_width *= video_x_correct_factor
 
 				-- spaces that are on the left and right of the text
@@ -92,8 +94,6 @@ class Line
 				-- to make everything more dynamic
 				.shape = .text_stripped
 				.text_stripped = ""
-
-			font = Font .data
 
 			-- gets the metric values of the text
 			if textIsBlank
@@ -110,8 +110,6 @@ class Line
 				.descent = textMetrics.descent
 				.internal_leading = textMetrics.internal_leading
 				.external_leading = textMetrics.external_leading
-
-			font\free! if IS_UNIX
 
 			-- text alignment
 			{:an} = .data
@@ -486,7 +484,6 @@ class Line
 				lineBlock.data.scale_y = 100
 				font = Font lineBlock.data
 				textExtents = font\getTextExtents lineBlock.text_stripped
-				font\free! if IS_UNIX
 				lineBlock.width = textExtents.width
 				lineBlock.height = textExtents.height
 				-- converts the text to shape and then converts the shape to Path
@@ -718,11 +715,7 @@ class Line
 			return x * w, y * w
 
 	-- converts the text to shape
-	toShape: (l) ->
-		font = Font l.data
-		shape = font\getTextToShape l.text_stripped
-		font\free! if IS_UNIX
-		return shape
+	toShape: (l) -> Font(l.data)\getTextToShape l.text_stripped
 
 	-- converts the text to Path
 	toPath: (l) -> Path Line.toShape l
