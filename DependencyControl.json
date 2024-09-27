@@ -387,13 +387,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.5.0",
+                    "version": "1.5.1",
                     "released": "2024-09-27",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "c87df5485f37f321f56f5270bb7fdd07c915300c"
+                            "sha1": "1b3f50ecefafee1546383e96534668a4ab08412b"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -453,7 +453,7 @@
                         {
                             "name": "/Font/Unx.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "017614412e937bfcb020c5075d039d11160f11f4"
+                            "sha1": "e6b05ac93401e0a7990a32177b0d39cd66a834b1"
                         },
                         {
                             "name": "/Font/Win.moon",
@@ -488,7 +488,7 @@
                         {
                             "name": "/UTF8.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "7b44b663ec1b4b036df0d6e4d0edcca59bec5557"
+                            "sha1": "1f38879d0233ee7c433a4f20d324330f0874970d"
                         }
                     ],
                     "requiredModules": [
@@ -594,6 +594,9 @@
                 ],
                 "1.5.0": [
                     "Added support for underline and strikeout to freetype wrapper"
+                ],
+                "1.5.1": [
+                    "Remove unnecessary defs"
                 ]
             }
         },
