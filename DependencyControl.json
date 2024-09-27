@@ -387,13 +387,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.4.9",
-                    "released": "2024-04-23",
+                    "version": "1.5.0",
+                    "released": "2024-09-27",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "2464da43a970be2db8d4b86ad0a76ff84b79388e"
+                            "sha1": "c87df5485f37f321f56f5270bb7fdd07c915300c"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -438,7 +438,7 @@
                         {
                             "name": "/Ass/Line.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "439375a09a18c1cef1329248c050e4e691b24f86"
+                            "sha1": "409b63a246d1a00117fb84ea7cd738af6e290a93"
                         },
                         {
                             "name": "/Font/Font.moon",
@@ -453,7 +453,7 @@
                         {
                             "name": "/Font/Unx.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "e038e8c883d73f6a2e0cfed1338f988770e09c59"
+                            "sha1": "017614412e937bfcb020c5075d039d11160f11f4"
                         },
                         {
                             "name": "/Font/Win.moon",
@@ -488,7 +488,7 @@
                         {
                             "name": "/UTF8.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "dc685029133b60b5aa4bbbdb2c9c4c53faa8b810"
+                            "sha1": "7b44b663ec1b4b036df0d6e4d0edcca59bec5557"
                         }
                     ],
                     "requiredModules": [
@@ -591,6 +591,9 @@
                 ],
                 "1.4.9": [
                     "Update ILL"
+                ],
+                "1.5.0": [
+                    "Added support for underline and strikeout to freetype wrapper"
                 ]
             }
         },
