@@ -379,18 +379,6 @@ cdef [[
 	} PS_FontInfoRec;
 
 	FT_Error FT_Get_PS_Font_Info(FT_Face face, PS_FontInfoRec *afont_info);
-
-	enum {
-		FT_FACE_FLAG_KERNING = 1 << 6
-	};
-
-	enum {
-		FT_KERNING_DEFAULT = 0,
-		FT_KERNING_UNFITTED = 1,
-		FT_KERNING_UNSCALED = 2
-	};
-
-	FT_Error FT_Get_Kerning( FT_Face face, FT_UInt left_glyph, FT_UInt right_glyph, FT_UInt kern_mode, FT_Vector* akerning );
 ]]
 
 -- Set C definitions for fontconfig
@@ -503,9 +491,9 @@ ass_glyph_embolden = (slot) ->
 
 -- https://github.com/libass/libass/blob/5298859c298d3c570d8d7e3b883a0d63490659b8/libass/ass_font.c#L518
 ass_face_is_postscript = (face) ->
-    postscript_info = new "PS_FontInfoRec[1]"
-    err = freetype.FT_Get_PS_Font_Info face, postscript_info
-    return err == 0
+	postscript_info = new "PS_FontInfoRec[1]"
+	err = freetype.FT_Get_PS_Font_Info face, postscript_info
+	return err == 0
 
 -- https://github.com/libass/libass/blob/5298859c298d3c570d8d7e3b883a0d63490659b8/libass/ass_font.c#L611
 ass_glyph_italicize = (slot) ->
@@ -574,42 +562,42 @@ ass_get_glyph_outline = (face, has_underline, has_strikeout, addx, addy) ->
 
 class FreeType extends Init
 
-    init: =>
-        unless has_freetype
-            error "freetype library couldn't be loaded", 2
+	init: =>
+		unless has_freetype
+			error "freetype library couldn't be loaded", 2
 
-        -- Check that the font has a bold and italic variant if necessary
-        @found_bold, @found_italic = false, false
+		-- Check that the font has a bold and italic variant if necessary
+		@found_bold, @found_italic = false, false
 
-        -- Get the font path
-        font_path = @getFontPath!
-        unless font_path
-            error "Couldn't find #{@family} among your fonts"
+		-- Get the font path
+		font_path = @getFontPath!
+		unless font_path
+			error "Couldn't find #{@family} among your fonts"
 
-        -- Init FreeType
-        @library = new "FT_Library[1]"
-        err = freetype.FT_Init_FreeType @library
+		-- Init FreeType
+		@library = new "FT_Library[1]"
+		err = freetype.FT_Init_FreeType @library
 
-        if err != 0
-            error "Failed to load freetype library"
+		if err != 0
+			error "Failed to load freetype library"
 
-        ffi.gc @library, (lib) -> freetype.FT_Done_FreeType lib[0]
+		ffi.gc @library, (lib) -> freetype.FT_Done_FreeType lib[0]
 
-        -- Load font face
-        @face = new "FT_Face[1]"
-        err = freetype.FT_New_Face @library[0], font_path, 0, @face
+		-- Load font face
+		@face = new "FT_Face[1]"
+		err = freetype.FT_New_Face @library[0], font_path, 0, @face
 
-        if err != 0
-            error "Failed to load freetype face"
+		if err != 0
+			error "Failed to load freetype face"
 
-        ffi.gc @face, (face) -> freetype.FT_Done_Face face[0]
+		ffi.gc @face, (face) -> freetype.FT_Done_Face face[0]
 
-        set_font_metrics @face[0]
-        ass_face_set_size @face[0], @size
+		set_font_metrics @face[0]
+		ass_face_set_size @face[0], @size
 
-        @ascender, @descender = ass_font_get_asc_desc @face[0]
-        @height = @ascender + @descender
-        @weight = tonumber ass_face_get_weight @face[0]
+		@ascender, @descender = ass_font_get_asc_desc @face[0]
+		@height = @ascender + @descender
+		@weight = tonumber ass_face_get_weight @face[0]
 
 	-- Callback to access the glyphs for each character
 	callBackChars: (text, callback) =>
@@ -772,49 +760,49 @@ class FreeType extends Init
 
 	-- Gets the directory path of the fonts
 	getFontPath: =>
-        fonts = @getFonts!
-        font_variants = {}
+		fonts = @getFonts!
+		font_variants = {}
 
 		-- Collect all fonts matching the requested family
-        for font in *fonts
-            if font.name\lower! == @family\lower!
-                table.insert font_variants, font
+		for font in *fonts
+			if font.name\lower! == @family\lower!
+				table.insert font_variants, font
 
-        if #font_variants == 0
-            return false
+		if #font_variants == 0
+			return false
 
 		style_preference = {
-            ["bold italic"]: 1
-            ["bold oblique"]: 2
-            ["italic"]: 3
-            ["oblique"]: 4
-            ["bold"]: 5
-            ["regular"]: 6
-            ["normal"]: 7
-        }
+			["bold italic"]: 1
+			["bold oblique"]: 2
+			["italic"]: 3
+			["oblique"]: 4
+			["bold"]: 5
+			["regular"]: 6
+			["normal"]: 7
+		}
 
 		-- Sort fonts by style preference
-        table.sort font_variants, (a, b) ->
-            a_style = a.style\lower!
-            b_style = b.style\lower!
-            a_pref = style_preference[a_style] or 99
-            b_pref = style_preference[b_style] or 99
-            return a_pref < b_pref
+		table.sort font_variants, (a, b) ->
+			a_style = a.style\lower!
+			b_style = b.style\lower!
+			a_pref = style_preference[a_style] or 99
+			b_pref = style_preference[b_style] or 99
+			return a_pref < b_pref
 
-        -- Find the best match based on requested styles
-        for font in *font_variants
-            style = font.style\lower!
-            is_bold = style\find("bold") != nil
-            is_italic = (style\find("italic") or style\find("oblique")) != nil
-            if @bold == is_bold and @italic == is_italic
-                @found_bold = is_bold
-                @found_italic = is_italic
-                return font.path
+		-- Find the best match based on requested styles
+		for font in *font_variants
+			style = font.style\lower!
+			is_bold = style\find("bold") != nil
+			is_italic = (style\find("italic") or style\find("oblique")) != nil
+			if @bold == is_bold and @italic == is_italic
+				@found_bold = is_bold
+				@found_italic = is_italic
+				return font.path
 
-        -- If no exact match, return the first variant
-        first_font = font_variants[1]
+		-- If no exact match, return the first variant
+		first_font = font_variants[1]
 		@found_bold = first_font.style\lower!\find("bold") != nil
 		@found_italic = first_font.style\lower!\find("italic") != nil or first_font.style\lower!\find("oblique") != nil
-        return first_font.path
+		return first_font.path
 
 {:FreeType}
