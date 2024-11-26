@@ -200,4 +200,9 @@ class Curve
 			return index / len
 		return (index + (targetLength - lengthBefore) / (lengths[index + 2] - lengthBefore)) / len
 
+	reverse: =>
+		a2, b2, c2, d2 = @a\clone!, @b\clone!, @c\clone!, @d\clone!
+		@a, @b, @c, @d = d2, c2, b2, a2
+		@a.id, @d.id = "l", "b"
+
 {:Curve}

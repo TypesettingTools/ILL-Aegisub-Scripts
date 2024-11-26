@@ -44,19 +44,38 @@ class Path
 
 	-- Callback to access the Curves and Segments
 	callBackPath: (fn) =>
+		k = 1
 		for contour in *@path
 			j = 2
 			while j <= #contour
 				prev = contour[j-1]
 				curr = contour[j]
 				if curr.id == "b"
-					if "break" == fn "b", Curve prev, curr, contour[j+1], contour[j+2]
+					if "break" == fn "b", Curve(prev, curr, contour[j+1], contour[j+2]), k
 						return
 					j += 2
 				else
-					if "break" == fn "l", Segment prev, curr
+					if "break" == fn "l", Segment(prev, curr), k
 						return
 				j += 1
+			k += 1
+		return @
+
+	reverse: =>
+		reversedPath = {}
+		@callBackPath (id, seg, index) ->
+			if reversedPath[index] == nil
+				reversedPath[index] = {seg.a}
+
+			seg\reverse!
+			if id == "l"
+				table.insert reversedPath[index], 1, seg.a
+			if id == "b"
+				table.insert reversedPath[index], 1, seg.c
+				table.insert reversedPath[index], 1, seg.b
+				table.insert reversedPath[index], 1, seg.a
+			
+		@path = reversedPath
 		return @
 
 	-- Gets the bounding box and other information from the Path

@@ -63,5 +63,9 @@ class Segment
 		d = @b\clone!
 		a.id, b.id, c.id, d.id = "l", "b", "b", "b"
 		return a, b, c, d
+	
+	reverse: =>
+		a2, b2 = @a\clone!, @b\clone!
+		@a, @b = b2, a2
 
 {:Segment}
