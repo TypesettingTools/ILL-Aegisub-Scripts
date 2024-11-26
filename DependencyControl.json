@@ -387,23 +387,23 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.5.1",
-                    "released": "2024-09-27",
+                    "version": "1.5.2",
+                    "released": "2024-11-26",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "1b3f50ecefafee1546383e96534668a4ab08412b"
+                            "sha1": "1fe69f1b9e7cc11592301451a307cb69d51bfd2d"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "52f7bc9c3fd98d318962fae909ba80613f46ba26"
+                            "sha1": "48be877a563e33ded0d8e343999ccaf1e62c6e82"
                         },
                         {
                             "name": "/Ass/Shape/Path.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "a3e72133bb3cef4f2d883b51ec1127f63c34e540"
+                            "sha1": "f3a27e837cd894b8da4d9a4525d667c57effdf42"
                         },
                         {
                             "name": "/Ass/Shape/Point.moon",
@@ -413,7 +413,7 @@
                         {
                             "name": "/Ass/Shape/Segment.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "65520baba964da1a2315921452e8b00c18ff1f41"
+                            "sha1": "82b44c9e21a45025af2f2920319c3165a53bc2ef"
                         },
                         {
                             "name": "/Ass/Text/Tag.moon",
@@ -597,6 +597,9 @@
                 ],
                 "1.5.1": [
                     "Remove unnecessary defs"
+                ],
+                "1.5.2": [
+                    "Added functions to reverse a path"
                 ]
             }
         },
