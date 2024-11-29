@@ -625,7 +625,7 @@ class FreeType extends Init
 	getTextExtents: (text) =>
 		face_size, width = @face[0].size.face, 0
 		@callBackChars text, (ci, char, glyph) ->
-			width += tonumber(glyph.metrics.horiAdvance) + (ci > 1 and @hspace * FONT_UPSCALE or 0)
+			width += tonumber(glyph.metrics.horiAdvance) + (@hspace * FONT_UPSCALE)
 		{
 			width: (width / FONT_UPSCALE) * @xscale
 			height: @height * @yscale
