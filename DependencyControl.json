@@ -387,13 +387,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.5.2",
-                    "released": "2024-11-26",
+                    "version": "1.5.3",
+                    "released": "2024-11-29",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "1fe69f1b9e7cc11592301451a307cb69d51bfd2d"
+                            "sha1": "cdb57557410986befd6a06fe06e25a6068eacd33"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -453,7 +453,7 @@
                         {
                             "name": "/Font/Unx.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "e6b05ac93401e0a7990a32177b0d39cd66a834b1"
+                            "sha1": "9744a693c63c84e5cd820541f0be8dfe95f5943e"
                         },
                         {
                             "name": "/Font/Win.moon",
@@ -600,6 +600,9 @@
                 ],
                 "1.5.2": [
                     "Added functions to reverse a path"
+                ],
+                "1.5.3": [
+                    "Fix text extents width for unix"
                 ]
             }
         },
