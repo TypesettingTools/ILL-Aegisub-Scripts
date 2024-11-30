@@ -178,11 +178,17 @@ class WindowsGDI extends Init
 
 		-- Convert family from utf8 to utf16
 		family = utf8_to_utf16 @family
-		if tonumber(C.wcslen family) > 31
-			error "family name to long", 2
+
+		-- Fix family length
+		lfFaceName = ffi.new "WCHAR[?]", FONT_LF_FACESIZE
+		familyLen = C.wcslen family
+		if familyLen >= FONT_LF_FACESIZE
+			ffi.copy lfFaceName, family, (FONT_LF_FACESIZE-1) * ffi.sizeof "WCHAR"
+		else
+			ffi.copy lfFaceName, family, (familyLen+1) * ffi.sizeof "WCHAR"
 
 		-- Create font handle
-		font = C.CreateFontW @size * FONT_UPSCALE, 0, 0, 0, @bold and C.FW_BOLD_ILL or C.FW_NORMAL_ILL, @italic and 1 or 0, @underline and 1 or 0, @strikeout and 1 or 0, C.DEFAULT_CHARSET_ILL, C.OUT_TT_PRECIS_ILL, C.CLIP_DEFAULT_PRECIS_ILL, C.ANTIALIASED_QUALITY_ILL, C.DEFAULT_PITCH_ILL + C.FF_DONTCARE_ILL, family
+		font = C.CreateFontW @size * FONT_UPSCALE, 0, 0, 0, @bold and C.FW_BOLD_ILL or C.FW_NORMAL_ILL, @italic and 1 or 0, @underline and 1 or 0, @strikeout and 1 or 0, C.DEFAULT_CHARSET_ILL, C.OUT_TT_PRECIS_ILL, C.CLIP_DEFAULT_PRECIS_ILL, C.ANTIALIASED_QUALITY_ILL, C.DEFAULT_PITCH_ILL + C.FF_DONTCARE_ILL, lfFaceName
 
 		-- Set new font to device context
 		old_font = C.SelectObject @dc, font
