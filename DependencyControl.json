@@ -458,7 +458,7 @@
                         {
                             "name": "/Font/Win.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "3026f86ab127b652ec7283bb5cf9cefbffa99e83"
+                            "sha1": "ef9eed1908f431dfe0225dbf84e319d9156cbadc"
                         },
                         {
                             "name": "/Aegi.moon",
