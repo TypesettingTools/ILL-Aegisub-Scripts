@@ -387,13 +387,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.5.3",
-                    "released": "2024-11-29",
+                    "version": "1.5.4",
+                    "released": "2024-12-01",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "cdb57557410986befd6a06fe06e25a6068eacd33"
+                            "sha1": "70fc6b7b2df84f1120ab524af56e11d4066dd6ba"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -443,7 +443,7 @@
                         {
                             "name": "/Font/Font.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "8dbbd0956bef391f249fd3ca5dca40416e8574cd"
+                            "sha1": "efcb3754abcf0f2ea358abc4943d9128d7458a4f"
                         },
                         {
                             "name": "/Font/Init.moon",
@@ -458,7 +458,7 @@
                         {
                             "name": "/Font/Win.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "ef9eed1908f431dfe0225dbf84e319d9156cbadc"
+                            "sha1": "5d86d7902ae80f96462a61825f0263c48e590907"
                         },
                         {
                             "name": "/Aegi.moon",
@@ -603,6 +603,9 @@
                 ],
                 "1.5.3": [
                     "Fix text extents width for unix"
+                ],
+                "1.5.4": [
+                    "Fix font family"
                 ]
             }
         },
