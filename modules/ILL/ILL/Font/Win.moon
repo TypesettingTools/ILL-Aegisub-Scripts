@@ -181,7 +181,7 @@ class WindowsGDI extends Init
 
 		-- Fix family length
 		lfFaceName = ffi.new "WCHAR[?]", FONT_LF_FACESIZE
-		familyLen = C.wcslen family
+		familyLen = tonumber C.wcslen family
 		if familyLen >= FONT_LF_FACESIZE
 			ffi.copy lfFaceName, family, (FONT_LF_FACESIZE-1) * ffi.sizeof "WCHAR"
 		else

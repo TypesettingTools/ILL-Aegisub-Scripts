@@ -19,6 +19,7 @@
 -- THE SOFTWARE.
 
 -- Font scale values for increased size & later downscaling to produce floating point coordinates
+export FONT_LF_FACESIZE = 32
 export FONT_UPSCALE = 64
 export FONT_DOWNSCALE = 1 / FONT_UPSCALE
 export IS_UNIX = jit.os != "Windows"
