@@ -20,14 +20,14 @@ class Line
 		{:styles, :meta} = ass
 		{:res_x, :res_y, :video_x_correct_factor} = meta
 
-		if type(l.text) == "string" and not l.isShape 
+		if type(l.text) == "string"
 			l.text = Text l.text
 
 		if not l.data and not l.isShape
 			l.text\moveToFirstLayer!
 
 		with l
-			.text_stripped = .isShape and .text\gsub("%b{}", "") or .text\stripped!
+			.text_stripped = .isShape and .text.textBlocks[1]\gsub("%b{}", "") or .text\stripped!
 			.duration = .end_time - .start_time
 			textIsBlank = Util.isBlank .text_stripped
 
@@ -57,7 +57,7 @@ class Line
 						.data[tag] = value
 
 			-- sets the values found in the tags to the style
-			.tags or= Tags .isShape and .text\match("%b{}") or .text.tagsBlocks[1]\get!
+			.tags or= Tags .text.tagsBlocks[1]\get!
 			for {:tag, :name} in *.tags\split!
 				{:style_name, :value} = tag
 				if style_name
@@ -94,12 +94,16 @@ class Line
 				-- to make everything more dynamic
 				.shape = .text_stripped
 				.text_stripped = ""
+				.prevspace = 0
+				.postspace = 0
 
 			-- gets the metric values of the text
 			if textIsBlank
 				textExtents = font\getTextExtents " "
 				.width = 0
 				.height = textExtents.height
+				.ascent = 0
+				.descent = 0
 			else
 				textValue = .isShape and "" or .text_stripped
 				textExtents = font\getTextExtents textValue
@@ -422,6 +426,8 @@ class Line
 				lerpTagTransform f, dado, tags
 				lerpTagFade f, dado, tags
 				return tags, text
+			if l.isShape
+				line.tags = line.text.tagsBlocks[1]
 			fn line, i, end_frame
 
 	-- callback to access the shapes
