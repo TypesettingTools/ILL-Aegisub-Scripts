@@ -387,13 +387,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.5.4",
-                    "released": "2024-12-01",
+                    "version": "1.5.5",
+                    "released": "2025-02-02",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "70fc6b7b2df84f1120ab524af56e11d4066dd6ba"
+                            "sha1": "50e0f2758d67a63191f00146c02969f9596f036f"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -438,7 +438,7 @@
                         {
                             "name": "/Ass/Line.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "409b63a246d1a00117fb84ea7cd738af6e290a93"
+                            "sha1": "ed04c07c54cb67c6e083ccaaff543219b1d8f5fc"
                         },
                         {
                             "name": "/Font/Font.moon",
@@ -606,6 +606,9 @@
                 ],
                 "1.5.4": [
                     "Fix font family"
+                ],
+                "1.5.5": [
+                    "Fix issue #2 and #3"
                 ]
             }
         },
