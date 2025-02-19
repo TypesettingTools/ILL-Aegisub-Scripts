@@ -180,6 +180,10 @@ class Ass
 			copyInstance = Table.copy l.text
 			l.text = l.text\__tostring!
 			return copyInstance
+		elseif l.isShape and Util.checkClass l.text, "Text"
+			copyInstance = Table.copy l.text
+			l.text = l.text\__tostring!
+			return copyInstance
 		elseif l.tags
 			local tags
 			if Util.checkClass l.tags, "Tags"
