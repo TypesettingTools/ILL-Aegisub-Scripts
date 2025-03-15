@@ -387,13 +387,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.5.7",
-                    "released": "2025-02-19",
+                    "version": "1.5.8",
+                    "released": "2025-03-15",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "7193cf1dae5cf47e06080f9e7578973f20a46db8"
+                            "sha1": "0a84da0c9931942fb3d84ed5ba44fd3b2f156ad1"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -433,7 +433,7 @@
                         {
                             "name": "/Ass/Ass.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "fc2987d6464c3b849c54bcb1524652439927ab90"
+                            "sha1": "4ce31428ab0529a9e32dcac03251536d452428f2"
                         },
                         {
                             "name": "/Ass/Line.moon",
@@ -612,6 +612,9 @@
                 ],
                 "1.5.7": [
                     "Fix set text on shape dialogs"
+                ],
+                "1.5.8": [
+                    "Fix insert shape in Line"
                 ]
             }
         },
