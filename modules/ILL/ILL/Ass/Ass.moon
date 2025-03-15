@@ -176,11 +176,10 @@ class Ass
 
 	-- sets the final value of the text
 	setText: (l) ->
-		if not l.isShape and Util.checkClass l.text, "Text"
-			copyInstance = Table.copy l.text
-			l.text = l.text\__tostring!
-			return copyInstance
-		elseif l.isShape and Util.checkClass l.text, "Text"
+		if Util.checkClass l.text, "Text"
+			if l.isShape
+				l.text = l.tags\__tostring! .. l.shape
+				return
 			copyInstance = Table.copy l.text
 			l.text = l.text\__tostring!
 			return copyInstance
