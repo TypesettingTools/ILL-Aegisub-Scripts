@@ -85,11 +85,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.5.6",
-                    "released": "2024-04-16",
+                    "version": "2.5.7",
+                    "released": "2025-04-15",
                     "files": [
                         {
-                            "sha1": "8edc360e4ac43f378f7489bb6bc5585d4a6fa644",
+                            "sha1": "f7e0a805e07506be4a820ad2beef73d3f6f272c1",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -167,6 +167,9 @@
                 ],
                 "2.5.6": [
                     "Minor fix"
+                ],
+                "2.5.7": [
+                    "Add Shape to clip (clipboard)"
                 ]
             },
             "name": "Shapery",
