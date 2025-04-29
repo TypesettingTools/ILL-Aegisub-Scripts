@@ -29,7 +29,7 @@ class Curve
 	-- flattens the bezier segment
 	flatten: (len = @getLength!, reduce = 1) =>
 		len = math.floor len / reduce + 0.5
-		lengths = @getArcLenghts len
+		lengths = @getArcLengths len
 		points = {Point @a.x, @a.y}
 		for i = 1, len - 1
 			insert points, @getPTatTime Curve.uniformTime lengths, len, i / len
@@ -44,7 +44,7 @@ class Curve
 		return 0 if a.x == p.x and a.y == p.y
 		return 1 if d.x == p.x and d.y == p.y
 		length = @getLength!
-		lengths = @getArcLenghts precision
+		lengths = @getArcLengths precision
 		for t = 0, 1, 1 / precision
 			u = Curve.uniformTime lengths, length, t
 			if @getPTatTime(u)\distance(p) <= tolerance
@@ -120,7 +120,7 @@ class Curve
 	getNormalized: (t, inverse) =>
 		t = Math.clamp t, 0, 1
 		n = @getLength!
-		u = Curve.uniformTime @getArcLenghts(n), n, t
+		u = Curve.uniformTime @getArcLengths(n), n, t
 		p = @getPTatTime u
 		tan = @getDerivative u
 		with tan
@@ -172,7 +172,7 @@ class Curve
 
 	-- Return a table containing the lenght of all the arc
 	-- The "precision" variable can be considered the distance of the points from each other in pixel 
-	getArcLenghts: (precision = 100) =>
+	getArcLengths: (precision = 100) =>
 		z = 1 / precision
 		lengths, clen = {0}, 0
 		cx, cy = @getXatTime(0), @getYatTime(0)
