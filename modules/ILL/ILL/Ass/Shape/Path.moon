@@ -9,6 +9,7 @@ class Path
 
 	-- Create a new Path object
 	new: (path) =>
+		@hasCurve = false
 		if type(path) == "string"
 			@import path
 		elseif type(path) == "table"
@@ -118,12 +119,17 @@ class Path
 				j += 1
 			insert newPath, newContour
 		@path = newPath
+		@hasCurve = false
 		return @
 
 	-- Simplifies the number of path points
 	simplify: (tolerance = 0.5, highestQuality = true, recreateBezier = true, angleThreshold = 170) =>
 		@cleanContours!
-		@path = Path.Simplifier(@path, tolerance, highestQuality, recreateBezier, angleThreshold)
+		if @hasCurve
+			@flatten!
+		if recreateBezier
+			@hasCurve = true
+		@path = Path.Simplifier @path, tolerance, highestQuality, recreateBezier, angleThreshold
 		return @
 
 	-- Move the @path by specified distance
@@ -368,32 +374,16 @@ class Path
 		return length
 
 	-- Gets the normalized tangent on the Path given a time
-	-- Gets the normalized tangent on the Path given a time
 	getNormalized: (t = 0.5) =>
-		sumLength, length, newPath, tan, p, u = 0, t * @getLength!, Path!, nil, nil, nil
-		@callBackPath (id, seg, k) ->
-			path, segmentLen = {}, seg\getLength!
-			if newPath.path[k] == nil
-				newPath.path[k] = {seg.a}
+		sumLength, length, tan, p, u = 0, t * @getLength!, nil, nil, nil
+		@callBackPath (id, seg) ->
+			segmentLen = seg\getLength!
 			if sumLength + segmentLen >= length
 				u = (length - sumLength) / segmentLen
 				tan, p, u = seg\getNormalized u
-				spt = seg\split(u)[1]
-				if id == 'l'
-					insert newPath.path[k], spt.b
-				else if id == 'b'
-					insert newPath.path[k], spt.b
-					insert newPath.path[k], spt.c
-					insert newPath.path[k], spt.b
-				return "break", p, u, newPath
-			if id == 'l'
-				insert newPath.path[k], seg.b
-			else
-				insert newPath.path[k], seg.b
-				insert newPath.path[k], seg.c
-				insert newPath.path[k], seg.d
+				return "break"
 			sumLength += segmentLen
-		return tan, p, u, newPath
+		return tan, p, u
 
 	-- Distort the Path into another Path
 	-- http://www.planetclegg.com/projects/WarpingTextToSplines.html
@@ -468,6 +458,8 @@ class Path
 					-- checks if the shape has only m, l and b commands
 					unless cmd\find "[mlb]"
 						error "shape unknown", 2
+					if cmd == "b" and not @hasCurve
+						@hasCurve = true
 					currCmd = cmd
 				insert path, Point tonumber(x), tonumber(y), currCmd
 			path[1].id = "l"
