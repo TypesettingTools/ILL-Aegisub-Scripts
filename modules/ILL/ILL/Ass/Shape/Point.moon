@@ -50,9 +50,10 @@ class Point
 
 	-- Rotate the object according the given params.
 	rotate: (angle, c = Point!) =>
-		{:x, :y} = @
-		@x = x * math.cos(angle) - y * math.sin(angle)
-		@y = x * math.sin(angle) + y * math.cos(angle)
+		x_rel = @x - c.x
+		y_rel = @y - c.y
+		@x = x_rel * math.cos(angle) - y_rel * math.sin(angle) + c.x
+		@y = x_rel * math.sin(angle) + y_rel * math.cos(angle) + c.y 
 		return @
 
 	-- Rotate the object according the given params.
