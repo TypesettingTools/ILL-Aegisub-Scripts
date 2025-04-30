@@ -375,15 +375,30 @@ class Path
 
 	-- Gets the normalized tangent on the Path given a time
 	getNormalized: (t = 0.5) =>
-		sumLength, length, tan, p, u = 0, t * @getLength!, nil, nil, nil
-		@callBackPath (id, seg) ->
-			segmentLen = seg\getLength!
+		sumLength, length, newPath, tan, p, u = 0, t * @getLength!, Path!, nil, nil, nil
+		@callBackPath (id, seg, k) ->
+			path, segmentLen = {}, seg\getLength!
+			if newPath.path[k] == nil
+				newPath.path[k] = {seg.a}
 			if sumLength + segmentLen >= length
 				u = (length - sumLength) / segmentLen
 				tan, p, u = seg\getNormalized u
-				return "break"
+				spt = seg\split(u)[1]
+				if id == 'l'
+					insert newPath.path[k], spt.b
+				else if id == 'b'
+					insert newPath.path[k], spt.b
+					insert newPath.path[k], spt.c
+					insert newPath.path[k], spt.b
+				return "break", p, u, newPath
+			if id == 'l'
+				insert newPath.path[k], seg.b
+			else
+				insert newPath.path[k], seg.b
+				insert newPath.path[k], seg.c
+				insert newPath.path[k], seg.d
 			sumLength += segmentLen
-		return tan, p, u
+		return tan, p, u, newPath
 
 	-- Distort the Path into another Path
 	-- http://www.planetclegg.com/projects/WarpingTextToSplines.html
