@@ -406,7 +406,7 @@
                         {
                             "name": "/Ass/Shape/Path.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "54b92ab39cd3c89420f424832e70852f94a1bda9"
+                            "sha1": "f67156cae1a9059a2e5f2794991533079ba48f35"
                         },
                         {
                             "name": "/Ass/Shape/Point.moon",
