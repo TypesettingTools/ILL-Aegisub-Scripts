@@ -401,7 +401,7 @@
                         {
                             "name": "/Ass/Shape/Curve.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "48be877a563e33ded0d8e343999ccaf1e62c6e82"
+                            "sha1": "5df2fe7d8516b21f3c84a3aad77b756225ffea5d"
                         },
                         {
                             "name": "/Ass/Shape/Path.moon",
