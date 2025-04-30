@@ -411,7 +411,7 @@
                         {
                             "name": "/Ass/Shape/Point.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "8ea0c0a39be5fb05d7496f60a3058a162f493d94"
+                            "sha1": "a6a2e2b021b875130283e9297769a6677e38d1c2"
                         },
                         {
                             "name": "/Ass/Shape/Segment.moon",
