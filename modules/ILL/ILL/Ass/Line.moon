@@ -314,12 +314,107 @@ class Line
 		Line.process ass, l
 		unless l.isShape
 			l.lines = Line.lineBreaks ass, l, noblank
+			l.extended = true
+
+	-- splits the text word by word
+	words: (ass, l) ->
+		if l.extended
+			words = {n: 0}
+			for i = 1, l.lines.n
+				lineBreak = l.lines[i]
+				left = switch l.data.an
+					when 1, 4, 7 then l.eff_margin_l
+					when 2, 5, 8 then (ass.meta.res_x - l.eff_margin_l - l.eff_margin_r - lineBreak.width) / 2 + l.eff_margin_l
+					when 3, 6, 9 then ass.meta.res_x - l.eff_margin_r - lineBreak.width
+				for j = 1, lineBreak.n
+					lineTags = lineBreak[j]
+					lineTagsText = lineTags.text_stripped
+					lineTagsTags = lineTags.tags\get!
+					for prevspace, wordText, postspace in lineTagsText\gmatch "(%s*)(%S+)(%s*)"
+						word = Table.copy lineTags
+						word.tags = Tags lineTagsTags
+						word.text = Text wordText
+						word.text.tagsBlocks[1] = Tags lineTagsTags
+						word.text_stripped = wordText
+						font = Font word.data
+						textExtents = font\getTextExtents wordText
+						prevspace = prevspace\len!
+						postspace = postspace\len!
+						spacewidth = font\getTextExtents(" ").width
+						left += prevspace * spacewidth
+						word.width = textExtents.width * ass.meta.video_x_correct_factor
+						word.left = left
+						word.center = left + word.width * 0.5
+						word.right = left + word.width
+						word.top = lineTags.top
+						word.middle = lineTags.middle
+						word.bottom = lineTags.bottom
+						word.x = switch l.data.an
+							when 1, 4, 7 then word.left
+							when 2, 5, 8 then word.center
+							when 3, 6, 9 then word.right
+						word.y = lineTags.y
+						left += word.width + postspace * spacewidth
+						words.n += 1
+						words[words.n] = word
+			return words
+		else
+			error "You have to extend the line before you get the words", 2
+
+	-- splits the text character by character
+	chars: (ass, l, noblank) ->
+		if l.extended
+			chars = {n: 0}
+			for i = 1, l.lines.n
+				lineBreak = l.lines[i]
+				left = switch l.data.an
+					when 1, 4, 7 then l.eff_margin_l
+					when 2, 5, 8 then (ass.meta.res_x - l.eff_margin_l - l.eff_margin_r - lineBreak.width) / 2 + l.eff_margin_l
+					when 3, 6, 9 then ass.meta.res_x - l.eff_margin_r - lineBreak.width
+				for j = 1, lineBreak.n
+					lineTags = lineBreak[j]
+					lineTagsText = lineTags.text_stripped
+					lineTagsTags = lineTags.tags\get!
+					for ci, charText in UTF8(lineTagsText)\chars!
+						char = Table.copy lineTags
+						char.tags = Tags lineTagsTags
+						char.text = Text charText
+						char.text.tagsBlocks[1] = Tags lineTagsTags
+						char.text_stripped = charText
+						font = Font char.data
+						textExtents = font\getTextExtents charText
+						char.width = textExtents.width * ass.meta.video_x_correct_factor
+						char.left = left
+						char.center = left + char.width * 0.5
+						char.right = left + char.width
+						char.top = lineTags.top
+						char.middle = lineTags.middle
+						char.bottom = lineTags.bottom
+						char.x = switch l.data.an
+							when 1, 4, 7 then char.left
+							when 2, 5, 8 then char.center
+							when 3, 6, 9 then char.right
+						char.y = lineTags.y
+						left += char.width
+						chars.n += 1
+						chars[chars.n] = char
+			if noblank
+				charsNoblank = {n: 0}
+				for char in *chars
+					unless Util.isBlank char.text_stripped
+						charsNoblank.n += 1
+						charsNoblank[charsNoblank.n] = char
+				return charsNoblank
+			return chars
+		else
+			error "You have to extend the line before you get the characters", 2
 
 	-- updates line information
 	update: (ass, l, noblank) ->
 		l.lines = nil
 		l.data = nil
 		l.styleref = nil
+		l.extended = false
 		l.text = l.text\__tostring!
 		Line.extend ass, l, noblank
 

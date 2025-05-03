@@ -304,6 +304,39 @@
             "name": "ILL - Change Alignment",
             "description": "Changes the alignment of a text or shape without changing its original position",
             "author": "ILLTeam"
+        },
+        "ILL.SplitText": {
+            "url": "@{baseUrl}#@{namespace}",
+            "fileBaseUrl": "@{fileBaseUrl}macros/@{namespace}",
+            "channels": {
+                "main": {
+                    "default": true,
+                    "version": "2.0.0",
+                    "released": "2025-05-03",
+                    "files": [
+                        {
+                            "sha1": "6c1a5debebe1f72227e548fe126c259b6c3354d4",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "name": ".moon"
+                        }
+                    ],
+                    "requiredModules": [
+                        {
+                            "moduleName": "ILL.ILL",
+                            "feed": "@{feed:ILL}",
+                            "version": "1.6.1"
+                        }
+                    ]
+                }
+            },
+            "changelog": {
+                "2.0.0": [
+                    "Initial depctrl release"
+                ]
+            },
+            "name": "ILL - Split Text",
+            "description": "Splits the text in several ways",
+            "author": "ILLTeam"
         }
     },
     "modules": {
