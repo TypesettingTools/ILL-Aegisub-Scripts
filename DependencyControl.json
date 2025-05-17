@@ -85,11 +85,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.5.7",
-                    "released": "2025-04-15",
+                    "version": "2.5.8",
+                    "released": "2025-05-17",
                     "files": [
                         {
-                            "sha1": "f7e0a805e07506be4a820ad2beef73d3f6f272c1",
+                            "sha1": "07a069882f3f1f5cc13e1970d0900ea91d20db78",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -170,6 +170,9 @@
                 ],
                 "2.5.7": [
                     "Add Shape to clip (clipboard)"
+                ],
+                "2.5.8": [
+                    "Improved Path.simplify"
                 ]
             },
             "name": "Shapery",
@@ -423,13 +426,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.6.1",
-                    "released": "2025-05-03",
+                    "version": "1.6.2",
+                    "released": "2025-05-17",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "df46534c2f15632f371c3cfbcc3324fce7a11d5e"
+                            "sha1": "f0e599506de3307721b37dd895420891f659f423"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -439,7 +442,7 @@
                         {
                             "name": "/Ass/Shape/Path.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "f67156cae1a9059a2e5f2794991533079ba48f35"
+                            "sha1": "7688baa8a2f976acaad68088d998728032d4375d"
                         },
                         {
                             "name": "/Ass/Shape/Point.moon",
@@ -660,6 +663,9 @@
                 ],
                 "1.6.1": [
                     "Add Split Text"
+                ],
+                "1.6.2": [
+                    "Improved Path.simplify"
                 ]
             }
         },
