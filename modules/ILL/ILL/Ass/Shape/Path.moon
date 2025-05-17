@@ -123,13 +123,12 @@ class Path
 		return @
 
 	-- Simplifies the number of path points
-	simplify: (tolerance = 0.5, highestQuality = true, recreateBezier = true, angleThreshold = 170) =>
-		@cleanContours!
+	simplify: (tolerance = 0.5, filterNoise = true, recreateBezier = true, angleThreshold = 170) =>
 		if @hasCurve
 			@flatten!
 		if recreateBezier
 			@hasCurve = true
-		@path = Path.Simplifier @path, tolerance, highestQuality, recreateBezier, angleThreshold
+		@path = Path.Simplifier @path, tolerance, filterNoise, recreateBezier, angleThreshold
 		return @
 
 	-- Move the @path by specified distance
@@ -580,7 +579,8 @@ class Path
 	offset: (delta, join_type, end_type, miter_limit, arc_tolerance, preserve_collinear, reverse_solution) =>
 		subj = @convertToClipper!
 		subj = subj\inflate delta, join_type, end_type, miter_limit, arc_tolerance, preserve_collinear, reverse_solution
-		@path = Path.convertFromClipper(subj).path
+		result = Path.convertFromClipper(subj).path
+		@path = Path.Simplifier result, 0.1, true, false
 		return @
 
 Path.RoundingPath = (path, radius, inverted = false, cornerStyle = "Rounded", rounding = "Absolute") ->
@@ -888,7 +888,7 @@ Path.RoundingPath = (path, radius, inverted = false, cornerStyle = "Rounded", ro
 
 	return newPath
 
-Path.Simplifier = (points, tolerance = 0.1, highestQuality, recreateBezier, angleThreshold) ->
+Path.Simplifier = (paths, tolerance, filterNoise, recreateBezier, angleThreshold) ->
 	simplifyRadialDist = (points, sqTolerance) ->
 		prevPoint = points[1]
 		newPoints = {prevPoint}
@@ -1151,7 +1151,27 @@ Path.Simplifier = (points, tolerance = 0.1, highestQuality, recreateBezier, angl
 		tHat1 = computeLeftTangent(d, 1)
 		tHat2 = computeRightTangent(d, nPts)
 		fitCubic(b, d, 1, nPts, tHat1, tHat2, _error)
-	
+
+	elaborateSection = (section, final, tolerance) ->
+		if #section <= 4
+			for i = 2, #section
+				insert final, section[i]
+			return {section[#section]}
+		
+		b = {section[1]}
+			
+		fitCurve(b, section, #section, tolerance)
+		
+		for i = 2, #b
+			insert final, b[i]
+		
+		return {b[#b]}
+
+	isInRange = (cs, ls) ->
+		if not (cs > ls * 2) and not (cs < ls / 2)
+			return true
+		return false
+
 	getAngle = (p1, p2, p3) ->
 		x1, y1 = p1.x, p1.y
 		x2, y2 = p2.x, p2.y
@@ -1159,79 +1179,45 @@ Path.Simplifier = (points, tolerance = 0.1, highestQuality, recreateBezier, angl
 		angle = math.atan2(y3 - y2, x3 - x2) - math.atan2(y1 - y2, x1 - x2)
 		return math.deg(angle)
 
-	elaborateSelected = (selected, final, tolerance) ->
-
-		if #selected <= 4
-			for i = 1, #selected
-				insert final, selected[i]
-			return
-		
-		b = {selected[1]}
-			
-		fitCurve(b, selected, #selected, tolerance)
-		
-		for i = 1, #b
-			insert final, b[i]
-
-	isInRange = (cs, ls) ->
-		if not (cs > ls * 2) and not (cs < ls / 2)
-			return true
-		return false
-
-	simplify = (points, tolerance, angleThreshold) ->
+	simplifyBezier = (points, tolerance, angleThreshold) ->
 		at1, at2 = angleThreshold, 360 - angleThreshold
 		final = {}
 
-		-- first and last points are duplicated for checks but ignored
 		insert points, 1, points[#points]
 		insert points, points[2]
 
-		lastSegmentLength = 0
-		selected = {points[1]}
-		-- the current work around to remove duplicated points
-		-- close the contour by duplicating the first point
-		-- in this foor loop is possible to change to #points - 2
-		-- if you want to have an open contour
+		lastSegmentLength = points[1]\distance(points[2])
+		section = {points[1]}
+
 		for i = 2, #points - 1
-			
-			-- first point must not be a control point
-			if i == 2
-				lastSegmentLength = points[2]\distance(points[3])
-				points[i].id = "l"
-				selected = {points[i]}
-				continue
-			insert selected, points[i]
+			insert section, points[i]
 			
 			currSegmentLength = points[i]\distance(points[i + 1])
 			if not isInRange(currSegmentLength, lastSegmentLength)
-				elaborateSelected(selected, final, tolerance)
-				selected = {}
+				section = elaborateSection(section, final, tolerance)
 				lastSegmentLength = currSegmentLength
 				continue
 			
 			ang = math.abs getAngle(points[i-1], points[i], points[i+1])
 			if ang < at1 or ang > at2
-				elaborateSelected(selected, final, tolerance)
-				selected = {}
+				section = elaborateSection(section, final, tolerance)
 				lastSegmentLength = currSegmentLength
 				continue
 			
 			lastSegmentLength = currSegmentLength
 
-		elaborateSelected(selected, final, tolerance)
 		return final
 
-	for i = 1, #points
+	for i = 1, #paths
+		if filterNoise
+			paths[i] = simplifyRadialDist(paths[i], tolerance)
+
 		if recreateBezier
-			points[i] = simplifyRadialDist(points[i], 0.5) -- from 0.5 to 1
-			points[i] = simplify(points[i], tolerance, angleThreshold)
+			paths[i] = simplifyBezier(paths[i], tolerance, angleThreshold)
 		else
 			sqTolerance = tolerance * tolerance
-			if not highestQuality
-				points[i] = simplifyRadialDist(points[i], sqTolerance)
-
-			points[i] = simplifyDouglasPeucker(points[i], sqTolerance)
-
-	return points
+			paths[i] = simplifyDouglasPeucker(paths[i], sqTolerance)
+		
+	return paths
 
 {:Path}

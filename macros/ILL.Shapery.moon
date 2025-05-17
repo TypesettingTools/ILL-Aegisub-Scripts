@@ -1,6 +1,6 @@
 export script_name        = "Shapery"
 export script_description = "Does several types of shape manipulations from the simplest to the most complex"
-export script_version     = "2.5.7"
+export script_version     = "2.5.8"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
@@ -223,7 +223,7 @@ ManipulateDialog = (sub, sel, activeLine) ->
 	if button != "Cancel"
 		cfg = getConfigElements!
 		ass = Ass sub, sel, activeLine, not cfg.saveLines
-		{:enableClip, :recreateBezier, :distance, :angleThreshold} = elements
+		{:enableClip, :recreateBezier, :distance, :angleThreshold, :tolerance} = elements
 		for l, s, i, n in ass\iterSel!
 			ass\progressLine s, i, n
 			Line.extend ass, l
@@ -231,7 +231,10 @@ ManipulateDialog = (sub, sel, activeLine) ->
 				{:clip, :isIclip} = l.data
 				if clip
 					if type(clip) != "table"
-						clip = Path(clip)\flatten(distance)\simplify(tolerance, false, recreateBezier, angleThreshold)\export!
+						if button == "Flatten"
+							clip = Path(clip)\flatten(distance)\export!
+						elseif button == "Simplify"
+							clip = Path(clip)\simplify(tolerance, false, recreateBezier, angleThreshold)\export!
 						if isIclip
 							l.tags\insert {{"iclip", clip}}
 						else
@@ -248,7 +251,7 @@ ManipulateDialog = (sub, sel, activeLine) ->
 					if button == "Flatten"
 						path\flatten distance
 					elseif button == "Simplify"
-						path\flatten(distance)\simplify tolerance, false, recreateBezier, angleThreshold
+						path\simplify tolerance, false, recreateBezier, angleThreshold
 					l.shape = path\export!
 					ass\insertLine l, s
 				else
