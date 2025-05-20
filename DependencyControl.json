@@ -314,11 +314,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.0.0",
-                    "released": "2025-05-03",
+                    "version": "2.1.0",
+                    "released": "2025-05-20",
                     "files": [
                         {
-                            "sha1": "39e40737943cc56c24f925870af7b486916711b0",
+                            "sha1": "1d3b312db282727e6bac7f1bba7f3eeac10766cf",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -335,6 +335,9 @@
             "changelog": {
                 "2.0.0": [
                     "Initial depctrl release"
+                ],
+                "2.1.0": [
+                    "Update Split Text"
                 ]
             },
             "name": "ILL - Split Text",
@@ -426,13 +429,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.6.2",
-                    "released": "2025-05-17",
+                    "version": "1.6.3",
+                    "released": "2025-05-20",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "f0e599506de3307721b37dd895420891f659f423"
+                            "sha1": "56b640f25953f9e40a9839e85f3ccc6485e19ec7"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -477,7 +480,7 @@
                         {
                             "name": "/Ass/Line.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "4b4d55348ab8474f965ca037a600a91afdab9b45"
+                            "sha1": "d498928ad8aa0e3f4aa6dfff38d41945e07b0ad5"
                         },
                         {
                             "name": "/Font/Font.moon",
@@ -666,6 +669,9 @@
                 ],
                 "1.6.2": [
                     "Improved Path.simplify"
+                ],
+                "1.6.3": [
+                    "Update Split Text"
                 ]
             }
         },
