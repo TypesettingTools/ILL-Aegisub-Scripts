@@ -1,12 +1,12 @@
 export script_name        = "ILL - Split Text"
 export script_description = "Splits the text in several ways"
-export script_version     = "2.0.0"
+export script_version     = "2.1.0"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.SplitText"
 
 haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
 
-local depctrl, ILL, Ass, Line
+local depctrl, ILL
 if haveDepCtrl
 	depctrl = DependencyControl {
 		feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json",
@@ -30,14 +30,21 @@ main = (mode) ->
         ass = Ass sub, sel, activeLine
         for l, s, i, n in ass\iterSel!
             ass\progressLine s, i, n
-            ass\removeLine l, s
-            Line.extend ass, l
             unless l.isShape
-                for line in *(mode == "chars" and Line.chars(ass, l, true) or Line.words(ass, l, true))
+                ass\removeLine l, s
+                Line.extend ass, l
+                for line in *switch mode
+                        when "chars" then Line.chars ass, l
+                        when "words" then Line.words ass, l
+                        when "breaks" then Line.breaks ass, l
+                        when "tags" then Line.tags ass, l
                     fr = line.data.angle != 0
                     if fr or line.text\existsTagOr "frx", "fry", "frz"
                         line.tags\insert {{"org", line.data.org}, true}
-                    line.tags\insert {{"pos", Line.reallocate l, line}, true}
+					unless line.tags\existsTag "move"
+						line.tags\insert {{"pos", Line.reallocate l, line}, true}
+					else
+						line.tags\insert {{"move", Line.reallocate l, line, true}, true}
                     line.text\modifyBlock line.tags
                     ass\insertLine line, s
             else
@@ -48,7 +55,11 @@ if haveDepCtrl
     depctrl\registerMacros {
         {"By Chars", "", main "chars"}
         {"By Words", "", main "words"}
+        {"By Tags Blocks", "", main "tags"}
+        {"By Line Breaks", "", main "breaks"}
     }
 else
     aegisub.register_macro "#{script_name}/By Chars", "", main "chars"
     aegisub.register_macro "#{script_name}/By Words", "", main "words"
+    aegisub.register_macro "#{script_name}/By Tags Blocks", "", main "tags"
+    aegisub.register_macro "#{script_name}/By Line Breaks", "", main "breaks"

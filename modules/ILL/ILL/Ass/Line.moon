@@ -316,6 +316,15 @@ class Line
 			l.lines = Line.lineBreaks ass, l, noblank
 			l.extended = true
 
+	-- updates line information
+	update: (ass, l, noblank) ->
+		l.lines = nil
+		l.data = nil
+		l.styleref = nil
+		l.extended = false
+		l.text = l.text\__tostring!
+		Line.extend ass, l, noblank
+
 	-- splits the text word by word
 	words: (ass, l) ->
 		if l.extended
@@ -357,12 +366,13 @@ class Line
 						left += word.width + postspace * spacewidth
 						words.n += 1
 						words[words.n] = word
+					left += lineTags.postspace
 			return words
 		else
 			error "You have to extend the line before you get the words", 2
 
 	-- splits the text character by character
-	chars: (ass, l, noblank) ->
+	chars: (ass, l, noblank = true) ->
 		if l.extended
 			chars = {n: 0}
 			for i = 1, l.lines.n
@@ -398,6 +408,7 @@ class Line
 						left += char.width
 						chars.n += 1
 						chars[chars.n] = char
+					left += lineTags.postspace
 			if noblank
 				charsNoblank = {n: 0}
 				for char in *chars
@@ -409,14 +420,48 @@ class Line
 		else
 			error "You have to extend the line before you get the characters", 2
 
-	-- updates line information
-	update: (ass, l, noblank) ->
-		l.lines = nil
-		l.data = nil
-		l.styleref = nil
-		l.extended = false
-		l.text = l.text\__tostring!
-		Line.extend ass, l, noblank
+	-- splits the text line break by line break
+	breaks: (ass, l) ->
+		if l.extended
+			lines = {n: 0}
+			for line in *l.lines
+				lineBreak = Table.copy line[1]
+				newBreakText = ""
+				for i = 1, line.n
+					newBreakTags = line[i].tags
+					if i > 1
+						newBreakTags\clear line.data
+					newBreakText ..= newBreakTags\get! .. line[i].text_stripped
+					lineBreak.y = math.max line[i].y, lineBreak.y
+				lineBreak.text = Text newBreakText
+				lineBreak.tags = Tags lineBreak.text.tagsBlocks[1]\get!
+				lineBreak.text.tagsBlocks[1] = Tags lineBreak.text.tagsBlocks[1]\get!
+				lineBreak.text_stripped = newBreakText
+				left = switch l.data.an
+					when 1, 4, 7 then l.eff_margin_l
+					when 2, 5, 8 then (ass.meta.res_x - l.eff_margin_l - l.eff_margin_r - lineBreak.width) / 2 + l.eff_margin_l
+					when 3, 6, 9 then ass.meta.res_x - l.eff_margin_r - lineBreak.width
+				lineBreak.x = switch l.data.an
+					when 1, 4, 7 then left
+					when 2, 5, 8 then left + lineBreak.width * 0.5
+					when 3, 6, 9 then left + lineBreak.width
+				lines.n += 1
+				lines[lines.n] = lineBreak
+			return lines
+		else
+			error "You have to extend the line before you get the breaks", 2
+
+	-- splits the text tags blocks by tags blocks
+	tags: (ass, l) ->
+		if l.extended
+			lines = {n: 0}
+			for line in *l.lines
+				for lineTags in *line
+					lines.n += 1
+					lines[lines.n] = Table.copy lineTags
+			return lines
+		else
+			error "You have to extend the line before you get the tags", 2
 
 	-- callback to map between all possible lines of text
 	callBackTags: (ass, l, fn) ->
