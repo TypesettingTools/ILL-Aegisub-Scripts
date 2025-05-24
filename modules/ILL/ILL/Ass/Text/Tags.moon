@@ -185,6 +185,17 @@ class Tags
 		@tags = table.concat [s\__tostring! for s in *newSplit]
 		@close!
 
+	-- performs a difference operation on the tags
+	-- tags A = Tags {\fs20\bord10}
+	-- tags B = Tags {\fs20\bord10\fs100}
+	-- result = {\fs100}
+	difference: (tags) =>
+		for {:name, :value} in *tags\split!
+			if @existsTag name
+				if @getTag(name).value == value
+					@remove name
+		@close!
+
 	-- checks if the tag exists in the tags
 	existsTag: (name) =>
 		if name != "t"

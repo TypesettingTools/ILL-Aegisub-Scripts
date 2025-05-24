@@ -189,30 +189,11 @@ class Text
 			tagsBlock = tagsBlocks[i]
 			textBlock = textBlocks[i]
 			new ..= tostring(tagsBlock)\gsub("{(.-)\\N}", "\\N{%1}") .. textBlock
-			new = new\gsub "}{", ""
+			-- new = new\gsub "}{", ""
 
 		-- gets the line breaks
 		breaks = Util.splitByPattern new, "\\N"
 		n = #breaks
-
-		-- solves cases where the initial tags are only blanks
-		i = 1
-		while true
-			if breaks[i] and Util.isBlank breaks[i]\gsub "%b{}", ""
-				n -= 1
-				i -= 1
-				table.remove breaks, 1
-			else
-				break
-			i += 1
-
-		-- fixes a bug of extreme masochism
-		if n >= 1
-			breaks[1] = Text(breaks[1])\__tostring!
-			breaks[1] = breaks[1]\gsub "}%s*{", ""
-			if n > 1
-				breaks[n] = Text(breaks[n])\__tostring!
-				breaks[n] = breaks[n]\gsub "}%s*{", ""
 
 		return breaks, n
 

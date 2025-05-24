@@ -27,7 +27,7 @@ class Line
 			l.text\moveToFirstLayer!
 
 		with l
-			.text_stripped = .isShape and .text.textBlocks[1]\gsub("%b{}", "") or .text\stripped!
+			.text_stripped = .text.textBlocks[1]\gsub "%b{}", ""
 			.duration = .end_time - .start_time
 			textIsBlank = Util.isBlank .text_stripped
 
@@ -89,7 +89,8 @@ class Line
 				.postspace = .text_stripped\match("^%s*.-(%s*)$")\len! * .space_width
 
 				-- removes the spaces between the text
-				.text_stripped = .text_stripped\match "^%s*(.-)%s*$"
+				unless textIsBlank
+					.text_stripped = .text_stripped\match "^%s*(.-)%s*$"
 			else
 				-- to make everything more dynamic
 				.shape = .text_stripped
@@ -100,14 +101,15 @@ class Line
 			-- gets the metric values of the text
 			if textIsBlank
 				textExtents = font\getTextExtents " "
+				textMetrics = font\getMetrics!
 				.width = 0
 				.height = textExtents.height
-				.ascent = 0
-				.descent = 0
+				.ascent = textMetrics.ascent
+				.descent = textMetrics.descent
 			else
 				textValue = .isShape and "" or .text_stripped
 				textExtents = font\getTextExtents textValue
-				textMetrics = font\getMetrics textValue
+				textMetrics = font\getMetrics!
 				.width = textExtents.width * video_x_correct_factor
 				.height = textExtents.height
 				.ascent = textMetrics.ascent
@@ -168,7 +170,7 @@ class Line
 					.y = .bottom
 
 	-- gets all the data values from the tags blocks
-	tagsBlocks: (ass, l, noblank = true) ->
+	tagsBlocks: (ass, l, noblank = false) ->
 		data = {width: 0, height: 0, n: 0}
 
 		unless l.data
@@ -188,6 +190,7 @@ class Line
 			line.text_stripped = text
 			line.tags = tags\clean!
 			line.text = Text line.tags\__tostring! .. text
+			line.text.textBlocks[1] = text
 
 			-- support for the \r tag in line processing
 			if reset = line.tags\getTag "r"
@@ -214,6 +217,7 @@ class Line
 
 		-- fixes the positioning of tag blocks in relation to the rendered text
 		for line in *data
+
 			-- sums with the previous space values
 			left += line.prevspace
 
@@ -240,7 +244,7 @@ class Line
 		return noblank and dataNoblank or data
 
 	-- gets all the data values from the line breaks
-	lineBreaks: (ass, l, noblank = true) ->
+	lineBreaks: (ass, l, noblank = false) ->
 		data = {width: 0, height: 0, n: 0}
 
 		unless l.data
@@ -310,7 +314,7 @@ class Line
 		return noblank and dataNoblank or data
 
 	-- adds all possible information to the line
-	extend: (ass, l, noblank) ->
+	extend: (ass, l, noblank = true) ->
 		Line.process ass, l
 		unless l.isShape
 			l.lines = Line.lineBreaks ass, l, noblank
@@ -326,7 +330,7 @@ class Line
 		Line.extend ass, l, noblank
 
 	-- splits the text word by word
-	words: (ass, l) ->
+	words: (ass, l, noblank = false) ->
 		if l.extended
 			words = {n: 0}
 			for i = 1, l.lines.n
@@ -339,7 +343,7 @@ class Line
 					lineTags = lineBreak[j]
 					lineTagsText = lineTags.text_stripped
 					lineTagsTags = lineTags.tags\get!
-					for prevspace, wordText, postspace in lineTagsText\gmatch "(%s*)(%S+)(%s*)"
+					for prevspace, wordText, postspace in lineTagsText\gmatch "(%s*)(.+)(%s*)"
 						word = Table.copy lineTags
 						word.tags = Tags lineTagsTags
 						word.text = Text wordText
@@ -367,6 +371,13 @@ class Line
 						words.n += 1
 						words[words.n] = word
 					left += lineTags.postspace
+			if noblank
+				wordsNoblank = {n: 0}
+				for word in *words
+					unless Util.isBlank word.text_stripped
+						wordsNoblank.n += 1
+						wordsNoblank[wordsNoblank.n] = word
+				return wordsNoblank
 			return words
 		else
 			error "You have to extend the line before you get the words", 2
@@ -428,9 +439,9 @@ class Line
 				lineBreak = Table.copy line[1]
 				newBreakText = ""
 				for i = 1, line.n
-					newBreakTags = line[i].tags
+					newBreakTags = Table.copy line[i].tags
 					if i > 1
-						newBreakTags\clear line.data
+						newBreakTags\difference line[i-1].tags
 					newBreakText ..= newBreakTags\get! .. line[i].text_stripped
 					lineBreak.y = math.max line[i].y, lineBreak.y
 				lineBreak.text = Text newBreakText
@@ -457,8 +468,9 @@ class Line
 			lines = {n: 0}
 			for line in *l.lines
 				for lineTags in *line
-					lines.n += 1
-					lines[lines.n] = Table.copy lineTags
+					unless Util.isBlank lineTags.text_stripped
+						lines.n += 1
+						lines[lines.n] = Table.copy lineTags
 			return lines
 		else
 			error "You have to extend the line before you get the tags", 2
