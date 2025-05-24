@@ -314,11 +314,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.1.0",
-                    "released": "2025-05-20",
+                    "version": "2.1.2",
+                    "released": "2025-05-24",
                     "files": [
                         {
-                            "sha1": "1d3b312db282727e6bac7f1bba7f3eeac10766cf",
+                            "sha1": "73c9a8f443981506f4410b730671cfa14a704baf",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -338,6 +338,9 @@
                 ],
                 "2.1.0": [
                     "Update Split Text"
+                ],
+                "2.1.2": [
+                    "Update Files"
                 ]
             },
             "name": "ILL - Split Text",
@@ -429,13 +432,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.6.3",
-                    "released": "2025-05-20",
+                    "version": "1.6.4",
+                    "released": "2025-05-24",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "56b640f25953f9e40a9839e85f3ccc6485e19ec7"
+                            "sha1": "a4314334a8660dbbb6c54ce055417aea9792711a"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -465,12 +468,12 @@
                         {
                             "name": "/Ass/Text/Tags.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "aa5ca3efb9ec5771b3e90274736243fb0388bb13"
+                            "sha1": "576538213ae30cd2c5c4755fd80ee0f14c097835"
                         },
                         {
                             "name": "/Ass/Text/Text.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "8d27e05ea45128d3a538ab88e808bc0f49c1810a"
+                            "sha1": "1806a0a3fc22c903b34d34648571fd50c582c99f"
                         },
                         {
                             "name": "/Ass/Ass.moon",
@@ -480,7 +483,7 @@
                         {
                             "name": "/Ass/Line.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "d498928ad8aa0e3f4aa6dfff38d41945e07b0ad5"
+                            "sha1": "e3a5fd0d7c307a0f7df515fec41129d9109df18c"
                         },
                         {
                             "name": "/Font/Font.moon",
@@ -672,6 +675,9 @@
                 ],
                 "1.6.3": [
                     "Update Split Text"
+                ],
+                "1.6.4": [
+                    "Update Files"
                 ]
             }
         },
