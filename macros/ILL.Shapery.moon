@@ -1,12 +1,12 @@
 export script_name        = "Shapery"
 export script_description = "Does several types of shape manipulations from the simplest to the most complex"
-export script_version     = "2.5.8"
+export script_version     = "2.6.0"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
 haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
 
-local depctrl, Clipper, ILL, Aegi, Ass, Config, Line, Curve, Path, Point, Util, Math, Table, Util
+local depctrl, Clipper, ILL
 if haveDepCtrl
 	depctrl = DependencyControl {
 		feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json",
@@ -19,19 +19,18 @@ if haveDepCtrl
 			}
 			{
 				"ILL.ILL"
-				version: "1.4.5"
+				version: "1.6.5"
 				url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
 				feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}
 		}
 	}
 	Clipper, ILL = depctrl\requireModules!
-	{:Aegi, :Ass, :Config, :Line, :Curve, :Path, :Point, :Util, :Math, :Table, :Util} = ILL
 else
 	Clipper = require "clipper2.clipper2"
 	ILL = require "ILL.ILL"
-	{:Aegi, :Ass, :Config, :Line, :Curve, :Path, :Point, :Util, :Math, :Table, :Util} = ILL
 
+{:Aegi, :Ass, :Config, :Line, :Curve, :Path, :Point, :Util, :Math, :Table, :Util} = ILL
 clipboard = require "aegisub.clipboard"
 
 checkPathClockWise = (path) ->
@@ -504,6 +503,23 @@ ShaperyMacrosDialog = (macro) ->
 						ass\setLine l, s
 					else
 						ass\warning s, "Expected a shape"
+				when "Shape morph"
+					if l.isShape
+						if n < 2 or n > 2
+							ass\error s, "Expected two selected lines"
+						ass\removeLine l, s
+						Line.callBackExpand ass, l, nil, (line) ->
+							{px, py} = line.data.pos
+							line.shape = Path(line.shape)\move(px, py)\export!
+							table.insert lines, line
+						if i == n
+							a = Path lines[1].shape
+							b = Path lines[2].shape
+							Line.callBackFBF ass, lines[1], (line, frame_index, end_frame, j, n) ->
+								line.shape = a\morph(b, (j - 1) / (n - 1))\export!
+								ass\insertLine line, s
+					else
+						ass\warning s, "Expected a shape"
 				when "Shape merge"
 					if l.isShape
 						{:color1, :color3, :color4, :alpha, :alpha1, :alpha2, :alpha3, :alpha4} = l.data
@@ -534,6 +550,45 @@ ShaperyMacrosDialog = (macro) ->
 									lcopy = Table.copy line
 								table.insert clip, Path(line.shape)\export!
 							mergeShapesObj[code] = {:i, pos: l.data.pos, line: lcopy, shape: table.concat clip}
+					else
+						ass\warning s, "Expected a shape"
+				when "Shape blend"
+					if l.isShape
+						if n < 2
+							ass\error s, "Expected one or more selected lines"
+						Line.callBackExpand ass, l, nil, (line, j) ->
+							{x, y} = l.data.pos
+							newPath = Path line.shape
+							newPath\move x, y
+							line.tags\remove "move"
+							line.tags\insert {{"pos", {0, 0}}, true}
+							line.data.pos = {0, 0}
+							table.insert mergeShapesObj, {tags: line.tags, path: newPath}
+							if j == 1 and i == 1
+								lines.line = Table.copy line
+						if i == n
+							ass\deleteLines l, sel
+							prev = mergeShapesObj[1]
+							preb = prev.path\boundingBox!
+							sumw = preb.width
+							maxh = preb.height
+							buff = {}
+							for j = 2, #mergeShapesObj
+								buff[j] = mergeShapesObj[j].path\boundingBox!
+								maxh = math.max maxh, buff[j].height
+							text = prev.tags\get! .. prev.path\move(0, -maxh + preb.height)\export!
+							for j = 2, #mergeShapesObj
+								curr = mergeShapesObj[j]
+								tags = Table.copy curr.tags
+								tags\difference prev.tags
+								tags\insert "\\p1"
+								curr.path\move -sumw, -maxh + buff[j].height
+								text ..= tags\get! .. curr.path\export!
+								sumw += buff[j].width
+								prev = curr
+							lines.line.text = ILL.Text text
+							lines.line.isShape = false
+							ass\insertLine lines.line, s
 					else
 						ass\warning s, "Expected a shape"
 				when "Shape without holes"
@@ -627,13 +682,13 @@ ShaperyMacrosDialog = (macro) ->
 
 if haveDepCtrl
 	depctrl\registerMacros {
-		{"Pathfinder",  "", PathfinderDialog}
-		{"Offsetting",  "", OffsettingDialog}
-		{"Manipulate",  "", ManipulateDialog}
-		{"Transform",   "", TransformDialog}
-		{"Utilities",   "", UtilitiesDialog}
-		{"Cut Contour", "", CutContourDialog}
-		{"Config",      "", ConfigDialog}
+		{"Pathfinder",    "", PathfinderDialog}
+		{"Offsetting",    "", OffsettingDialog}
+		{"Manipulate",    "", ManipulateDialog}
+		{"Transform",     "", TransformDialog}
+		{"Utilities",     "", UtilitiesDialog}
+		{"Cut Contour",   "", CutContourDialog}
+		{"Config",        "", ConfigDialog}
 	}
 
 	depctrl\registerMacros {
@@ -643,6 +698,8 @@ if haveDepCtrl
 		{"Shape to clip",             "", ShaperyMacrosDialog "Shape to clip"}
 		{"Shape to clip (clipboard)", "", ShaperyMacrosDialog "Shape to clip (clipboard)"}
 		{"Shape merge",               "", ShaperyMacrosDialog "Shape merge"}
+		{"Shape blend",               "", ShaperyMacrosDialog "Shape blend"}
+		{"Shape morph",               "", ShaperyMacrosDialog "Shape morph"}
 		{"Shape trim",                "", ShaperyMacrosDialog "Shape trim"}
 		{"Shape to 0,0",              "", ShaperyMacrosDialog "Shape to 0,0"}
 		{"Shape to pos",              "", ShaperyMacrosDialog "Shape to pos"}
@@ -652,13 +709,13 @@ if haveDepCtrl
 		{"Shape bounding box",        "", ShaperyMacrosDialog "Shape bounding box"}
 	}, ": Shapery macros :"
 else
-	aegisub.register_macro "#{script_name}/Pathfinder",  "", PathfinderDialog
-	aegisub.register_macro "#{script_name}/Offsetting",  "", OffsettingDialog
-	aegisub.register_macro "#{script_name}/Manipulate",  "", ManipulateDialog
-	aegisub.register_macro "#{script_name}/Transform",   "", TransformDialog
-	aegisub.register_macro "#{script_name}/Utilities",   "", UtilitiesDialog
-	aegisub.register_macro "#{script_name}/Cut Contour", "", CutContourDialog
-	aegisub.register_macro "#{script_name}/Config",      "", ConfigDialog
+	aegisub.register_macro "#{script_name}/Pathfinder",    "", PathfinderDialog
+	aegisub.register_macro "#{script_name}/Offsetting",    "", OffsettingDialog
+	aegisub.register_macro "#{script_name}/Manipulate",    "", ManipulateDialog
+	aegisub.register_macro "#{script_name}/Transform",     "", TransformDialog
+	aegisub.register_macro "#{script_name}/Utilities",     "", UtilitiesDialog
+	aegisub.register_macro "#{script_name}/Cut Contour",   "", CutContourDialog
+	aegisub.register_macro "#{script_name}/Config",        "", ConfigDialog
 
 	aegisub.register_macro ": Shapery macros :/Shape expand",              "", ShaperyMacrosDialog "Shape expand"
 	aegisub.register_macro ": Shapery macros :/Shape clipper",             "", ShaperyMacrosDialog "Shape clipper"
@@ -666,6 +723,8 @@ else
 	aegisub.register_macro ": Shapery macros :/Shape to clip",             "", ShaperyMacrosDialog "Shape to clip"
 	aegisub.register_macro ": Shapery macros :/Shape to clip (clipboard)", "", ShaperyMacrosDialog "Shape to clip (clipboard)"
 	aegisub.register_macro ": Shapery macros :/Shape merge",               "", ShaperyMacrosDialog "Shape merge"
+	aegisub.register_macro ": Shapery macros :/Shape blend",               "", ShaperyMacrosDialog "Shape blend"
+	aegisub.register_macro ": Shapery macros :/Shape morph",               "", ShaperyMacrosDialog "Shape morph"
 	aegisub.register_macro ": Shapery macros :/Shape trim",                "", ShaperyMacrosDialog "Shape trim"
 	aegisub.register_macro ": Shapery macros :/Shape to 0,0",              "", ShaperyMacrosDialog "Shape to 0,0"
 	aegisub.register_macro ": Shapery macros :/Shape to pos",              "", ShaperyMacrosDialog "Shape to pos"

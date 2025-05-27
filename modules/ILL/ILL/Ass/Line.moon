@@ -107,7 +107,10 @@ class Line
 				.ascent = textMetrics.ascent
 				.descent = textMetrics.descent
 			else
-				textValue = .isShape and "" or .text_stripped
+				textValue = ""
+				unless .isShape
+					textValue = .text_stripped\gsub "\\h", " "
+					.text_stripped = textValue
 				textExtents = font\getTextExtents textValue
 				textMetrics = font\getMetrics!
 				.width = textExtents.width * video_x_correct_factor
@@ -189,8 +192,8 @@ class Line
 
 			line.text_stripped = text
 			line.tags = tags\clean!
-			line.text = Text line.tags\__tostring! .. text
-			line.text.textBlocks[1] = text
+			line.text = Text line.tags\__tostring! .. line.text_stripped
+			line.text.textBlocks[1] = line.text_stripped
 
 			-- support for the \r tag in line processing
 			if reset = line.tags\getTag "r"
@@ -343,7 +346,15 @@ class Line
 					lineTags = lineBreak[j]
 					lineTagsText = lineTags.text_stripped
 					lineTagsTags = lineTags.tags\get!
-					for prevspace, wordText, postspace in lineTagsText\gmatch "(%s*)(.+)(%s*)"
+					wordText, k = "", 1
+					while k <= #lineTagsText
+						s = lineTagsText\sub k, k
+						if s\match "%s"
+							wordText = lineTagsText\match "(%s+)", k
+							k += #wordText
+						else
+							wordText = lineTagsText\match "(%S+)", k
+							k += #wordText
 						word = Table.copy lineTags
 						word.tags = Tags lineTagsTags
 						word.text = Text wordText
@@ -351,10 +362,6 @@ class Line
 						word.text_stripped = wordText
 						font = Font word.data
 						textExtents = font\getTextExtents wordText
-						prevspace = prevspace\len!
-						postspace = postspace\len!
-						spacewidth = font\getTextExtents(" ").width
-						left += prevspace * spacewidth
 						word.width = textExtents.width * ass.meta.video_x_correct_factor
 						word.left = left
 						word.center = left + word.width * 0.5
@@ -367,7 +374,7 @@ class Line
 							when 2, 5, 8 then word.center
 							when 3, 6, 9 then word.right
 						word.y = lineTags.y
-						left += word.width + postspace * spacewidth
+						left += word.width
 						words.n += 1
 						words[words.n] = word
 					left += lineTags.postspace
@@ -383,7 +390,7 @@ class Line
 			error "You have to extend the line before you get the words", 2
 
 	-- splits the text character by character
-	chars: (ass, l, noblank = true) ->
+	chars: (ass, l, noblank = false) ->
 		if l.extended
 			chars = {n: 0}
 			for i = 1, l.lines.n
@@ -432,7 +439,7 @@ class Line
 			error "You have to extend the line before you get the characters", 2
 
 	-- splits the text line break by line break
-	breaks: (ass, l) ->
+	breaks: (ass, l, noblank = false) ->
 		if l.extended
 			lines = {n: 0}
 			for line in *l.lines
@@ -442,11 +449,10 @@ class Line
 					newBreakTags = Table.copy line[i].tags
 					if i > 1
 						newBreakTags\difference line[i-1].tags
-					newBreakText ..= newBreakTags\get! .. line[i].text_stripped
+					newBreakText ..= newBreakTags\get! .. line[i].text.textBlocks[1]
 					lineBreak.y = math.max line[i].y, lineBreak.y
 				lineBreak.text = Text newBreakText
 				lineBreak.tags = Tags lineBreak.text.tagsBlocks[1]\get!
-				lineBreak.text.tagsBlocks[1] = Tags lineBreak.text.tagsBlocks[1]\get!
 				lineBreak.text_stripped = newBreakText
 				left = switch l.data.an
 					when 1, 4, 7 then l.eff_margin_l
@@ -458,41 +464,35 @@ class Line
 					when 3, 6, 9 then left + lineBreak.width
 				lines.n += 1
 				lines[lines.n] = lineBreak
+			if noblank
+				linesNoblank = {n: 0}
+				for line in *lines
+					unless Util.isBlank line.text_stripped
+						linesNoblank.n += 1
+						linesNoblank[linesNoblank.n] = line
+				return linesNoblank
 			return lines
 		else
 			error "You have to extend the line before you get the breaks", 2
 
 	-- splits the text tags blocks by tags blocks
-	tags: (ass, l) ->
+	tags: (ass, l, noblank = false) ->
 		if l.extended
 			lines = {n: 0}
 			for line in *l.lines
 				for lineTags in *line
-					unless Util.isBlank lineTags.text_stripped
-						lines.n += 1
-						lines[lines.n] = Table.copy lineTags
+					lines.n += 1
+					lines[lines.n] = Table.copy lineTags
+			if noblank
+				linesNoblank = {n: 0}
+				for line in *lines
+					unless Util.isBlank line.text_stripped
+						linesNoblank.n += 1
+						linesNoblank[linesNoblank.n] = line
+				return linesNoblank
 			return lines
 		else
 			error "You have to extend the line before you get the tags", 2
-
-	-- callback to map between all possible lines of text
-	callBackTags: (ass, l, fn) ->
-		unless l.isShape
-			{:clip, :isIclip} = l.data
-			j, isMove = 0, l.tags\existsTag "move"
-			for lineBreak in *l.lines
-				for lineBlock in *lineBreak
-					j += 1
-					-- gets the new position of the text
-					lineBlock.data.pos = Line.reallocate l, lineBlock
-					if isMove
-						lineBlock.tags\insert {{"move", Line.reallocate l, lineBlock, true}, true}
-					else
-						lineBlock.tags\insert {{"pos", lineBlock.data.pos}, true}
-					-- adds the values \clip or \iclip to all tag blocks
-					if clip
-						lineBlock.tags\insert {{isIclip and "iclip" or "clip", clip}}
-					fn lineBlock, j
 
 	-- callback to access the line values frame by frame
 	callBackFBF: (ass, l, fn) ->
@@ -562,6 +562,8 @@ class Line
 		-- gets the start and end time values in frames
 		stt_frame = Aegi.ffm start_time
 		end_frame = Aegi.ffm end_time
+		j = 0
+		n = end_frame - stt_frame
 		-- iterates over all the identified frames
 		for i = stt_frame, end_frame - 1
 			s = Aegi.mff i
@@ -572,15 +574,39 @@ class Line
 			line.start_time = s
 			line.end_time = e
 			line.duration = e - s
-			line.text\callBack (tags, text, j) ->
-				if j == 1
-					lerpTagMove f, dado, tags
-				lerpTagTransform f, dado, tags
-				lerpTagFade f, dado, tags
-				return tags, text
-			if l.isShape
-				line.tags = line.text.tagsBlocks[1]
-			fn line, i, end_frame
+			unless l.isShape
+				line.text\callBack (tags, text, j) ->
+					if j == 1
+						lerpTagMove f, dado, tags
+					lerpTagTransform f, dado, tags
+					lerpTagFade f, dado, tags
+					return tags, text
+			else
+				lerpTagMove f, dado, line.tags
+				lerpTagTransform f, dado, line.tags
+				lerpTagFade f, dado, line.tags
+			j += 1
+			fn line, i, end_frame, j, n
+
+	-- callback to map between all possible lines of text
+	callBackTags: (ass, l, fn) ->
+		unless l.isShape
+			{:clip, :isIclip} = l.data
+			j, isMove = 0, l.tags\existsTag "move"
+			for lineBreak in *l.lines
+				for lineBlock in *lineBreak
+					j += 1
+					-- gets the new position of the text
+					lineBlock.text_stripped = lineBlock.text_stripped\gsub "\\h", " "
+					lineBlock.data.pos = Line.reallocate l, lineBlock
+					if isMove
+						lineBlock.tags\insert {{"move", Line.reallocate l, lineBlock, true}, true}
+					else
+						lineBlock.tags\insert {{"pos", lineBlock.data.pos}, true}
+					-- adds the values \clip or \iclip to all tag blocks
+					if clip
+						lineBlock.tags\insert {{isIclip and "iclip" or "clip", clip}}
+					fn lineBlock, j
 
 	-- callback to access the shapes
 	callBackShape: (ass, l, fn) ->

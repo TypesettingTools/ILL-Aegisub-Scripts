@@ -5,6 +5,14 @@ import Curve from require "ILL.ILL.Ass.Shape.Curve"
 import Segment from require "ILL.ILL.Ass.Shape.Segment"
 {:insert, :remove} = table
 
+checkPathClockWise = (path) ->
+	sum = 0
+	for i = 1, #path
+		currPoint = path[i]
+		nextPoint = path[(i % #path) + 1]
+		sum += (nextPoint.x - currPoint.x) * (nextPoint.y + currPoint.y)
+	return sum < 0
+
 class Path
 
 	-- Create a new Path object
@@ -43,6 +51,122 @@ class Path
 					point.x, point.y = px, py
 		return @
 
+	-- Checks if path is CCW
+	isClockWise: =>
+		clone = @clone!
+		clone\flatten!
+		for j = 1, #clone.path
+			unless checkPathClockWise clone.path[j]
+				return false
+		return true
+
+	-- Morphology between two paths
+	morph: (to, t = 0.5) =>
+		math.randomseed 1337
+
+		return @ if t == 0
+		return to if t == 1
+
+		calculateSumOfSquares = (a, b, offset) ->
+			n, sum = #a, 0
+			for i = 1, n
+				c = a[((offset + i - 2) % n) + 1]
+				sum += Point(c.x, c.y)\sqDistance Point b[i].x, b[i].y
+			return sum
+
+		findBestRotation = (a, b) ->
+			n = #a
+			low = 0
+			high = n - 1
+			while low < high
+				mid1 = math.floor low + (high - low) / 3
+				mid2 = math.floor high - (high - low) / 3
+				d1 = calculateSumOfSquares a, b, mid1
+				d2 = calculateSumOfSquares a, b, mid2
+				if d1 < d2
+					high = mid2 - 1
+				else
+					low = mid1 + 1
+			return low
+
+		rotatePath = (path, n) ->
+			len = #path
+			n = ((n % len) + len) % len
+			if n == 0
+				return
+			rotated = {}
+			for i = 1, len
+				rotated[i] = path[((i + n - 1) % len) + 1]
+			return rotated
+
+		fromPathClone = @clone!
+		fromPathClone\flatten!
+		fromPathClone\closeContours!
+
+		toPathClone = to\clone!
+		toPathClone\flatten!
+		toPathClone\closeContours!
+
+		newPath = Path!
+		for i = 1, math.max #fromPathClone.path, #toPathClone.path
+			local fromPath, toPath
+			if #fromPathClone.path > #toPathClone.path
+				fromPath = fromPathClone.path[i]
+				if i > #toPathClone.path
+					toPath = toPathClone.path[#toPathClone.path]
+					unless checkPathClockWise toPath
+						newToPath = {}
+						toPathCloneBbox = toPathClone\boundingBox!
+						for j = #toPath, 1, -1
+							{:x, :y} = toPath[j]
+							table.insert newToPath, Point (toPathCloneBbox.l + toPathCloneBbox.width * 0.5) + x * 1e-3, (toPathCloneBbox.t + toPathCloneBbox.height * 0.5) +  y * 1e-3
+						toPath = newToPath
+				else
+					toPath = toPathClone.path[i]
+			else
+				toPath = toPathClone.path[i]
+				if i > #fromPathClone.path
+					fromPath = fromPathClone.path[#fromPathClone.path]
+					unless checkPathClockWise fromPath
+						newFromPath = {}
+						fromPathCloneBbox = fromPathClone\boundingBox!
+						for j = #fromPath, 1, -1
+							{:x, :y} = fromPath[j]
+							table.insert newFromPath, Point (fromPathCloneBbox.l + fromPathCloneBbox.width * 0.5) + x * 1e-3, (fromPathCloneBbox.t + fromPathCloneBbox.height * 0.5) +  y * 1e-3
+						fromPath = newFromPath
+				else
+					fromPath = fromPathClone.path[i]
+
+			local smaller, bigger, smallerIsTo
+			if #fromPath > #toPath
+				bigger, smaller, smallerIsTo = fromPath, toPath, true
+			else
+				bigger, smaller, smallerIsTo = toPath, fromPath, false
+
+			table.remove smaller
+			table.remove bigger
+
+			diff = #bigger - #smaller
+			for j = 1, diff
+				k = math.random 1, #smaller - 1
+				table.insert smaller, k + 1, smaller[k]\lerp smaller[k + 1], 0.5
+
+			bestOffset = findBestRotation smaller, bigger
+			if bestOffset != 0
+				smaller = rotatePath smaller, -bestOffset
+
+			table.insert smaller, Point smaller[1].x, smaller[1].y
+			table.insert bigger, Point bigger[1].x, bigger[1].y
+
+			pathFrom = smallerIsTo and bigger or smaller
+			pathTo = smallerIsTo and smaller or bigger
+
+			newPath.path[i] = {}
+			for j = 1, #pathFrom
+				table.insert newPath.path[i], pathFrom[j]\lerp pathTo[j], t
+
+		return newPath
+
 	-- Callback to access the Curves and Segments
 	callBackPath: (fn) =>
 		k = 1
@@ -62,12 +186,12 @@ class Path
 			k += 1
 		return @
 
+	-- Changes path orientation
 	reverse: =>
 		reversedPath = {}
 		@callBackPath (id, seg, index) ->
 			if reversedPath[index] == nil
 				reversedPath[index] = {seg.a}
-
 			seg\reverse!
 			if id == "l"
 				table.insert reversedPath[index], 1, seg.a
@@ -75,7 +199,6 @@ class Path
 				table.insert reversedPath[index], 1, seg.c
 				table.insert reversedPath[index], 1, seg.b
 				table.insert reversedPath[index], 1, seg.a
-			
 		@path = reversedPath
 		return @
 
