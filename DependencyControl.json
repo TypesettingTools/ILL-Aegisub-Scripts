@@ -85,11 +85,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.6.0",
-                    "released": "2025-05-27",
+                    "version": "2.6.1",
+                    "released": "2025-06-06",
                     "files": [
                         {
-                            "sha1": "3d266eb40c61ba93f62c519d7d1a7b1b89d231ad",
+                            "sha1": "251f2f95886319c820694c1ddf34c84ed75c1202",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -176,6 +176,9 @@
                 ],
                 "2.6.0": [
                     "New Features for Shapery"
+                ],
+                "2.6.1": [
+                    "Add Reverse points"
                 ]
             },
             "name": "Shapery",
