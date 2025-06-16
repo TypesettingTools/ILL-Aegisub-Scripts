@@ -438,13 +438,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.6.5",
-                    "released": "2025-05-27",
+                    "version": "1.6.6",
+                    "released": "2025-06-16",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "eff3689dc22048df2404ce62327b889f3407b262"
+                            "sha1": "34e887269c0704ceac52c5cb3a546b96409a3724"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -454,7 +454,7 @@
                         {
                             "name": "/Ass/Shape/Path.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "124c1fed87acde3ddb892979fd1014a1d799c38b"
+                            "sha1": "48e74f61a08f487e75e0abf0eef7b98a8a7b9b5e"
                         },
                         {
                             "name": "/Ass/Shape/Point.moon",
@@ -687,6 +687,9 @@
                 ],
                 "1.6.5": [
                     "New Features for Shapery"
+                ],
+                "1.6.6": [
+                    "Fixed a bug in Path.simplify"
                 ]
             }
         },
