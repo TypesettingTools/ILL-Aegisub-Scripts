@@ -701,8 +701,8 @@
             "fileBaseUrl": "@{fileBaseUrl}modules/@{namespacePath}",
             "channels": {
                 "main": {
-                    "version": "1.0.2",
-                    "released": "2023-04-30",
+                    "version": "1.0.3",
+                    "released": "2025-07-17",
                     "default": true,
                     "platforms": [
                         "Windows-x64",
@@ -713,7 +713,7 @@
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "8eef6452f0c1dea6f1bc43d1d56b4e65149b9455"
+                            "sha1": "21d7dbffeb245e44e96ed05b114383019f6182e8"
                         },
                         {
                             "name": "/Potrace.moon",
@@ -825,6 +825,9 @@
                     "Update ILL IMG module",
                     "",
                     "- Corrigido inicializa\u00e7\u00e3o no Aegisub v3.2.2"
+                ],
+                "1.0.3": [
+                    "Update ILL.IMG - Fix reduce pixels for ass"
                 ]
             }
         }
