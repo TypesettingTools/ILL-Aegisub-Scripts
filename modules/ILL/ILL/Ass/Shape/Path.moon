@@ -33,22 +33,16 @@ class Path
 			if rawget path, "path"
 				path = path.path
 			for contour in *path
-				insert @path, {}
-				for point in *contour
-					insert @path[#@path], point\clone!
+				@insertContour contour
 		else
 			@path = {}
 
 	-- Returns a copy of the path.
 	clone: => Path @path
 
-	-- Maps all points on the Path
-	map: (fn) =>
-		for contour in *@path
-			for point in *contour
-				px, py = fn point.x, point.y, point
-				if px and py
-					point.x, point.y = px, py
+	-- Update Path data
+	update: (newPath) =>
+		@path = newPath
 		return @
 
 	-- Checks if path is CCW
@@ -60,112 +54,48 @@ class Path
 				return false
 		return true
 
-	-- Morphology between two paths
-	morph: (to, t = 0.5) =>
-		math.randomseed 1337
+	-- Inserts a point inside the Path
+	-- if the index is defined, it inserts the point to the specific contour
+	insertPoint: (point, index) =>
+		index = 1 if #@path == 0
+		@path[index] = {} if index != nil and @path[index] == nil
+		insert @path[index and index or #@path], point\clone!
 
-		return @ if t == 0
-		return to if t == 1
+	-- Push N points for the last contour of the Path
+	pushPoints: (...) =>
+		for point in *{...}
+			@insertPoint point
 
-		calculateSumOfSquares = (a, b, offset) ->
-			n, sum = #a, 0
-			for i = 1, n
-				c = a[((offset + i - 2) % n) + 1]
-				sum += Point(c.x, c.y)\sqDistance Point b[i].x, b[i].y
-			return sum
+	-- Inserts N contours for the Path
+	insertContour: (contour) =>
+		for point in *contour
+			@insertPoint point
 
-		findBestRotation = (a, b) ->
-			n = #a
-			low = 0
-			high = n - 1
-			while low < high
-				mid1 = math.floor low + (high - low) / 3
-				mid2 = math.floor high - (high - low) / 3
-				d1 = calculateSumOfSquares a, b, mid1
-				d2 = calculateSumOfSquares a, b, mid2
-				if d1 < d2
-					high = mid2 - 1
-				else
-					low = mid1 + 1
-			return low
+	-- Push N points for the last contour of the Path
+	pushContours: (...) =>
+		for contour in *{...}
+			@insertContour contour
 
-		rotatePath = (path, n) ->
-			len = #path
-			n = ((n % len) + len) % len
-			if n == 0
-				return
-			rotated = {}
-			for i = 1, len
-				rotated[i] = path[((i + n - 1) % len) + 1]
-			return rotated
+	-- Maps all points on the Path
+	map: (fn) =>
+		for contour in *@path
+			for point in *contour
+				px, py = fn point.x, point.y, point
+				if px and py
+					point.x, point.y = px, py
+		return @
 
-		fromPathClone = @clone!
-		fromPathClone\flatten!
-		fromPathClone\closeContours!
-
-		toPathClone = to\clone!
-		toPathClone\flatten!
-		toPathClone\closeContours!
-
-		newPath = Path!
-		for i = 1, math.max #fromPathClone.path, #toPathClone.path
-			local fromPath, toPath
-			if #fromPathClone.path > #toPathClone.path
-				fromPath = fromPathClone.path[i]
-				if i > #toPathClone.path
-					toPath = toPathClone.path[#toPathClone.path]
-					unless checkPathClockWise toPath
-						newToPath = {}
-						toPathCloneBbox = toPathClone\boundingBox!
-						for j = #toPath, 1, -1
-							{:x, :y} = toPath[j]
-							table.insert newToPath, Point (toPathCloneBbox.l + toPathCloneBbox.width * 0.5) + x * 1e-3, (toPathCloneBbox.t + toPathCloneBbox.height * 0.5) +  y * 1e-3
-						toPath = newToPath
-				else
-					toPath = toPathClone.path[i]
-			else
-				toPath = toPathClone.path[i]
-				if i > #fromPathClone.path
-					fromPath = fromPathClone.path[#fromPathClone.path]
-					unless checkPathClockWise fromPath
-						newFromPath = {}
-						fromPathCloneBbox = fromPathClone\boundingBox!
-						for j = #fromPath, 1, -1
-							{:x, :y} = fromPath[j]
-							table.insert newFromPath, Point (fromPathCloneBbox.l + fromPathCloneBbox.width * 0.5) + x * 1e-3, (fromPathCloneBbox.t + fromPathCloneBbox.height * 0.5) +  y * 1e-3
-						fromPath = newFromPath
-				else
-					fromPath = fromPathClone.path[i]
-
-			local smaller, bigger, smallerIsTo
-			if #fromPath > #toPath
-				bigger, smaller, smallerIsTo = fromPath, toPath, true
-			else
-				bigger, smaller, smallerIsTo = toPath, fromPath, false
-
-			table.remove smaller
-			table.remove bigger
-
-			diff = #bigger - #smaller
-			for j = 1, diff
-				k = math.random 1, #smaller - 1
-				table.insert smaller, k + 1, smaller[k]\lerp smaller[k + 1], 0.5
-
-			bestOffset = findBestRotation smaller, bigger
-			if bestOffset != 0
-				smaller = rotatePath smaller, -bestOffset
-
-			table.insert smaller, Point smaller[1].x, smaller[1].y
-			table.insert bigger, Point bigger[1].x, bigger[1].y
-
-			pathFrom = smallerIsTo and bigger or smaller
-			pathTo = smallerIsTo and smaller or bigger
-
-			newPath.path[i] = {}
-			for j = 1, #pathFrom
-				table.insert newPath.path[i], pathFrom[j]\lerp pathTo[j], t
-
-		return newPath
+	-- Get all points of the Path
+	-- If the index is defined, it gets the points of a specific contour
+	getPoints: (index) =>
+		points = {}
+		if index != nil and @path[i] != nil
+			for point in *@path[i]
+				insert points, point\clone!
+		else
+			@map (x, y, pt) ->
+				insert points, pt\clone!
+		return points
 
 	-- Callback to access the Curves and Segments
 	callBackPath: (fn) =>
@@ -188,19 +118,18 @@ class Path
 
 	-- Changes path orientation
 	reverse: =>
-		reversedPath = {}
+		reversedPath = Path!
 		@callBackPath (id, seg, index) ->
-			if reversedPath[index] == nil
-				reversedPath[index] = {seg.a}
+			if reversedPath.path[index] == nil
+				reversedPath.path[index] = {seg.a}
 			seg\reverse!
 			if id == "l"
-				table.insert reversedPath[index], 1, seg.a
+				insert reversedPath.path[index], 1, seg.a
 			if id == "b"
-				table.insert reversedPath[index], 1, seg.c
-				table.insert reversedPath[index], 1, seg.b
-				table.insert reversedPath[index], 1, seg.a
-		@path = reversedPath
-		return @
+				insert reversedPath.path[index], 1, seg.c
+				insert reversedPath.path[index], 1, seg.b
+				insert reversedPath.path[index], 1, seg.a
+		@update reversedPath
 
 	-- Gets the bounding box and other information from the Path
 	boundingBox: =>
@@ -464,7 +393,7 @@ class Path
 
 	-- Converts all line segments to bezier segments
 	allCurve: =>
-		newPath = {}
+		newPath = Path!
 		for contour in *@path
 			j, add = 2, {contour[1]\clone!}
 			while j <= #contour
@@ -484,9 +413,8 @@ class Path
 					else
 						insert add, curr
 				j += 1
-			insert newPath, add
-		@path = newPath
-		return @
+			insert newPath.path, add
+		@update newPath
 
 	-- Gets the total length of the Path
 	getLength: =>
@@ -583,6 +511,113 @@ class Path
 					newPathsClipper\add newPathClipper
 			@path = Path.convertFromClipper(pathsClipperA\union newPathsClipper).path
 		return @
+
+	-- Morphology between two paths
+	morph: (to, t = 0.5) =>
+		math.randomseed 1337
+
+		return @ if t == 0
+		return to if t == 1
+
+		calculateSumOfSquares = (a, b, offset) ->
+			n, sum = #a, 0
+			for i = 1, n
+				c = a[((offset + i - 2) % n) + 1]
+				sum += Point(c.x, c.y)\sqDistance Point b[i].x, b[i].y
+			return sum
+
+		findBestRotation = (a, b) ->
+			n = #a
+			low = 0
+			high = n - 1
+			while low < high
+				mid1 = math.floor low + (high - low) / 3
+				mid2 = math.floor high - (high - low) / 3
+				d1 = calculateSumOfSquares a, b, mid1
+				d2 = calculateSumOfSquares a, b, mid2
+				if d1 < d2
+					high = mid2 - 1
+				else
+					low = mid1 + 1
+			return low
+
+		rotatePath = (path, n) ->
+			len = #path
+			n = ((n % len) + len) % len
+			if n == 0
+				return
+			rotated = {}
+			for i = 1, len
+				rotated[i] = path[((i + n - 1) % len) + 1]
+			return rotated
+
+		fromPathClone = @clone!
+		fromPathClone\flatten!
+		fromPathClone\closeContours!
+
+		toPathClone = to\clone!
+		toPathClone\flatten!
+		toPathClone\closeContours!
+
+		newPath = Path!
+		for i = 1, math.max #fromPathClone.path, #toPathClone.path
+			local fromPath, toPath
+			if #fromPathClone.path > #toPathClone.path
+				fromPath = fromPathClone.path[i]
+				if i > #toPathClone.path
+					toPath = toPathClone.path[#toPathClone.path]
+					unless checkPathClockWise toPath
+						newToPath = {}
+						toPathCloneBbox = toPathClone\boundingBox!
+						for j = #toPath, 1, -1
+							{:x, :y} = toPath[j]
+							table.insert newToPath, Point (toPathCloneBbox.l + toPathCloneBbox.width * 0.5) + x * 1e-3, (toPathCloneBbox.t + toPathCloneBbox.height * 0.5) +  y * 1e-3
+						toPath = newToPath
+				else
+					toPath = toPathClone.path[i]
+			else
+				toPath = toPathClone.path[i]
+				if i > #fromPathClone.path
+					fromPath = fromPathClone.path[#fromPathClone.path]
+					unless checkPathClockWise fromPath
+						newFromPath = {}
+						fromPathCloneBbox = fromPathClone\boundingBox!
+						for j = #fromPath, 1, -1
+							{:x, :y} = fromPath[j]
+							table.insert newFromPath, Point (fromPathCloneBbox.l + fromPathCloneBbox.width * 0.5) + x * 1e-3, (fromPathCloneBbox.t + fromPathCloneBbox.height * 0.5) +  y * 1e-3
+						fromPath = newFromPath
+				else
+					fromPath = fromPathClone.path[i]
+
+			local smaller, bigger, smallerIsTo
+			if #fromPath > #toPath
+				bigger, smaller, smallerIsTo = fromPath, toPath, true
+			else
+				bigger, smaller, smallerIsTo = toPath, fromPath, false
+
+			table.remove smaller
+			table.remove bigger
+
+			diff = #bigger - #smaller
+			for j = 1, diff
+				k = math.random 1, #smaller - 1
+				table.insert smaller, k + 1, smaller[k]\lerp smaller[k + 1], 0.5
+
+			bestOffset = findBestRotation smaller, bigger
+			if bestOffset != 0
+				smaller = rotatePath smaller, -bestOffset
+
+			table.insert smaller, Point smaller[1].x, smaller[1].y
+			table.insert bigger, Point bigger[1].x, bigger[1].y
+
+			pathFrom = smallerIsTo and bigger or smaller
+			pathTo = smallerIsTo and smaller or bigger
+
+			newPath.path[i] = {}
+			for j = 1, #pathFrom
+				table.insert newPath.path[i], pathFrom[j]\lerp pathTo[j], t
+
+		return newPath
 
 	-- Create the @path table for the given string
 	import: (shape) =>
