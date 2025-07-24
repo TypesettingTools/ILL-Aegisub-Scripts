@@ -42,7 +42,7 @@ class Path
 
 	-- Update Path data
 	update: (newPath) =>
-		@path = newPath
+		@path = newPath.path
 		return @
 
 	-- Checks if path is CCW
