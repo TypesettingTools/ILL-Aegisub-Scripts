@@ -438,13 +438,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.6.6",
-                    "released": "2025-06-16",
+                    "version": "1.6.7",
+                    "released": "2025-07-24",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "34e887269c0704ceac52c5cb3a546b96409a3724"
+                            "sha1": "86fa54db6280c37b983796b9918bb4ae031180af"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -454,7 +454,7 @@
                         {
                             "name": "/Ass/Shape/Path.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "48e74f61a08f487e75e0abf0eef7b98a8a7b9b5e"
+                            "sha1": "1c1c5e394b6655be4aa31d8889cf44200146b55f"
                         },
                         {
                             "name": "/Ass/Shape/Point.moon",
@@ -690,6 +690,9 @@
                 ],
                 "1.6.6": [
                     "Fixed a bug in Path.simplify"
+                ],
+                "1.6.7": [
+                    "Update Files"
                 ]
             }
         },
