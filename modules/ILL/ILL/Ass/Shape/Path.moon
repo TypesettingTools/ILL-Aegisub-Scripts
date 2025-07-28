@@ -1359,7 +1359,7 @@ Path.Simplifier = (paths, tolerance, filterNoise, recreateBezier, angleThreshold
 			paths[i] = simplifyBezier paths[i], tolerance, angleThreshold
 		else
 			paths[i] = simplifyDouglasPeucker paths[i], tolerance ^ 2
-		newPath\insertContour paths[i]
+		insert newPath.path, paths[i]
 
 	return newPath
 
