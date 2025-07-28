@@ -1,4 +1,4 @@
-module_version = "1.6.8"
+module_version = "1.6.9"
 
 haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
 

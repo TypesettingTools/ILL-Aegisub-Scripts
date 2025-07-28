@@ -33,7 +33,9 @@ class Path
 			if rawget path, "path"
 				path = path.path
 			for contour in *path
-				@insertContour contour
+				insert @path, {}
+				for point in *contour
+					insert @path[#@path], point\clone!
 		else
 			@path = {}
 
@@ -42,7 +44,10 @@ class Path
 
 	-- Update Path data
 	update: (newPath) =>
-		@path = newPath.path
+		if rawget newPath, "path"
+			@path = newPath.path
+		else
+			@path = newPath
 		return @
 
 	-- Checks if path is CCW
@@ -54,27 +59,14 @@ class Path
 				return false
 		return true
 
-	-- Inserts a point inside the Path
-	-- if the index is defined, it inserts the point to the specific contour
-	insertPoint: (point, index) =>
-		index = 1 if #@path == 0
-		@path[index] = {} if index != nil and @path[index] == nil
-		insert @path[index and index or #@path], point\clone!
-
-	-- Push N points for the last contour of the Path
-	pushPoints: (...) =>
-		for point in *{...}
-			@insertPoint point
-
-	-- Inserts N contours for the Path
-	insertContour: (contour) =>
-		for point in *contour
-			@insertPoint point
-
-	-- Push N points for the last contour of the Path
-	pushContours: (...) =>
-		for contour in *{...}
-			@insertContour contour
+	-- Remove holes from Path
+	withoutHoles: =>
+		clone = @clone!
+		clone\flatten!
+		for j = 1, #clone.path
+			unless checkPathClockWise clone.path[j]
+				remove @path, j
+		return @
 
 	-- Maps all points on the Path
 	map: (fn) =>
@@ -149,10 +141,11 @@ class Path
 
 	-- Flattens bezier segments and optionally flattens line segments of the @path
 	flatten: (distance, flattenStraight, customLen) =>
-		newPath = {}
+		newPath = Path!
+		@hasCurve = false
 		for contour in *@path
-			j, newContour = 2, {}
-			insert newContour, contour[1]\clone!
+			newContour = {contour[1]\clone!}
+			j = 2
 			while j <= #contour
 				prev = contour[j-1]
 				curr = contour[j]
@@ -169,10 +162,8 @@ class Path
 					else
 						insert newContour, curr
 				j += 1
-			insert newPath, newContour
-		@path = newPath
-		@hasCurve = false
-		return @
+			insert newPath.path, newContour
+		@update newPath
 
 	-- Simplifies the number of path points
 	simplify: (tolerance = 0.5, filterNoise = true, recreateBezier = true, angleThreshold = 170) =>
@@ -180,8 +171,7 @@ class Path
 			@flatten!
 		if recreateBezier
 			@hasCurve = true
-		@path = Path.Simplifier @path, tolerance, filterNoise, recreateBezier, angleThreshold
-		return @
+		@update Path.Simplifier @path, tolerance, filterNoise, recreateBezier, angleThreshold
 
 	-- Move the @path by specified distance
 	move: (px, py) =>
@@ -395,25 +385,25 @@ class Path
 	allCurve: =>
 		newPath = Path!
 		for contour in *@path
-			j, add = 2, {contour[1]\clone!}
+			j, newContour = 2, {contour[1]\clone!}
 			while j <= #contour
 				prev = contour[j-1]
 				curr = contour[j]
 				if curr.id == "b"
-					insert add, curr
-					insert add, contour[j+1]
-					insert add, contour[j+2]
+					insert newContour, curr
+					insert newContour, contour[j+1]
+					insert newContour, contour[j+2]
 					j += 2
 				else
 					unless prev\equals curr
 						a, b, c, d = Segment(prev, curr)\lineToBezier!
-						insert add, b
-						insert add, c
-						insert add, d
+						insert newContour, b
+						insert newContour, c
+						insert newContour, d
 					else
-						insert add, curr
+						insert newContour, curr
 				j += 1
-			insert newPath.path, add
+			insert newPath.path, newContour
 		@update newPath
 
 	-- Gets the total length of the Path
@@ -493,7 +483,7 @@ class Path
 			pathA = @clone!
 			pathB = pathA\clone!
 			pathB\move xshad, yshad
-			@path = pathA\difference(pathB).path
+			@update pathA\difference(pathB).path
 		else
 			pathA = @clone!
 			pathA\closeContours!
@@ -509,7 +499,7 @@ class Path
 					newPathClipper = CPP.path.new!
 					newPathClipper\push sortPointsToClockWise {pa[j], pa[j + 1], pb[j + 1], pb[j]}
 					newPathsClipper\add newPathClipper
-			@path = Path.convertFromClipper(pathsClipperA\union newPathsClipper).path
+			@update Path.convertFromClipper(pathsClipperA\union newPathsClipper).path
 		return @
 
 	-- Morphology between two paths
@@ -624,7 +614,7 @@ class Path
 		@path = {}
 		for strPath in shape\gmatch "m [^m]+"
 			insert @path, {}
-			i, path, currCmd = 2, @path[#@path], nil
+			path, currCmd = @path[#@path], nil
 			for cmd, x, y in strPath\gmatch "(%a?)%s+(%-?%d[%.%d]*)%s+(%-?%d[%.%d]*)"
 				if cmd != ""
 					-- checks if the shape has only m, l and b commands
@@ -662,7 +652,7 @@ class Path
 						cmd = "l"
 						insert shape[i], "l #{curr.x} #{curr.y}"
 				j += 1
-			shape[i] = "m #{contour[1].x} #{contour[1].y} " .. table.concat shape[i], " "
+			shape[i] = "m #{contour[1].x} #{contour[1].y} #{table.concat shape[i], " "}"
 		return table.concat shape, " "
 
 	-- (Clipper function)
@@ -705,41 +695,35 @@ class Path
 	unite: (clip) =>
 		subj = @convertToClipper!
 		clip = clip\convertToClipper!
-		@path = Path.convertFromClipper(subj\union clip).path
-		return @
+		@update Path.convertFromClipper subj\union clip
 
 	-- (Clipper function)
 	-- Remove from @path another path object
 	difference: (clip) =>
 		subj = @convertToClipper!
 		clip = clip\convertToClipper!
-		@path = Path.convertFromClipper(subj\difference clip).path
-		return @
+		@update Path.convertFromClipper subj\difference clip
 
 	-- (Clipper function)
 	-- Intersect @path with another path object
 	intersect: (clip) =>
 		subj = @convertToClipper!
 		clip = clip\convertToClipper!
-		@path = Path.convertFromClipper(subj\intersection clip).path
-		return @
+		@update Path.convertFromClipper subj\intersection clip
 
 	-- (Clipper function)
 	-- Join @path with another path object and remove the parts where those intersect
 	exclude: (clip) =>
 		subj = @convertToClipper!
 		clip = clip\convertToClipper!
-		@path = Path.convertFromClipper(subj\xor clip).path
-		return @
+		@update Path.convertFromClipper subj\xor clip
 
 	-- (Clipper function)
 	-- Inflate/deflate @path by the specifies amount
 	offset: (delta, join_type, end_type, miter_limit, arc_tolerance, preserve_collinear, reverse_solution) =>
 		subj = @convertToClipper!
 		subj = subj\inflate delta, join_type, end_type, miter_limit, arc_tolerance, preserve_collinear, reverse_solution
-		result = Path.convertFromClipper(subj).path
-		@path = Path.Simplifier result, 0.1, true, false
-		return @
+		@update Path.Simplifier Path.convertFromClipper(subj).path, 0.1, true, false
 
 Path.RoundingPath = (path, radius, inverted = false, cornerStyle = "Rounded", rounding = "Absolute") ->
 	path = Path path if type(path) == "string"
@@ -1367,16 +1351,16 @@ Path.Simplifier = (paths, tolerance, filterNoise, recreateBezier, angleThreshold
 		elaborateSection(section, final, tolerance)
 		return final
 
+	newPath = Path!
 	for i = 1, #paths
 		if filterNoise
-			paths[i] = simplifyRadialDist(paths[i], tolerance)
-
+			paths[i] = simplifyRadialDist paths[i], tolerance
 		if recreateBezier
-			paths[i] = simplifyBezier(paths[i], tolerance, angleThreshold)
+			paths[i] = simplifyBezier paths[i], tolerance, angleThreshold
 		else
-			sqTolerance = tolerance * tolerance
-			paths[i] = simplifyDouglasPeucker(paths[i], sqTolerance)
-		
-	return paths
+			paths[i] = simplifyDouglasPeucker paths[i], tolerance ^ 2
+		newPath\insertContour paths[i]
+
+	return newPath
 
 {:Path}
