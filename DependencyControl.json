@@ -438,13 +438,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.6.9",
-                    "released": "2025-07-28",
+                    "version": "1.7.0",
+                    "released": "2025-07-29",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "d0d9be7c955d00e5d9546a04a93c4cd0196ca0a8"
+                            "sha1": "e914c3bbb5a3074f5d23b94d7284ef4f4d677ebe"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -454,7 +454,7 @@
                         {
                             "name": "/Ass/Shape/Path.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "454ceff83da31113720ac29596ab31378c4141ca"
+                            "sha1": "082d5c424366396fa8f98605c05459afbf4b1657"
                         },
                         {
                             "name": "/Ass/Shape/Point.moon",
@@ -464,7 +464,7 @@
                         {
                             "name": "/Ass/Shape/Segment.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "82b44c9e21a45025af2f2920319c3165a53bc2ef"
+                            "sha1": "0c2fe706b3367bc33425458816d27bbe7cd758d9"
                         },
                         {
                             "name": "/Ass/Text/Tag.moon",
@@ -698,6 +698,9 @@
                     "Fix minor buf"
                 ],
                 "1.6.9": [
+                    "Update Files"
+                ],
+                "1.7.0": [
                     "Update Files"
                 ]
             }
