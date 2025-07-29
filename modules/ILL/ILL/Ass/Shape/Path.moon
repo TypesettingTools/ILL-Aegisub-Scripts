@@ -3,6 +3,7 @@ CPP = require "clipper2.clipper2"
 import Point from require "ILL.ILL.Ass.Shape.Point"
 import Curve from require "ILL.ILL.Ass.Shape.Curve"
 import Segment from require "ILL.ILL.Ass.Shape.Segment"
+import Math from require "ILL.ILL.Math"
 {:insert, :remove} = table
 
 checkPathClockWise = (path) ->
@@ -414,31 +415,70 @@ class Path
 		return length
 
 	-- Gets the normalized tangent on the Path given a time
-	getNormalized: (t = 0.5) =>
+	getNormalized: (t = 0.5, returnPath) =>
 		sumLength, length, newPath, tan, p, u = 0, t * @getLength!, Path!, nil, nil, nil
 		@callBackPath (id, seg, k) ->
-			path, segmentLen = {}, seg\getLength!
+			segmentLen = seg\getLength!
 			if newPath.path[k] == nil
 				newPath.path[k] = {seg.a}
-			if sumLength + segmentLen >= length
-				u = (length - sumLength) / segmentLen
-				tan, p, u = seg\getNormalized u
-				spt = seg\split(u)[1]
-				if id == 'l'
+			if sumLength + segmentLen > length
+				spt = seg\splitAtInterval (length - sumLength) / segmentLen, 1
+				if id == "l"
 					insert newPath.path[k], spt.b
-				else if id == 'b'
+				else
 					insert newPath.path[k], spt.b
 					insert newPath.path[k], spt.c
-					insert newPath.path[k], spt.b
-				return "break", p, u, newPath
-			if id == 'l'
+					insert newPath.path[k], spt.d
+				return "break"
+			if id == "l"
 				insert newPath.path[k], seg.b
 			else
 				insert newPath.path[k], seg.b
 				insert newPath.path[k], seg.c
 				insert newPath.path[k], seg.d
 			sumLength += segmentLen
+		if returnPath
+			return newPath
 		return tan, p, u, newPath
+
+	-- Get the Path by giving a interval
+	getNormalizedInterval: (u, v) =>
+		u = Math.clamp u, 0, 1
+		v = Math.clamp v, 0, 1
+		if u > v
+			u, v = v, u
+		length = @getLength!
+		startLen, endLen, sumLength, newPath = u * length, v * length, 0, Path!
+		if startLen == 0 and endLen == 0
+			p = @path[1][1]\clone!
+			newPath.path[1] = {p\clone!, p\clone!}
+			return newPath
+		elseif startLen == 1 and endLen == 1
+			p = @path[#@path][#@path]\clone!
+			newPath.path[1] = {p\clone!, p\clone!}
+			return newPath
+		@callBackPath (id, seg, k) ->
+			segmentLen = seg\getLength!
+			segStart = sumLength
+			segEnd = sumLength + segmentLen
+			if segEnd <= startLen
+				sumLength += segmentLen
+				return
+			if segStart >= endLen
+				return "break"
+			t1 = math.max((startLen - segStart) / segmentLen, 0)
+			t2 = math.min((endLen - segStart) / segmentLen, 1)
+			spt = seg\splitAtInterval t1, t2
+			if newPath.path[k] == nil
+				newPath.path[k] = {spt.a}
+			if id == "l"
+				insert newPath.path[k], spt.b
+			else
+				insert newPath.path[k], spt.b
+				insert newPath.path[k], spt.c
+				insert newPath.path[k], spt.d
+			sumLength += segmentLen
+		return newPath
 
 	-- Distort the Path into another Path
 	-- http://www.planetclegg.com/projects/WarpingTextToSplines.html
@@ -499,7 +539,7 @@ class Path
 					newPathClipper = CPP.path.new!
 					newPathClipper\push sortPointsToClockWise {pa[j], pa[j + 1], pb[j + 1], pb[j]}
 					newPathsClipper\add newPathClipper
-			@update Path.convertFromClipper(pathsClipperA\union newPathsClipper).path
+			@update Path.convertFromClipper pathsClipperA\union newPathsClipper
 		return @
 
 	-- Morphology between two paths
@@ -744,12 +784,10 @@ Path.RoundingPath = (path, radius, inverted = false, cornerStyle = "Rounded", ro
 			-- If 90 degree circular arc, use a constant
 			-- as derived from http://spencermortensen.com/articles/bezier-circle
 			a = ang2 == 1.5707963267948966 and 0.551915024494 or (ang2 == -1.5707963267948966 and -0.551915024494 or 4 / 3 * math.tan(ang2 / 4))
-
 			x1 = math.cos ang1
 			y1 = math.sin ang1
 			x2 = math.cos ang1 + ang2
 			y2 = math.sin ang1 + ang2
-
 			return {
 				Point x1 - y1 * a, y1 + x1 * a
 				Point x2 + y2 * a, y2 - x2 * a
@@ -770,76 +808,54 @@ Path.RoundingPath = (path, radius, inverted = false, cornerStyle = "Rounded", ro
 			rysq = ry ^ 2
 			pxpsq = pxp ^ 2
 			pypsq = pyp ^ 2
-
 			radicant = rxsq * rysq - rxsq * pypsq - rysq * pxpsq
 			if radicant < 0
 				radicant = 0
-
 			radicant = radicant / (rxsq * pypsq + rysq * pxpsq)
 			radicant = math.sqrt(radicant) * (largeArcFlag == sweepFlag and -1 or 1)
-
 			centerxp = radicant * rx / ry * pyp
 			centeryp = radicant * -ry / rx * pxp
-
 			centerx = cosphi * centerxp - sinphi * centeryp + (px + cx) / 2
 			centery = sinphi * centerxp + cosphi * centeryp + (py + cy) / 2
-
 			vx1 = (pxp - centerxp) / rx
 			vy1 = (pyp - centeryp) / ry
 			vx2 = (-pxp - centerxp) / rx
 			vy2 = (-pyp - centeryp) / ry
-
 			ang1 = vectorAngle 1, 0, vx1, vy1
 			ang2 = vectorAngle vx1, vy1, vx2, vy2
-
 			if sweepFlag == 0 and ang2 > 0
 				ang2 -= TAU
-
 			if sweepFlag == 1 and ang2 < 0
 				ang2 += TAU
-
 			return {centerx, centery, ang1, ang2}
-
 		{:px, :py, :cx, :cy, :rx, :ry, :xAxisRotation, :largeArcFlag, :sweepFlag} = info
 		xAxisRotation or= 0
 		largeArcFlag or= 0
 		sweepFlag or= 0
-
 		if rx == 0 or ry == 0
 			return {}
-
 		sinphi = math.sin xAxisRotation * TAU / 360
 		cosphi = math.cos xAxisRotation * TAU / 360
-
 		pxp = cosphi * (px - cx) / 2 + sinphi * (py - cy) / 2
 		pyp = -sinphi * (px - cx) / 2 + cosphi * (py - cy) / 2
-
 		if pxp == 0 and pyp == 0
 			return {}
-
 		rx = math.abs rx
 		ry = math.abs ry
-
 		lambda = (pxp ^ 2) / (rx ^ 2) + (pyp ^ 2) / (ry ^ 2)
 		if lambda > 1
 			rx *= math.sqrt lambda
 			ry *= math.sqrt lambda
-
 		{centerx, centery, ang1, ang2} = getArcCenter px, py, cx, cy, rx, ry, largeArcFlag, sweepFlag, sinphi, cosphi, pxp, pyp
-
 		ratio = math.abs(ang2) / (TAU / 4)
 		if math.abs(1 - ratio) < 1e-7
 			ratio = 1
-
 		segments = math.max math.ceil(ratio), 1
-
 		ang2 /= segments
-
 		curves = {}
 		for i = 1, segments
 			insert curves, approxUnitArc ang1, ang2
 			ang1 += ang2
-
 		result = {}
 		for i = 1, #curves
 			curve = curves[i]
@@ -847,15 +863,12 @@ Path.RoundingPath = (path, radius, inverted = false, cornerStyle = "Rounded", ro
 			{x: x2, y: y2} = mapToEllipse curve[2], rx, ry, cosphi, sinphi, centerx, centery
 			{:x, :y} = mapToEllipse curve[3], rx, ry, cosphi, sinphi, centerx, centery
 			insert result, {x1, y1, x2, y2, x, y}
-
 		return result
 
 	sweepAngularPoint = (a, b, c) ->
 		center = a\lerp c, 0.5
-
 		cos_pi = math.cos math.pi
 		sin_pi = math.sin math.pi
-
 		p = Point!
 		p.x = cos_pi * (b.x - center.x) - sin_pi * (b.y - center.y) + center.x
 		p.y = sin_pi * (b.x - center.x) + cos_pi * (b.y - center.y) + center.y
@@ -878,61 +891,46 @@ Path.RoundingPath = (path, radius, inverted = false, cornerStyle = "Rounded", ro
 	modeRoundingAbsolute = (radius, p1, angularPoint, p2) ->
 		-- Vector 1
 		v1 = Point angularPoint.x - p1.x, angularPoint.y - p1.y
-
 		-- Vector 2
 		v2 = Point angularPoint.x - p2.x, angularPoint.y - p2.y
-
 		-- Angle between vector 1 and vector 2
 		angle = math.atan2(v1.y, v1.x) - math.atan2(v2.y, v2.x)
-
 		-- The length of segment between angular point and the
 		-- points of intersection with the circle of a given radius
 		abs_tan = math.abs math.tan angle / 2
 		segment = radius / abs_tan
-
 		-- Check the segment
 		length1 = v1\vecMagnitude!
 		length2 = v2\vecMagnitude!
-
 		length = math.min(length1, length2) / 2
 		if segment > length
 			segment = length
 			radius = length * abs_tan
-
 		-- Points of intersection are calculated by the proportion between 
 		-- the coordinates of the vector, length of vector and the length of the segment.
 		p1Cross = getProportionPoint angularPoint, segment, length1, v1
 		p2Cross = getProportionPoint angularPoint, segment, length2, v2
-
 		-- Calculation of the coordinates of the circle 
 		-- center by the addition of angular vectors.
 		c = Point!
 		c.x = angularPoint.x * 2 - p1Cross.x - p2Cross.x
 		c.y = angularPoint.y * 2 - p1Cross.y - p2Cross.y
-
 		L = c\vecMagnitude!
 		d = Point(segment, radius)\vecMagnitude!
-
 		circlePoint = getProportionPoint angularPoint, d, L, c
-
 		-- StartAngle and EndAngle of arc
 		startAngle = math.atan2 p1Cross.y - circlePoint.y, p1Cross.x - circlePoint.x
 		endAngle = math.atan2 p2Cross.y - circlePoint.y, p2Cross.x - circlePoint.x
-
 		-- Sweep angle
 		sweepAngle = endAngle - startAngle
-
 		-- Some additional checks
 		if sweepAngle < 0
 			startAngle = endAngle
 			sweepAngle = -sweepAngle
-
 		if sweepAngle > math.pi
 			sweepAngle = -(2 * math.pi - sweepAngle)
-
 		degreeFactor = 180 / math.pi
 		sweepFlag = getSweepFlag p1Cross, angularPoint, p2Cross
-
 		return {
 			line1: {p1, p1Cross}
 			line2: {p2, p2Cross}
@@ -1030,63 +1028,56 @@ Path.RoundingPath = (path, radius, inverted = false, cornerStyle = "Rounded", ro
 
 	return newPath
 
+-- https://github.com/mourner/simplify-js/blob/master/simplify.js
+-- https://github.com/ynakajima/polyline2bezier/blob/master/src/polyline2bezier.js
+-- This is a port of simplify.js and polyline2bezier adapted for Path
 Path.Simplifier = (paths, tolerance, filterNoise, recreateBezier, angleThreshold) ->
+
 	simplifyRadialDist = (points, sqTolerance) ->
 		prevPoint = points[1]
 		newPoints = {prevPoint}
 		local point
-
 		for i = 2, #points
 			point = points[i]
-
 			if point\sqDistance(prevPoint) > sqTolerance
 				insert newPoints, point
 				prevPoint = point
-
-		if (prevPoint.x != point.x) and (prevPoint.y != point.y)
+		if prevPoint.x != point.x and prevPoint.y != point.y
 			insert newPoints, point
-
 		return newPoints
 
 	simplifyDPStep = (points, first, last, sqTolerance, simplified) ->
 		maxSqDist, index = sqTolerance
-
 		for i = first + 1, last
 			sqDist = points[i]\sqSegDistance points[first], points[last]
-
-			if (sqDist > maxSqDist)
+			if sqDist > maxSqDist
 				index = i
 				maxSqDist = sqDist
-
-		if (maxSqDist > sqTolerance)
-			if (index - first > 1)
-				simplifyDPStep(points, first, index, sqTolerance, simplified)
+		if maxSqDist > sqTolerance
+			if index - first > 1
+				simplifyDPStep points, first, index, sqTolerance, simplified
 			insert simplified, points[index]
-
-			if (last - index > 1)
-				simplifyDPStep(points, index, last, sqTolerance, simplified)
+			if last - index > 1
+				simplifyDPStep points, index, last, sqTolerance, simplified
 
 	simplifyDouglasPeucker = (points, sqTolerance) ->
 		last = #points
 		simplified = {points[1]}
-
-		simplifyDPStep(points, 1, last, sqTolerance, simplified)
+		simplifyDPStep points, 1, last, sqTolerance, simplified
 		insert simplified, points[last]
-
 		return simplified
 
-	-- bezier
 	computeLeftTangent = (d, _end) ->
-		tHat1 = d[_end + 1]\subtract(d[_end])
+		tHat1 = d[_end + 1]\subtract d[_end]
 		return tHat1\vecNormalize!
 
 	computeRightTangent = (d, _end) ->
-		tHat2 = d[_end - 1]\subtract(d[_end])
+		tHat2 = d[_end - 1]\subtract d[_end]
 		return tHat2\vecNormalize!
 
 	computeCenterTangent = (d, center) ->
-		V1 = d[center - 1]\subtract(d[center])
-		V2 = d[center]\subtract(d[center + 1])
+		V1 = d[center - 1]\subtract d[center]
+		V2 = d[center]\subtract d[center + 1]
 		tHatCenter = Point!
 		tHatCenter.x = (V1.x + V2.x) / 2
 		tHatCenter.y = (V1.y + V2.y) / 2
@@ -1104,60 +1095,48 @@ Path.Simplifier = (paths, tolerance, filterNoise, recreateBezier, angleThreshold
 		Vtemp = {}
 		for i = 0, degree
 			Vtemp[i] = Point V[i + 1].x, V[i + 1].y
-
 		for i = 1, degree
 			for j = 0, degree - i
 				Vtemp[j].x = (1 - t) * Vtemp[j].x + t * Vtemp[j + 1].x
 				Vtemp[j].y = (1 - t) * Vtemp[j].y + t * Vtemp[j + 1].y
-
 		return Point Vtemp[0].x, Vtemp[0].y
 
 	computeMaxError = (d, first, last, bezCurve, u, splitPoint) ->
 		splitPoint = (last - first + 1) / 2
-
 		maxError = 0
 		for i = first + 1, last - 1
-			P = bezierII(3, bezCurve, u[i - first + 1])
+			P = bezierII 3, bezCurve, u[i - first + 1]
 			v = P\subtract d[i]
 			dist = v\vecLength!
 			if dist >= maxError
 				maxError = dist
 				splitPoint = i
-
 		return {:maxError, :splitPoint}
 
 	newtonRaphsonRootFind = (_Q, _P, u) ->
 		Q1, Q2 = {}, {}
-
 		Q = {
 			Point _Q[1].x, _Q[1].y
 			Point _Q[2].x, _Q[2].y
 			Point _Q[3].x, _Q[3].y
 			Point _Q[4].x, _Q[4].y
 		}
-	
 		P = Point _P.x, _P.y
-
 		Q_u = bezierII(3, Q, u)
 		for i = 1, 3
 			Q1[i] = Point!
 			Q1[i].x = (Q[i + 1].x - Q[i].x) * 3
 			Q1[i].y = (Q[i + 1].y - Q[i].y) * 3
-
 		for i = 1, 2
 			Q2[i] = Point!
 			Q2[i].x = (Q1[i + 1].x - Q1[i].x) * 2
 			Q2[i].y = (Q1[i + 1].y - Q1[i].y) * 2
-	
-		Q1_u = bezierII(2, Q1, u)
-		Q2_u = bezierII(1, Q2, u)
-
+		Q1_u = bezierII 2, Q1, u
+		Q2_u = bezierII 1, Q2, u
 		numerator = (Q_u.x - P.x) * (Q1_u.x) + (Q_u.y - P.y) * (Q1_u.y)
 		denominator = (Q1_u.x) * (Q1_u.x) + (Q1_u.y) * (Q1_u.y) + (Q_u.x - P.x) * (Q2_u.x) + (Q_u.y - P.y) * (Q2_u.y)
-
 		if denominator == 0
 			return u
-
 		return u - (numerator / denominator)
 
 	reparameterize = (d, first, last, u, bezCurve) ->
@@ -1169,7 +1148,7 @@ Path.Simplifier = (paths, tolerance, filterNoise, recreateBezier, angleThreshold
 		}
 		uPrime = {}
 		for i = first, last
-			uPrime[i - first + 1] = newtonRaphsonRootFind(_bezCurve, d[i], u[i - first + 1])
+			uPrime[i - first + 1] = newtonRaphsonRootFind _bezCurve, d[i], u[i - first + 1]
 		return uPrime
 
 	BM = (u, tp) ->
@@ -1182,44 +1161,34 @@ Path.Simplifier = (paths, tolerance, filterNoise, recreateBezier, angleThreshold
 	generateBezier = (d, first, last, uPrime, tHat1, tHat2) ->
 		C, A, bezCurve = {{0, 0}, {0, 0}, {0, 0}}, {}, {}
 		nPts = last - first + 1
-
 		for i = 1, nPts
 			v1 = Point tHat1.x, tHat1.y
 			v2 = Point tHat2.x, tHat2.y
 			v1 = v1\vecScale BM(uPrime[i], 1)
 			v2 = v2\vecScale BM(uPrime[i], 2)
 			A[i] = {v1, v2}
-
 		for i = 1, nPts
 			C[1][1] += A[i][1]\dot A[i][1]
 			C[1][2] += A[i][1]\dot A[i][2]
-
 			C[2][1] = C[1][2]
 			C[2][2] += A[i][2]\dot A[i][2]
-
 			b0 = d[first]\multiply(BM(uPrime[i]), BM(uPrime[i]))
 			b1 = d[first]\multiply(BM(uPrime[i], 1))
 			b2 = d[last]\multiply(BM(uPrime[i], 2))
 			b3 = d[last]\multiply(BM(uPrime[i], 3))
-
 			tm0 = b2\add b3
 			tm1 = b1\add tm0
 			tm2 = b0\add tm1
 			tmp = d[first + i - 1]\subtract tm2
-
 			C[3][1] += A[i][1]\dot tmp
 			C[3][2] += A[i][2]\dot tmp
-
 		det_C0_C1 = C[1][1] * C[2][2] - C[2][1] * C[1][2]
 		det_C0_X = C[1][1] * C[3][2] - C[2][1] * C[3][1]
 		det_X_C1 = C[3][1] * C[2][2] - C[3][2] * C[1][2]
-
 		alpha_l = det_C0_C1 == 0 and 0 or det_X_C1 / det_C0_C1
 		alpha_r = det_C0_C1 == 0 and 0 or det_C0_X / det_C0_C1
-
 		segLength = d[last]\distance d[first]
 		epsilon = 1e-6 * segLength
-
 		if alpha_l < epsilon or alpha_r < epsilon
 			dist = segLength / 3
 			bezCurve[1] = d[first]
@@ -1228,28 +1197,25 @@ Path.Simplifier = (paths, tolerance, filterNoise, recreateBezier, angleThreshold
 			bezCurve[3] = bezCurve[4]\add tHat2\vecScale dist
 			bezCurve[1].id, bezCurve[2].id, bezCurve[3].id, bezCurve[4].id = "l", "b", "b", "b"
 			return bezCurve
-
 		bezCurve[1] = d[first]
 		bezCurve[4] = d[last]
 		bezCurve[2] = bezCurve[1]\add tHat1\vecScale alpha_l
 		bezCurve[3] = bezCurve[4]\add tHat2\vecScale alpha_r
 		bezCurve[1].id, bezCurve[2].id, bezCurve[3].id, bezCurve[4].id = "l", "b", "b", "b"
 		return bezCurve
-	
+
 	addtoB = (b, bez) ->
 		if b[#b]\equals bez[1]
 			table.remove bez, 1
 		for i = 1, #bez
-			insert(b, bez[i])
-		
+			insert b, bez[i]
+
 	fitCubic = (b, d, first, last, tHat1, tHat2, _error) ->
 		u, uPrime, maxIterations, tHatCenter = {}, {}, 4, Point!
 		iterationError = _error ^ 2
 		nPts = last - first + 1
-	
 		if nPts == 2
 			dist = d[last]\distance(d[first]) / 3
-
 			bezCurve = {}
 			bezCurve[1] = d[first]
 			bezCurve[4] = d[last]
@@ -1258,107 +1224,93 @@ Path.Simplifier = (paths, tolerance, filterNoise, recreateBezier, angleThreshold
 			bezCurve[2] = bezCurve[1]\add tHat1
 			bezCurve[3] = bezCurve[4]\add tHat2
 			bezCurve[1].id, bezCurve[2].id, bezCurve[3].id, bezCurve[4].id = "l", "b", "b", "b"
-			addtoB(b, bezCurve)
+			addtoB b, bezCurve
 			return
-
-		u = chordLengthParameterize(d, first, last)
-		bezCurve = generateBezier(d, first, last, u, tHat1, tHat2)
-
-		resultMaxError = computeMaxError(d, first, last, bezCurve, u, nil)
+		u = chordLengthParameterize d, first, last
+		bezCurve = generateBezier d, first, last, u, tHat1, tHat2
+		resultMaxError = computeMaxError d, first, last, bezCurve, u, nil
 		maxError = resultMaxError.maxError
 		splitPoint = resultMaxError.splitPoint
-
 		if maxError < _error
-			addtoB(b, bezCurve)
+			addtoB b, bezCurve
 			return
-
 		if maxError < iterationError
 			for i = 1, maxIterations
-				uPrime = reparameterize(d, first, last, u, bezCurve)
-				bezCurve = generateBezier(d, first, last, uPrime, tHat1, tHat2)
-				resultMaxError = computeMaxError(d, first, last, bezCurve, uPrime, splitPoint)
+				uPrime = reparameterize d, first, last, u, bezCurve
+				bezCurve = generateBezier d, first, last, uPrime, tHat1, tHat2
+				resultMaxError = computeMaxError d, first, last, bezCurve, uPrime, splitPoint
 				maxError = resultMaxError.maxError
 				splitPoint = resultMaxError.splitPoint
 				if maxError < _error
-					addtoB(b, bezCurve)
+					addtoB b, bezCurve
 					return
 				u = uPrime
-
-		tHatCenter = computeCenterTangent(d, splitPoint)
-		fitCubic(b, d, first, splitPoint, tHat1, tHatCenter, _error)
+		tHatCenter = computeCenterTangent d, splitPoint
+		fitCubic b, d, first, splitPoint, tHat1, tHatCenter, _error
 		tHatCenter = tHatCenter\negate!
-		fitCubic(b, d, splitPoint, last, tHatCenter, tHat2, _error)
+		fitCubic b, d, splitPoint, last, tHatCenter, tHat2, _error
 
 	fitCurve = (b, d, nPts, _error = 1) ->
-		tHat1 = computeLeftTangent(d, 1)
-		tHat2 = computeRightTangent(d, nPts)
-		fitCubic(b, d, 1, nPts, tHat1, tHat2, _error)
+		tHat1 = computeLeftTangent d, 1
+		tHat2 = computeRightTangent d, nPts
+		fitCubic b, d, 1, nPts, tHat1, tHat2, _error
 
 	elaborateSection = (section, final, tolerance) ->
+		return if #section < 2
 		if #section <= 4
 			for i = 2, #section
 				insert final, section[i]
-			return {section[#section]}
-		
+			return
 		b = {section[1]}
-			
-		fitCurve(b, section, #section, tolerance)
-		
+		fitCurve b, section, #section, tolerance
 		for i = 2, #b
 			insert final, b[i]
-		
-		return {b[#b]}
 
-	isInRange = (cs, ls) ->
-		if not (cs > ls * 2) and not (cs < ls / 2)
-			return true
-		return false
+	isInRange = (currLen, lastLen) -> currLen >= lastLen * 0.5 and currLen <= lastLen * 2
 
 	getAngle = (p1, p2, p3) ->
-		x1, y1 = p1.x, p1.y
-		x2, y2 = p2.x, p2.y
-		x3, y3 = p3.x, p3.y
-		angle = math.atan2(y3 - y2, x3 - x2) - math.atan2(y1 - y2, x1 - x2)
-		return math.deg(angle)
+		dx1, dy1 = p1.x - p2.x, p1.y - p2.y
+		dx2, dy2 = p3.x - p2.x, p3.y - p2.y
+		angle = math.atan2(dy2, dx2) - math.atan2(dy1, dx1)
+		angle = math.deg angle
+		angle += 360 if angle < 0
+		return angle
 
 	simplifyBezier = (points, tolerance, angleThreshold) ->
-		at1, at2 = angleThreshold, 360 - angleThreshold
-
+		return points if #points < 3
 		insert points, 1, points[#points]\clone!
-		insert points, points[2]\clone!
-		lastSegmentLength = points[1]\distance(points[2])
-
-		final = {points[2]\clone!}
-		section = {}
-
+		final, section = {}, {points[2]}
+		at1, at2 = angleThreshold, 360 - angleThreshold
+		lastLen = points[1]\distance points[2]
 		for i = 2, #points - 1
-			insert section, points[i]
-			
-			currSegmentLength = points[i]\distance(points[i + 1])
-			if not isInRange(currSegmentLength, lastSegmentLength)
-				section = elaborateSection(section, final, tolerance)
-				lastSegmentLength = currSegmentLength
+			curr = points[i]
+			next = points[i + 1]
+			angle = math.abs getAngle points[i - 1], curr, next
+			currLen = curr\distance next
+			inRange = isInRange currLen, lastLen
+			insert section, curr
+			if not inRange or angle < at1 or angle > at2
+				elaborateSection section, final, tolerance
+				section = {curr}
+				lastLen = currLen
 				continue
-			
-			ang = math.abs getAngle(points[i-1], points[i], points[i+1])
-			if ang < at1 or ang > at2
-				section = elaborateSection(section, final, tolerance)
-				lastSegmentLength = currSegmentLength
-				continue
-			
-			lastSegmentLength = currSegmentLength
-		
-		elaborateSection(section, final, tolerance)
+			lastLen = currLen
+		insert section, points[#points]
+		elaborateSection section, final, tolerance
 		return final
 
 	newPath = Path!
 	for i = 1, #paths
-		if filterNoise
-			paths[i] = simplifyRadialDist paths[i], tolerance
 		if recreateBezier
+			if paths[i][1]\equals paths[i][#paths[i]]
+				remove paths[i]
+			paths[i] = simplifyRadialDist paths[i], tolerance
 			paths[i] = simplifyBezier paths[i], tolerance, angleThreshold
 		else
-			paths[i] = simplifyDouglasPeucker paths[i], tolerance ^ 2
+			if filterNoise
+				paths[i] = simplifyRadialDist paths[i], tolerance
+			else
+				paths[i] = simplifyDouglasPeucker paths[i], tolerance ^ 2
 		insert newPath.path, paths[i]
 
 	return newPath
