@@ -438,13 +438,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.7.0",
-                    "released": "2025-07-29",
+                    "version": "1.7.1",
+                    "released": "2025-10-01",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "e914c3bbb5a3074f5d23b94d7284ef4f4d677ebe"
+                            "sha1": "cfce72a040b97fd8c5598bdfe7e6482e0ee669ac"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -504,7 +504,7 @@
                         {
                             "name": "/Font/Unx.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "9744a693c63c84e5cd820541f0be8dfe95f5943e"
+                            "sha1": "f6f7869bc84f5929de4e2e1581d1ee4c65a0f5e3"
                         },
                         {
                             "name": "/Font/Win.moon",
@@ -702,6 +702,9 @@
                 ],
                 "1.7.0": [
                     "Update Files"
+                ],
+                "1.7.1": [
+                    "Try fix getFontPath method to unix"
                 ]
             }
         },
