@@ -600,16 +600,13 @@ class FreeType extends Init
 		@weight = tonumber ass_face_get_weight @face[0]
 
 	-- Callback to access the glyphs for each character
-	callBackChars: (text, callback) =>
+	callBackCharsGlyph: (text, callback) =>
 		face_size = @face[0].size.face
-		width, height = 0, 0
 		for ci, char in UTF8(text)\chars!
-			glyph_index = freetype.FT_Get_Char_Index face_size, UTF8.charcodepoint char
-			err = freetype.FT_Load_Glyph face_size, glyph_index, C.FT_LOAD_DEFAULT
-			if err != 0
+			index = freetype.FT_Get_Char_Index face_size, UTF8.charcodepoint char
+			if freetype.FT_Load_Glyph(face_size, index, C.FT_LOAD_DEFAULT) != 0
 				error "Failed to load the freetype glyph", 2
-			callback ci, char, face_size.glyph
-		return true
+			callback face_size.glyph
 
 	-- Get font metrics
 	getMetrics: =>
@@ -624,7 +621,7 @@ class FreeType extends Init
 	-- Get text extents
 	getTextExtents: (text) =>
 		face_size, width = @face[0].size.face, 0
-		@callBackChars text, (ci, char, glyph) ->
+		@callBackCharsGlyph text, (glyph) ->
 			width += tonumber(glyph.metrics.horiAdvance) + (@hspace * FONT_UPSCALE)
 		{
 			width: (width / FONT_UPSCALE) * @xscale
@@ -634,7 +631,7 @@ class FreeType extends Init
 	-- Converts text to ASS shape
 	getTextToShape: (text) =>
 		paths, x = {}, 0
-		@callBackChars text, (ci, char, glyph) ->
+		@callBackCharsGlyph text, (glyph) ->
 			build, path = {}, {}
 			-- FIXME
 			if @bold and @weight < 700 and not @found_bold
@@ -722,7 +719,7 @@ class FreeType extends Init
 		unless has_fontconfig
 			error "fontconfig library couldn't be loaded", 2
 		-- Get fonts list from fontconfig
-		fontset = ffi.gc fontconfig.FcFontList(fontconfig.FcInitLoadConfigAndFonts(), ffi.gc(fontconfig.FcPatternCreate(), fontconfig.FcPatternDestroy), ffi.gc(fontconfig.FcObjectSetBuild("family", "fullname", "style", "outline", "file", nil), fontconfig.FcObjectSetDestroy)), fontconfig.FcFontSetDestroy
+		fontset = ffi.gc fontconfig.FcFontList(fontconfig.FcInitLoadConfigAndFonts!, ffi.gc(fontconfig.FcPatternCreate!, fontconfig.FcPatternDestroy), ffi.gc(fontconfig.FcObjectSetBuild("family", "fullname", "style", "outline", "file", nil), fontconfig.FcObjectSetDestroy)), fontconfig.FcFontSetDestroy
 		local font, family, fullname, style, outline, file, cstr, cbool
 		cstr = new "FcChar8*[1]"
 		cbool = new "FcBool[1]"
@@ -758,20 +755,18 @@ class FreeType extends Init
 		-- Return collected fonts
 		return fonts
 
-	-- Gets the directory path of the fonts
+	-- Gets the directory path of the best matching font for the requested family
 	getFontPath: =>
 		fonts = @getFonts!
 		font_variants = {}
-
 		-- Collect all fonts matching the requested family
 		for font in *fonts
 			if font.name\lower! == @family\lower!
 				table.insert font_variants, font
-
 		if #font_variants == 0
 			return false
-
-		style_preference = {
+		-- Style preference order
+		style_preference =
 			["bold italic"]: 1
 			["bold oblique"]: 2
 			["italic"]: 3
@@ -779,8 +774,6 @@ class FreeType extends Init
 			["bold"]: 5
 			["regular"]: 6
 			["normal"]: 7
-		}
-
 		-- Sort fonts by style preference
 		table.sort font_variants, (a, b) ->
 			a_style = a.style\lower!
@@ -788,8 +781,7 @@ class FreeType extends Init
 			a_pref = style_preference[a_style] or 99
 			b_pref = style_preference[b_style] or 99
 			return a_pref < b_pref
-
-		-- Find the best match based on requested styles
+		-- Find exact match for bold/italic if requested
 		for font in *font_variants
 			style = font.style\lower!
 			is_bold = style\find("bold") != nil
@@ -798,11 +790,11 @@ class FreeType extends Init
 				@found_bold = is_bold
 				@found_italic = is_italic
 				return font.path
-
-		-- If no exact match, return the first variant
+		-- If no exact match, return the best available
 		first_font = font_variants[1]
-		@found_bold = first_font.style\lower!\find("bold") != nil
-		@found_italic = first_font.style\lower!\find("italic") != nil or first_font.style\lower!\find("oblique") != nil
+		first_style = first_font.style\lower!
+		@found_bold = first_style\find("bold") != nil
+		@found_italic = first_style\find("italic") != nil or first_style\find("oblique") != nil
 		return first_font.path
 
 {:FreeType}
