@@ -1,12 +1,12 @@
 export script_name        = "Make Image"
 export script_description = "Does several procedures for converting images to the .ass"
-export script_version     = "2.1.1"
+export script_version     = "2.2.0"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.MakeImage"
 
 haveDepCtrl, DependencyControl = pcall require, "l0.DependencyControl"
 
-local depctrl, IMG, ILL, Aegi, Ass, Math, Table
+local depctrl, IMG, ILL
 if haveDepCtrl
 	depctrl = DependencyControl {
 		feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json",
@@ -26,21 +26,21 @@ if haveDepCtrl
 		}
 	}
 	IMG, ILL = depctrl\requireModules!
-	{:Aegi, :Ass, :Math, :Table} = ILL
 else
 	IMG = require "ILL.IMG"
 	ILL = require "ILL.ILL"
-	{:Aegi, :Ass, :Math, :Table} = ILL
+
+{:Aegi, :Ass, :Math, :Table, :Path} = ILL
 
 getData = ->
-	exts = "*.png;*.jpeg;*.jpe;*.jpg;*.jfif;*.jfi;*.bmp;"
+	exts = "*.png;*.jpeg;*.jpe;*.jpg;*.jfif;*.jfi;*.bmp;*.gif;"
 	filename = aegisub.dialog.open "Open Image", "", "", "Extents (#{exts})|#{exts};", false, true
 	unless filename
 		Aegi.progressCancel!
 	Aegi.progressTask "Decoding image..."
 	img = IMG.IMG filename
 	img\setInfos!
-	return img
+	return img, img.extension == "gif" and img.infos.frames or nil
 
 imageTracer = (sub, sel, activeLine) ->
 	presets = {
@@ -88,7 +88,7 @@ imageTracer = (sub, sel, activeLine) ->
 		{class: "label", label: "Blur Delta:", x: 4, y: 16}
 		{class: "floatedit", name: "blurdelta", x: 4, y: 17, min: 0, value: 20.0}
 	}
-	img = getData!
+	img, frames = getData!
 	button, elements = Aegi.display interface, {"Ok", "Cancel"}, {close: "Cancel"}, "Tracer"
 	if button == "Ok"
 		local preset
@@ -113,19 +113,29 @@ imageTracer = (sub, sel, activeLine) ->
 			preset.roundcoords = elements.roundcoords
 			preset.blurradius = elements.blurradius
 			preset.blurdelta = elements.blurdelta
-		Aegi.progressTask "Tracing image..."
-		tracedata = IMG.Tracer.imagedataToTracedata img, preset
-		Aegi.progressTask "Simplifying tracing..."
-		asslines = IMG.Tracer.getAssLines tracedata, preset
-		asslineslen = #asslines
 		ass = Ass sub, sel, activeLine
 		line = Table.copy sub[activeLine]
+		line_start_time = line.start_time
 		line.isShape = true
-		Aegi.progressTask "Adding new lines..."
-		for key, trace in ipairs asslines
-			Aegi.progressSet key, asslineslen
-			line.shape = trace
-			ass\insertLine line, activeLine
+		Aegi.progressTask "Tracing image..."
+		for i = 1, frames and #frames or 1
+			if frames
+				{:delayMs} = frames[i]
+				line.start_time = line_start_time
+				line.end_time = line_start_time + delayMs
+				line_start_time += delayMs
+				Aegi.progressTask "Tracing frame #{i}..."
+			tracedata = IMG.Tracer.imagedataToTracedata frames and img.infos.frames[i] or img, preset
+			asslines = IMG.Tracer.getAssLines tracedata, preset
+			asslineslen = #asslines
+			for key, trace in ipairs asslines
+				Aegi.progressSet key, asslineslen
+				line.tags = ILL.Tags trace\match "%b{}"
+				line.shape = trace\gsub "%b{}", ""
+				if frames
+					{:x, :y} = frames[i]
+					line.shape = Path(line.shape)\move(x, y)\export!
+				ass\insertLine line, activeLine
 		return ass\getNewSelection!
 
 imagePixels = (sub, sel, activeLine) ->
@@ -134,22 +144,32 @@ imagePixels = (sub, sel, activeLine) ->
 		{class: "label", label: "Output Type:", x: 0, y: 0}
 		{class: "dropdown", name: "outputtype", :items , x: 0, y: 1, value: items[2]}
 	}
-	img = getData!
+	img, frames = getData!
 	button, elements = Aegi.display interface, {"Ok", "Cancel"}, {close: "Cancel"}, "Pixels"
 	if button == "Ok"
+		ass = Ass sub, sel, activeLine
+		line = Table.copy sub[activeLine]
+		line_start_time = line.start_time
+		line.isShape = true
 		typer = switch elements.outputtype
 			when "All in one line" then "oneLine"
 			when "On several lines - \"Rec\"" then true
-		asslines = img\toAss typer
-		asslineslen = #asslines
-		ass = Ass sub, sel, activeLine
-		line = Table.copy sub[activeLine]
-		line.isShape = true
-		Aegi.progressTask "Adding new lines..."
-		for key, pixel in ipairs asslines
-			Aegi.progressSet key, asslineslen
-			line.shape = pixel\gsub "}{", ""
-			ass\insertLine line, activeLine
+		for i = 1, frames and #frames or 1
+			if frames
+				{:delayMs} = frames[i]
+				line.start_time = line_start_time
+				line.end_time = line_start_time + delayMs
+				line_start_time += delayMs
+			asslines = img\toAss typer, i
+			asslineslen = #asslines
+			Aegi.progressTask "Adding new lines..."
+			for key, pixel in ipairs asslines
+				Aegi.progressSet key, asslineslen
+				if frames
+					{:x, :y} = frames[i]
+					pixel = pixel\gsub "\\pos%(0,(%-?%d[%.%d+]*)%)", (py) -> "\\pos(#{x},#{tonumber(py) + y})"
+				line.shape = pixel\gsub "}{", ""
+				ass\insertLine line, activeLine
 		return ass\getNewSelection!
 
 imagePotrace = (sub, sel, activeLine) ->
@@ -165,18 +185,28 @@ imagePotrace = (sub, sel, activeLine) ->
 		{class: "floatedit", name: "opt", :x, y: 7, min: 0, value: 0.2}
 		{class: "checkbox", label: "Curve optimization?", name: "opc", :x, y: 8, value: true}
 	}
-	img = getData!
+	img, frames = getData!
 	button, elements = Aegi.display interface, {"Ok", "Cancel"}, {close: "Cancel"}, "Potrace"
 	if button == "Ok"
-		Aegi.progressTask "Tracing image..."
-		pot = IMG.Potrace img, nil, elements.tpy, elements.tdz, elements.opc, elements.apm, elements.opt
-		pot\process!
 		ass = Ass sub, sel, activeLine
 		line = Table.copy sub[activeLine]
+		line_start_time = line.start_time
 		line.isShape = true
-		Aegi.progressTask "Adding new lines..."
-		line.shape = "{\\an7\\pos(0,0)\\bord0\\shad0\\fscx100\\fscy100\\fr0\\p1}#{pot\getShape!}"
-		ass\insertLine line, activeLine
+		Aegi.progressTask "Tracing image..."
+		for i = 1, frames and #frames or 1
+			if frames
+				{:delayMs} = frames[i]
+				line.start_time = line_start_time
+				line.end_time = line_start_time + delayMs
+				line_start_time += delayMs
+			pot = IMG.Potrace img, i, elements.tpy, elements.tdz, elements.opc, elements.apm, elements.opt
+			pot\process!
+			shape = pot\getShape!
+			if frames
+				{:x, :y} = frames[i]
+				shape = Path(shape)\move(x, y)\export!
+			line.shape = "{\\an7\\pos(0,0)\\bord0\\shad0\\fscx100\\fscy100\\fr0\\p1}#{shape}"
+			ass\insertLine line, activeLine
 		return ass\getNewSelection!
 
 if haveDepCtrl
