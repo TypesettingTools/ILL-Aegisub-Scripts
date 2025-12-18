@@ -758,43 +758,93 @@ class FreeType extends Init
 	-- Gets the directory path of the best matching font for the requested family
 	getFontPath: =>
 		fonts = @getFonts!
-		font_variants = {}
-		-- Collect all fonts matching the requested family
-		for font in *fonts
-			if font.name\lower! == @family\lower!
-				table.insert font_variants, font
-		if #font_variants == 0
-			return false
-		-- Style preference order
-		style_preference =
-			["bold italic"]: 1
-			["bold oblique"]: 2
-			["italic"]: 3
-			["oblique"]: 4
-			["bold"]: 5
-			["regular"]: 6
-			["normal"]: 7
-		-- Sort fonts by style preference
-		table.sort font_variants, (a, b) ->
-			a_style = a.style\lower!
-			b_style = b.style\lower!
-			a_pref = style_preference[a_style] or 99
-			b_pref = style_preference[b_style] or 99
-			return a_pref < b_pref
-		-- Find exact match for bold/italic if requested
-		for font in *font_variants
-			style = font.style\lower!
-			is_bold = style\find("bold") != nil
-			is_italic = (style\find("italic") or style\find("oblique")) != nil
-			if @bold == is_bold and @italic == is_italic
-				@found_bold = is_bold
-				@found_italic = is_italic
-				return font.path
-		-- If no exact match, return the best available
-		first_font = font_variants[1]
-		first_style = first_font.style\lower!
-		@found_bold = first_style\find("bold") != nil
-		@found_italic = first_style\find("italic") != nil or first_style\find("oblique") != nil
-		return first_font.path
+
+		norm = (s) ->
+			return "" unless s
+			return s\lower!\gsub("%s+", " ")\match "^%s*(.-)%s*$"
+
+		-- remove only style tokens
+		strip_style_words = (s) ->
+			return "" unless s
+			s = norm s\gsub "[%s%-_]+", " "
+			-- words that represent style
+			style_words = {
+				"bold",
+				"black",
+				"heavy",
+				"semibold",
+				"demibold",
+				"demi",
+				"italic",
+				"oblique",
+				"regular",
+				"light",
+				"medium",
+				"thin",
+				"condensed",
+				"narrow"
+			}
+			style_set = {}
+			for i = 1, #style_words
+				style_set[style_words[i]] = true
+			out = {}
+			for token in s\gmatch "%S+"
+				unless style_set[token]
+					table.insert out, token
+			return table.concat out, " "
+
+		family = strip_style_words @family
+		is_bold = (s) -> s\lower!\find("bold") != nil or s\find("black") != nil or s\find("heavy") != nil or s\find("semibold") != nil or s\find("demibold") != nil or s\find("demi") != nil
+		is_italic = (s) -> s\lower!\find("italic") != nil or s\find("oblique") != nil
+		is_regular = (s) -> not is_bold(s) and not is_italic(s)
+
+		candidates = {}
+		for i = 1, #fonts
+			font = fonts[i]
+			if norm(font.name) == family
+				table.insert candidates, font
+
+		return false if #candidates == 0
+
+		score_font = (font) ->
+			style = norm font.style
+			score = 0
+			font_bold = is_bold style
+			font_italic = is_italic style
+			-- exact match
+			if bold == font_bold and italic == font_italic
+				score += 100
+			-- fallbacks
+			if bold and italic
+				if font_bold and not font_italic
+					score += 70
+				if font_italic and not font_bold
+					score += 60
+			elseif bold and not italic
+				if font_bold
+					score += 80
+			elseif not bold and italic
+				if font_italic
+					score += 80
+			else
+				if is_regular style
+					score += 50
+			-- light penalties
+			if style\find "condensed"
+				score -= 5
+			if style\find "narrow"
+				score -= 2
+			return score
+
+		table.sort candidates, (a, b) -> score_font(b) < score_font(a)
+		chosen = candidates[1]
+
+		style = norm chosen.style
+
+		@found_italic = is_italic style
+		@found_bold = is_bold style
+		@found_regular = is_regular style
+
+		return chosen.path
 
 {:FreeType}
