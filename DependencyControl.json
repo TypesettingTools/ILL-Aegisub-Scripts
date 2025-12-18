@@ -441,13 +441,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.7.1",
-                    "released": "2025-10-01",
+                    "version": "1.7.2",
+                    "released": "2025-12-18",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "cfce72a040b97fd8c5598bdfe7e6482e0ee669ac"
+                            "sha1": "2b0a6f3335e6153163a7c5fafea22ee33bd4e763"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -507,7 +507,7 @@
                         {
                             "name": "/Font/Unx.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "f6f7869bc84f5929de4e2e1581d1ee4c65a0f5e3"
+                            "sha1": "ca0789921ccb667bacf9774633104f1baa2bcf02"
                         },
                         {
                             "name": "/Font/Win.moon",
@@ -708,6 +708,9 @@
                 ],
                 "1.7.1": [
                     "Try fix getFontPath method to unix"
+                ],
+                "1.7.2": [
+                    "Merge remote-tracking branch 'refs/remotes/origin/main'"
                 ]
             }
         },
