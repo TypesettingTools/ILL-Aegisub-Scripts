@@ -441,13 +441,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.7.4",
+                    "version": "1.7.5",
                     "released": "2025-12-25",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "9fe09ed72b0e8b055b71b49efc45b3dbdbc4d45a"
+                            "sha1": "428c15d18bc062d12183a868af22241367e8818f"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -507,7 +507,7 @@
                         {
                             "name": "/Font/Unx.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "0b75072544ee3faa4b86c12b3eeaa17d14800f19"
+                            "sha1": "888edbad9d1c007eb5591b84e99fb5875d73710d"
                         },
                         {
                             "name": "/Font/Win.moon",
@@ -717,6 +717,9 @@
                 ],
                 "1.7.4": [
                     "fix waste"
+                ],
+                "1.7.5": [
+                    "fix ambiguities"
                 ]
             }
         },
