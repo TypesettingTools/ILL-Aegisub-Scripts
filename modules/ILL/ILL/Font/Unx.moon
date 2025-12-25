@@ -565,39 +565,48 @@ class FreeType extends Init
 	init: =>
 		unless has_freetype
 			error "freetype library couldn't be loaded", 2
-
+		@face_cache = {}
 		-- Check that the font has a bold and italic variant if necessary
 		@found_bold, @found_italic = false, false
-
-		-- Get the font path
-		font_path = @getFontPath!
-		unless font_path
-			error "Couldn't find #{@family} among your fonts"
-
 		-- Init FreeType
-		@library = new "FT_Library[1]"
-		err = freetype.FT_Init_FreeType @library
-
-		if err != 0
-			error "Failed to load freetype library"
-
-		ffi.gc @library, (lib) -> freetype.FT_Done_FreeType lib[0]
-
+		@library = @getLib!
+		-- Get the font path
+		font = @fontSelect!
 		-- Load font face
-		@face = new "FT_Face[1]"
-		err = freetype.FT_New_Face @library[0], font_path, 0, @face
-
-		if err != 0
-			error "Failed to load freetype face"
-
-		ffi.gc @face, (face) -> freetype.FT_Done_Face face[0]
-
+		@face = @getFaceFromPath font.path
 		set_font_metrics @face[0]
 		ass_face_set_size @face[0], @size
-
 		@ascender, @descender = ass_font_get_asc_desc @face[0]
 		@height = @ascender + @descender
 		@weight = tonumber ass_face_get_weight @face[0]
+
+	-- Get FreeType library
+	getLib: =>
+		library = new "FT_Library[1]"
+		err = freetype.FT_Init_FreeType library
+		if err != 0
+			error "Failed to load freetype library"
+		ffi.gc library, (lib) -> freetype.FT_Done_FreeType lib[0]
+		return library
+
+	-- Get face from path
+	getFaceFromPath: (path) =>
+		face = @face_cache[path]
+		return face if face
+		face = new "FT_Face[1]"
+		err = freetype.FT_New_Face @library[0], path, 0, face
+		if err != 0
+			error "Failed to load freetype face"
+		ffi.gc face, (f) -> freetype.FT_Done_Face f[0]
+		@face_cache[path] = face
+		return face
+
+	-- Check if a glyph exists for a given codepoint in a specific font path
+	hasGlyphFromPath: (path, codepoint) =>
+		return true if codepoint == 0
+		face = @getFaceFromPath path
+		return false unless face
+		freetype.FT_Get_Char_Index(face[0], codepoint) != 0
 
 	-- Callback to access the glyphs for each character
 	callBackCharsGlyph: (text, callback) =>
@@ -633,7 +642,6 @@ class FreeType extends Init
 		paths, x = {}, 0
 		@callBackCharsGlyph text, (glyph) ->
 			build, path = {}, {}
-			-- FIXME
 			if @bold and @weight < 700 and not @found_bold
 				ass_glyph_embolden glyph
 			if @italic and not @found_italic
@@ -710,7 +718,7 @@ class FreeType extends Init
 			table.insert paths, table.concat path, " "
 			if @underline or @strikeout
 				table.insert paths, ass_get_glyph_outline @face[0], @underline, @strikeout, x, @ascender * FONT_UPSCALE
-			x += tonumber(glyph.metrics.horiAdvance) + (@hspace * FONT_UPSCALE)
+			x += tonumber(glyph.metrics.horiAdvance) + (@hspace * FONT_UPSCALE) - (0.1 * FONT_UPSCALE)
 		return table.concat paths, " "
 
 	-- Gets the complete list of fonts available on the system
@@ -755,96 +763,66 @@ class FreeType extends Init
 		-- Return collected fonts
 		return fonts
 
+	-- Normalize a string for font matching
+	norm: (s) ->
+		return "" unless s
+		s\lower!\gsub("[%s%-%_]+", " ")\match "^%s*(.-)%s*$"
+
+	-- Check if a style is bold
+	is_bold: (s) ->
+		z = FreeType.norm s
+		z\find("bold") or z\find("black") or z\find("heavy") or z\find("semibold") or z\find("demibold") or z\find("demi")
+
+	-- Check if a style is italic
+	is_italic: (s) ->
+		z = FreeType.norm s
+		z\find("italic") or z\find("oblique")
+
+	-- Check if a style is regular
+	is_regular: (s) -> not FreeType.is_bold(s) and not FreeType.is_italic(s)
+
+	-- Score a font based on bold and italic requirements
+	scoreFont: (font, bold, italic) ->
+		style = FreeType.norm font.style
+		font_bold = style\find("bold") or style\find("black") or style\find("heavy") or style\find("semibold") or style\find("demi")
+		font_italic = style\find("italic") or style\find("oblique")
+		score = 0
+		if bold == font_bold and italic == font_italic
+			return 0
+		if bold and not font_bold
+			score += 200
+		if not bold and font_bold
+			score += 300
+		if italic and not font_italic
+			score += 200
+		if not italic and font_italic
+			score += 300
+		if style\find "condensed"
+			score += 20
+		if style\find "narrow"
+			score += 10
+		return score
+
 	-- Gets the directory path of the best matching font for the requested family
-	getFontPath: =>
+	fontSelect: =>
 		fonts = @getFonts!
-
-		norm = (s) ->
-			return "" unless s
-			return s\lower!\gsub("%s+", " ")\match "^%s*(.-)%s*$"
-
-		-- remove only style tokens
-		strip_style_words = (s) ->
-			return "" unless s
-			s = norm s\gsub "[%s%-_]+", " "
-			-- words that represent style
-			style_words = {
-				"bold",
-				"black",
-				"heavy",
-				"semibold",
-				"demibold",
-				"demi",
-				"italic",
-				"oblique",
-				"regular",
-				"light",
-				"medium",
-				"thin",
-				"condensed",
-				"narrow"
-			}
-			style_set = {}
-			for i = 1, #style_words
-				style_set[style_words[i]] = true
-			out = {}
-			for token in s\gmatch "%S+"
-				unless style_set[token]
-					table.insert out, token
-			return table.concat out, " "
-
-		family = strip_style_words @family
-		is_bold = (s) -> s\lower!\find("bold") != nil or s\find("black") != nil or s\find("heavy") != nil or s\find("semibold") != nil or s\find("demibold") != nil or s\find("demi") != nil
-		is_italic = (s) -> s\lower!\find("italic") != nil or s\find("oblique") != nil
-		is_regular = (s) -> not is_bold(s) and not is_italic(s)
-
-		candidates = {}
-		for i = 1, #fonts
+		family = FreeType.norm @family
+		best, best_score = nil, math.huge
+		for i = 1, fonts.n
 			font = fonts[i]
-			if norm(font.name) == family
-				table.insert candidates, font
-
-		return false if #candidates == 0
-
-		score_font = (font) ->
-			style = norm font.style
-			score = 0
-			font_bold = is_bold style
-			font_italic = is_italic style
-			-- exact match
-			if bold == font_bold and italic == font_italic
-				score += 100
-			-- fallbacks
-			if bold and italic
-				if font_bold and not font_italic
-					score += 70
-				if font_italic and not font_bold
-					score += 60
-			elseif bold and not italic
-				if font_bold
-					score += 80
-			elseif not bold and italic
-				if font_italic
-					score += 80
-			else
-				if is_regular style
-					score += 50
-			-- light penalties
-			if style\find "condensed"
-				score -= 5
-			if style\find "narrow"
-				score -= 2
-			return score
-
-		table.sort candidates, (a, b) -> score_font(b) < score_font(a)
-		chosen = candidates[1]
-
-		style = norm chosen.style
-
-		@found_italic = is_italic style
-		@found_bold = is_bold style
-		@found_regular = is_regular style
-
-		return chosen.path
+			if FreeType.norm(font.name) != family and FreeType.norm(font.longname) != family
+				continue
+			unless @hasGlyphFromPath font.path, UTF8.charcodepoint "a"
+				continue
+			score = FreeType.scoreFont font, @bold, @italic
+			if score < best_score
+				best = font
+				best_score = score
+				break if score == 0
+		unless best
+			error "Couldn't find #{@family} among your fonts"
+		@found_italic = FreeType.is_italic best.style
+		@found_bold = FreeType.is_bold best.style
+		return best
 
 {:FreeType}
