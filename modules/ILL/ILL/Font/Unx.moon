@@ -718,7 +718,7 @@ class FreeType extends Init
 			table.insert paths, table.concat path, " "
 			if @underline or @strikeout
 				table.insert paths, ass_get_glyph_outline @face[0], @underline, @strikeout, x, @ascender * FONT_UPSCALE
-			x += tonumber(glyph.metrics.horiAdvance) + (@hspace * FONT_UPSCALE) - (0.1 * FONT_UPSCALE)
+			x += tonumber(glyph.metrics.horiAdvance) + (@hspace * FONT_UPSCALE)
 		return table.concat paths, " "
 
 	-- Gets the complete list of fonts available on the system
@@ -769,17 +769,17 @@ class FreeType extends Init
 		s\lower!\gsub("[%s%-%_]+", " ")\match "^%s*(.-)%s*$"
 
 	-- Check if a style is bold
-	is_bold: (s) ->
+	isBold: (s) ->
 		z = FreeType.norm s
 		z\find("bold") or z\find("black") or z\find("heavy") or z\find("semibold") or z\find("demibold") or z\find("demi")
 
 	-- Check if a style is italic
-	is_italic: (s) ->
+	isItalic: (s) ->
 		z = FreeType.norm s
 		z\find("italic") or z\find("oblique")
 
 	-- Check if a style is regular
-	is_regular: (s) -> not FreeType.is_bold(s) and not FreeType.is_italic(s)
+	isRegular: (s) -> not FreeType.isBold(s) and not FreeType.isItalic(s)
 
 	-- Score a font based on bold and italic requirements
 	scoreFont: (font, bold, italic) ->
@@ -821,8 +821,8 @@ class FreeType extends Init
 				break if score == 0
 		unless best
 			error "Couldn't find #{@family} among your fonts"
-		@found_italic = FreeType.is_italic best.style
-		@found_bold = FreeType.is_bold best.style
+		@found_italic = FreeType.isItalic best.style
+		@found_bold = FreeType.isBold best.style
 		return best
 
 {:FreeType}
