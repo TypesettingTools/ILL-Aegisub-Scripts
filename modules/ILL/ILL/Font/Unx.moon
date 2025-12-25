@@ -784,8 +784,8 @@ class FreeType extends Init
 	-- Score a font based on bold and italic requirements
 	scoreFont: (font, bold, italic) ->
 		style = FreeType.norm font.style
-		font_bold = style\find("bold") or style\find("black") or style\find("heavy") or style\find("semibold") or style\find("demi")
-		font_italic = style\find("italic") or style\find("oblique")
+		font_bold = FreeType.isBold style
+		font_italic = FreeType.isItalic style
 		score = 0
 		if bold == font_bold and italic == font_italic
 			return 0
