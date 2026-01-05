@@ -420,7 +420,13 @@ class Tag
 					@tag.isRect = true
 			elseif name == "t"
 				s, e, a, transform = value\match "([%.%d]*)%,?([%.%d]*)%,?([%.%d]*)%,?(.+)"
-				@tag.value = {s: tonumber(s), e: tonumber(e), a: tonumber(a), :transform}
+				s, e, a = tonumber(s), tonumber(e), tonumber(a)
+				if s != nil and e != nil and a != nil
+					@tag.value = {s: s, e: e, a: a, :transform}
+				elseif s != nil and e != nil and a == nil
+					@tag.value = {s: s, e: e, a: 1, :transform}
+				elseif s != nil and e == nil and a == nil
+					@tag.value = {a: s, :transform}
 		else
 			@tag.value = tonumber value
 
