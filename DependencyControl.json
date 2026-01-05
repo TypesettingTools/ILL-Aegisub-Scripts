@@ -362,11 +362,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.0.0",
+                    "version": "1.0.1",
                     "released": "2026-01-05",
                     "files": [
                         {
-                            "sha1": "d567498b5ffebc3913ec857790c6b576443150dd",
+                            "sha1": "0fd8ffffa939ddf364b26627ba266f6cf11e488f",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -383,6 +383,9 @@
             "changelog": {
                 "1.0.0": [
                     "Add FBF with step"
+                ],
+                "1.0.1": [
+                    "Add FBF to DepControl and fix FBF"
                 ]
             },
             "name": "ILL - Line2FBF",
