@@ -1,6 +1,6 @@
 export script_name        = "ILL - Line2FBF"
 export script_description = "It calculates line transformations frame by frame or given a step frame."
-export script_version     = "1.0.0"
+export script_version     = "1.0.1"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Line2FBF"
 
@@ -32,14 +32,14 @@ interface = ->
     }
 
 main = (sub, sel, activeLine) ->
-	button, {:step} = Aegi.display interface!, {"Ok", "Cancel"}, {close: "Cancel"}
+	button, elements = Aegi.display interface!, {"Ok", "Cancel"}, {close: "Cancel"}
 	if button == "Ok"
 		ass = Ass sub, sel, activeLine
 		for l, s, i, n in ass\iterSel!
 			ass\progressLine s, i, n
             ass\removeLine l, s
 			Line.process ass, l
-            Line.callBackFBFWithStep ass, l, step, (line, i, end_frame, j, n) ->
+            Line.callBackFBFWithStep ass, l, elements.step, (line, i, end_frame, j, n) ->
                 ass\insertLine line, s
 
 if haveDepCtrl

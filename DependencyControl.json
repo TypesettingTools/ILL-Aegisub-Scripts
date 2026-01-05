@@ -355,6 +355,39 @@
             "name": "ILL - Split Text",
             "description": "Splits the text in several ways",
             "author": "ILLTeam"
+        },
+        "ILL.Line2FBF": {
+            "url": "@{baseUrl}#@{namespace}",
+            "fileBaseUrl": "@{fileBaseUrl}macros/@{namespace}",
+            "channels": {
+                "main": {
+                    "default": true,
+                    "version": "1.0.0",
+                    "released": "2026-01-05",
+                    "files": [
+                        {
+                            "sha1": "d567498b5ffebc3913ec857790c6b576443150dd",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "name": ".moon"
+                        }
+                    ],
+                    "requiredModules": [
+                        {
+                            "moduleName": "ILL.ILL",
+                            "feed": "@{feed:ILL}",
+                            "version": "1.7.6"
+                        }
+                    ]
+                }
+            },
+            "changelog": {
+                "1.0.0": [
+                    "Add FBF with step"
+                ]
+            },
+            "name": "ILL - Line2FBF",
+            "description": "It calculates line transformations frame by frame or given a step frame.",
+            "author": "ILLTeam"
         }
     },
     "modules": {
