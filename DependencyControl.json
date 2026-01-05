@@ -441,13 +441,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.7.5",
-                    "released": "2025-12-25",
+                    "version": "1.7.6",
+                    "released": "2026-01-05",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "428c15d18bc062d12183a868af22241367e8818f"
+                            "sha1": "db84034fc6ffd6a73fc83c519378782fc4406058"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -472,7 +472,7 @@
                         {
                             "name": "/Ass/Text/Tag.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "6cbe306afb4f7e7db0bfadfd833283b70cb2fa72"
+                            "sha1": "ca7ac0729605470e0b33979f05faf3e620df5bf3"
                         },
                         {
                             "name": "/Ass/Text/Tags.moon",
@@ -492,7 +492,7 @@
                         {
                             "name": "/Ass/Line.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "a687cfb2a01e24fb3fcdc68d517a93bda628d2a2"
+                            "sha1": "5bca8b38cab16dd563a2a2b6e836f734ff846b44"
                         },
                         {
                             "name": "/Font/Font.moon",
@@ -720,6 +720,9 @@
                 ],
                 "1.7.5": [
                     "fix ambiguities"
+                ],
+                "1.7.6": [
+                    "Add FBF with step"
                 ]
             }
         },
