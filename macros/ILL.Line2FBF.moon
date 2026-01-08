@@ -1,6 +1,6 @@
-export script_name        = "ILL - Line2FBF"
+export script_name        = "Line To FBF"
 export script_description = "It calculates line transformations frame by frame or given a step frame."
-export script_version     = "1.0.1"
+export script_version     = "1.1.0"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Line2FBF"
 
@@ -13,7 +13,7 @@ if haveDepCtrl
 		{
 			{
 				"ILL.ILL"
-				version: "1.7.6"
+				version: "1.7.7"
 				url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
 				feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}
