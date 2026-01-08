@@ -527,8 +527,8 @@ class Line
 			return 1 if accel != accel or accel == math.huge or accel == -math.huge
 			Math.round Math.clamp accel, 0.01, 100
 		-- interpolates all the tags contained in the \t tag
-		lerpTagTransform = (currTime, sttTime, endTime, data, tags) ->
-			{:insert} = table
+		lerpTagTransform = (currTime, line, data, tags) ->
+			sttTime, endTime = line.start_time, line.end_time 
 			while true
 				if tr = tags\getTag "t"
 					{:s, :e, :a} = tr.tag.value
@@ -549,45 +549,46 @@ class Line
 						for i = 1, #values
 							{:name, :tag} = values[i]
 							if tag.transformable
-								if tags\existsTag name
+								n = tag.style_name and tag.style_name or name
+								v1, v2, result1, result2 = data[n], tag.value, nil, nil
+								if tg = tags\getTag name
 									tags\remove name
-								name = tag.style_name and tag.style_name or name
-								v1, v2, result1, result2 = data[name], tag.value, nil, nil
+									v1 = tg.value
 								unless name == "clip" or name == "iclip"
 									-- t1
 									result1 = Util.interpolation t1Step, nil, v1, v2
 									if type(result1) == "number"
 										result1 = Math.round result1, 2
-									data[name] = result1
+									data[n] = result1
 									-- t2
 									result2 = Util.interpolation t3Step, nil, v1, v2
 									if type(result2) == "number"
 										result2 = Math.round result2, 2
-									data[name] = result2
+									data[n] = result2
 								else
 									-- if is a rectangular clip
 									if type(v1) == "table" and type(v2) == "table"
 										{l1, t1, r1, b1} = v1
 										{l2, t2, r2, b2} = v2
 										-- t1
-										data[name][1] = Math.round Util.interpolation(t1Step, "number", l1, l2), 2
-										data[name][2] = Math.round Util.interpolation(t1Step, "number", t1, t2), 2
-										data[name][3] = Math.round Util.interpolation(t1Step, "number", r1, r2), 2
-										data[name][4] = Math.round Util.interpolation(t1Step, "number", b1, b2), 2
-										result1 = "(#{data[name][1]},#{data[name][2]},#{data[name][3]},#{data[name][4]})"
+										data[n][1] = Math.round Util.interpolation(t1Step, "number", l1, l2), 2
+										data[n][2] = Math.round Util.interpolation(t1Step, "number", t1, t2), 2
+										data[n][3] = Math.round Util.interpolation(t1Step, "number", r1, r2), 2
+										data[n][4] = Math.round Util.interpolation(t1Step, "number", b1, b2), 2
+										result1 = "(#{data[n][1]},#{data[n][2]},#{data[n][3]},#{data[n][4]})"
 										-- t2
-										data[name][1] = Math.round Util.interpolation(t3Step, "number", l1, l2), 2
-										data[name][2] = Math.round Util.interpolation(t3Step, "number", t1, t2), 2
-										data[name][3] = Math.round Util.interpolation(t3Step, "number", r1, r2), 2
-										data[name][4] = Math.round Util.interpolation(t3Step, "number", b1, b2), 2
-										result2 = "(#{data[name][1]},#{data[name][2]},#{data[name][3]},#{data[name][4]})"
+										data[n][1] = Math.round Util.interpolation(t3Step, "number", l1, l2), 2
+										data[n][2] = Math.round Util.interpolation(t3Step, "number", t1, t2), 2
+										data[n][3] = Math.round Util.interpolation(t3Step, "number", r1, r2), 2
+										data[n][4] = Math.round Util.interpolation(t3Step, "number", b1, b2), 2
+										result2 = "(#{data[n][1]},#{data[n][2]},#{data[n][3]},#{data[n][4]})"
 									else -- if is a vector clip --> yes it works
 										-- t1
-										data[name] = Util.interpolation t1Step, "shape", v1, v2
-										result1 = "(#{data[name]})"
+										data[n] = Util.interpolation t1Step, "shape", v1, v2
+										result1 = "(#{data[n]})"
 										-- t2
-										data[name] = Util.interpolation t3Step, "shape", v1, v2
-										result2 = "(#{data[name]})"
+										data[n] = Util.interpolation t3Step, "shape", v1, v2
+										result2 = "(#{data[n]})"
 								t1Lerp ..= tag.ass .. result1
 								t2Lerp ..= tag.ass .. result2
 						ts = math.max s - startStepTime, 0
@@ -598,38 +599,40 @@ class Line
 						t = Util.getTimeInInterval currTime, s, e, a
 						lerp, values = "", Tags(tr.tag.value.transform)\split!
 						for i = 1, #values
-							{:name, :tag} = values[i]
+							{:name, :value, :tag} = values[i]
 							if tag.transformable
-								if tags\existsTag name
+								n = tag.style_name and tag.style_name or name
+								v1, v2, result = data[n], value, nil
+								if tg = tags\getTag name
 									tags\remove name
-								name = tag.style_name and tag.style_name or name
-								v1, v2, result = data[name], tag.value, nil
-								unless name == "clip" or name == "iclip"
+									v1 = tg.value
+								unless n == "clip" or n == "iclip"
 									result = Util.interpolation t, nil, v1, v2
 									if type(result) == "number"
 										result = Math.round result, 2
-									data[name] = result
+									data[n] = result
 								else
 									-- if is a rectangular clip
 									if type(v1) == "table" and type(v2) == "table"
 										{l1, t1, r1, b1} = v1
 										{l2, t2, r2, b2} = v2
-										data[name][1] = Math.round Util.interpolation(t, "number", l1, l2), 2
-										data[name][2] = Math.round Util.interpolation(t, "number", t1, t2), 2
-										data[name][3] = Math.round Util.interpolation(t, "number", r1, r2), 2
-										data[name][4] = Math.round Util.interpolation(t, "number", b1, b2), 2
-										result = "(#{data[name][1]},#{data[name][2]},#{data[name][3]},#{data[name][4]})"
+										data[n][1] = Math.round Util.interpolation(t, "number", l1, l2), 2
+										data[n][2] = Math.round Util.interpolation(t, "number", t1, t2), 2
+										data[n][3] = Math.round Util.interpolation(t, "number", r1, r2), 2
+										data[n][4] = Math.round Util.interpolation(t, "number", b1, b2), 2
+										result = "(#{data[n][1]},#{data[n][2]},#{data[n][3]},#{data[n][4]})"
 									else
 										-- if is a vector clip --> yes it works
-										data[name] = Util.interpolation t, "shape", v1, v2
-										result = "(#{data[name]})"
+										data[n] = Util.interpolation t, "shape", v1, v2
+										result = "(#{data[n]})"
 								lerp ..= tag.ass .. result
 						tags\remove {"t", lerp, 1}
 				else
 					break
 			tags.tags = tags.tags\gsub "\\gt", "\\t" if step > 1
 		-- interpolates between the start and end coordinates of the \move tag
-		lerpTagMove = (currTime, sttTime, endTime, data, tags) ->
+		lerpTagMove = (currTime, line, data, tags) ->
+			sttTime, endTime = line.start_time, line.end_time 
 			if tags\existsTag "move"
 				if step > 1
 					startStepTime = roundLineTime sttTime - start_time
@@ -664,7 +667,8 @@ class Line
 					data.move = nil
 					tags\remove {"move", "\\pos(#{x},#{y})"}
 		-- interpolates the value of the \fad or \fade tag given the initial value of alpha
-		lerpTagFade = (currTime, sttTime, endTime, data, tags) ->
+		lerpTagFade = (currTime, line, data, tags) ->
+			sttTime, endTime = line.start_time, line.end_time 
 			if fade = data.fade or data.fad
 				alphaData = {{"alpha", "alpha"}, {"alpha1", "1a"}, {"alpha2", "2a"}, {"alpha3", "3a"}, {"alpha4", "4a"}}
 				if step > 1
@@ -702,8 +706,7 @@ class Line
 							data[alphaName] = endAlpha
 							-- removes the tag
 							tags\remove {alphaTag, "\\#{alphaTag}#{startAlpha}\\t(\\#{alphaTag}#{endAlpha})"}
-					data.fad = nil
-					data.fade = nil
+					data.fad, data.fade = nil, nil
 				else
 					value = 0
 					if alpha = tags\getTag "alpha"
@@ -725,19 +728,17 @@ class Line
 							data[alphaName] = Math.clamp data[alphaName], 0, 255
 							data[alphaName] = ("&H%02X&")\format data[alphaName]
 							tags\remove {alphaTag, "\\#{alphaTag}#{data[alphaName]}"}
-					data.fad = nil
-					data.fade = nil
+					data.fad, data.fade = nil, nil
 		-- gets the start and end time values in frames
 		stt_frame = Aegi.ffm start_time
 		end_frame = Aegi.ffm end_time
-		j = 0
 		n = end_frame - stt_frame
 		-- iterates over all the identified frames
 		for i = stt_frame, end_frame - 1, step
 			s = Aegi.mff i
 			e = Aegi.mff math.min i + step, end_frame
 			f = math.floor((s + e) / 2) - start_time
-			dado = Table.copy data
+			curr = Table.copy data
 			line = Table.copy l
 			line.start_time = s
 			line.end_time = e
@@ -745,16 +746,15 @@ class Line
 			unless l.isShape
 				line.text\callBack (tags, text, k) ->
 					if k == 1
-						lerpTagMove f, line.start_time, line.end_time, dado, tags
-					lerpTagTransform f, line.start_time, line.end_time, dado, tags
-					lerpTagFade f, line.start_time, line.end_time, dado, tags
+						lerpTagMove f, line, curr, tags
+					lerpTagTransform f, line, curr, tags
+					lerpTagFade f, line, curr, tags
 					return tags, text
 			else
-				lerpTagMove f, line.start_time, line.end_time, dado, line.tags
-				lerpTagTransform f, line.start_time, line.end_time, dado, line.tags
-				lerpTagFade f, line.start_time, line.end_time, dado, line.tags
-			j = i - stt_frame
-			fn line, i, end_frame, j, n
+				lerpTagMove f, line, curr, line.tags
+				lerpTagTransform f, line, curr, line.tags
+				lerpTagFade f, line, curr, line.tags
+			fn line, i, end_frame, i - stt_frame, n
 
 	-- callback to map between all possible lines of text
 	callBackTags: (ass, l, fn) ->
