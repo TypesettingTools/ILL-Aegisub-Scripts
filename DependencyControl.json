@@ -495,13 +495,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.8.1",
+                    "version": "1.8.2",
                     "released": "2026-03-03",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "33d1f1d25212be5d8ce062db9a056e1f2dc714fd"
+                            "sha1": "faf2e61d7feef06dce81fa03be1e7c36cab275e6"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -511,7 +511,7 @@
                         {
                             "name": "/Ass/Shape/Path.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "fe2abe579d90d261cdb96cc599197cc9a13d7d1f"
+                            "sha1": "6307e532c49d34f8b44b2f052381f9cbe6f7894a"
                         },
                         {
                             "name": "/Ass/Shape/Point.moon",
@@ -795,6 +795,9 @@
                 ],
                 "1.8.1": [
                     "Add simplify to offsetting and back to old simplify (stable)"
+                ],
+                "1.8.2": [
+                    "Remove old Simplify"
                 ]
             }
         },
