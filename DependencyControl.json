@@ -480,13 +480,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.7.7",
-                    "released": "2026-01-08",
+                    "version": "1.7.8",
+                    "released": "2026-03-03",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "70154fc4c3e48398a5d89b8b0c9c2434ab7bd9fe"
+                            "sha1": "7bdec98ab4d82615b17ea1fa85138010b8db98d4"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -531,12 +531,12 @@
                         {
                             "name": "/Ass/Line.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "ba947e3865633b72f87b4d92695e4c2ab3ea5a41"
+                            "sha1": "dd55f2a647f7780ab9acbbe4efbf674afd1c7eba"
                         },
                         {
                             "name": "/Font/Font.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "efcb3754abcf0f2ea358abc4943d9128d7458a4f"
+                            "sha1": "04c0cada1c03af54db318461c5452f712f4c54e7"
                         },
                         {
                             "name": "/Font/Init.moon",
@@ -551,7 +551,7 @@
                         {
                             "name": "/Font/Win.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "5d86d7902ae80f96462a61825f0263c48e590907"
+                            "sha1": "f6d5784c4c58f6b5c144d91b502f39c2d518f7fc"
                         },
                         {
                             "name": "/Aegi.moon",
@@ -765,6 +765,9 @@
                 ],
                 "1.7.7": [
                     "Fix FBF interpolations"
+                ],
+                "1.7.8": [
+                    "Prevent GDI handle leak"
                 ]
             }
         },
