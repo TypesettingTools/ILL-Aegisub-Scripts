@@ -62,12 +62,13 @@ class Path
 
 	-- Remove holes from Path
 	withoutHoles: =>
+		newPath = Path!
 		clone = @clone!
 		clone\flatten!
 		for j = 1, #clone.path
-			unless checkPathClockWise clone.path[j]
-				remove @path, j
-		return @
+			if checkPathClockWise clone.path[j]
+				insert newPath.path, @path[j]
+		@update newPath
 
 	-- Maps all points on the Path
 	map: (fn) =>
@@ -416,13 +417,13 @@ class Path
 
 	-- Gets the normalized tangent on the Path given a time
 	getNormalized: (t = 0.5, returnPath) =>
-		sumLength, length, newPath, tan, p, u = 0, t * @getLength!, Path!, nil, nil, nil
+		sumLength, length, newPath, data = 0, t * @getLength!, Path!, nil
 		@callBackPath (id, seg, k) ->
 			segmentLen = seg\getLength!
 			if newPath.path[k] == nil
 				newPath.path[k] = {seg.a}
 			if sumLength + segmentLen > length
-				spt = seg\splitAtInterval (length - sumLength) / segmentLen, 1
+				spt, data = seg\splitAtInterval (length - sumLength) / segmentLen, 1
 				if id == "l"
 					insert newPath.path[k], spt.b
 				else
@@ -439,7 +440,7 @@ class Path
 			sumLength += segmentLen
 		if returnPath
 			return newPath
-		return tan, p, u, newPath
+		return data.t.tangent, data.t.point, data.t.time, newPath
 
 	-- Get the Path by giving a interval
 	getNormalizedInterval: (u, v) =>

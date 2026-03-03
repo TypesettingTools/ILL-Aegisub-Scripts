@@ -45,7 +45,10 @@ class Segment
 		{:a, :b} = @
 		p1 = a\lerp b, t
 		p2 = a\lerp b, u
-		return Segment p1, p2
+		segment = Segment p1, p2
+		tanT, pT, tT = @getNormalized t
+		tanU, pU, tU = @getNormalized u
+		return segment, {t: {tangent: tanT, point: pT, time: tT}, u: {tangent: tanU, point: pU, time: tU}}
 
 	-- gets the normalized tangent given a time on a segment
 	getNormalized: (t, inverse) =>
