@@ -1,6 +1,6 @@
 export script_name        = "Shapery"
 export script_description = "Does several types of shape manipulations from the simplest to the most complex"
-export script_version     = "2.6.4"
+export script_version     = "2.6.5"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
@@ -46,14 +46,15 @@ interfaces = {
 	offsetting: -> {
 		{class: "label", label: "Stroke Weight", x: 0, y: 0}
 		{class: "floatedit", x: 1, y: 0, name: "strokeWeight", value: 0}
-		{class: "label", label: "Corner Style", x: 0, y: 2}
-		{class: "dropdown", items: {"Miter", "Round", "Square"}, x: 1, y: 2, name: "cornerStyle", value: "Round"}
-		{class: "label", label: "Align Stroke", x: 0, y: 3}
-		{class: "dropdown", items: {"Outside", "Center", "Inside"}, x: 1, y: 3, name: "strokeAlign", value: "Outside"}
-		{class: "label", label: "Miter Limit", x: 0, y: 5}
-		{class: "floatedit", x: 0, y: 6, name: "miterLimit", value: 2}
-		{class: "label", label: "Arc Precision", x: 1, y: 5}
-		{class: "floatedit", x: 1, y: 6, name: "arcPrecision", value: 0.25}
+		{class: "checkbox", x: 1, y: 1, label: "Simplify Curves?", name: "simplifyCurves", value: true}
+		{class: "label", label: "Corner Style", x: 0, y: 3}
+		{class: "dropdown", items: {"Miter", "Round", "Square"}, x: 1, y: 3, name: "cornerStyle", value: "Round"}
+		{class: "label", label: "Align Stroke", x: 0, y: 4}
+		{class: "dropdown", items: {"Outside", "Center", "Inside"}, x: 1, y: 4, name: "strokeAlign", value: "Outside"}
+		{class: "label", label: "Miter Limit", x: 0, y: 6}
+		{class: "floatedit", x: 0, y: 7, name: "miterLimit", value: 2}
+		{class: "label", label: "Arc Precision", x: 1, y: 6}
+		{class: "floatedit", x: 1, y: 7, name: "arcPrecision", value: 0.25}
 	}
 	manipulate: -> {
 		{class: "label", label: "Fit Curves", x: 0, y: 0}
@@ -113,7 +114,7 @@ resetInterface = (name) ->
 		cfg\reset!
 	else
 		interface = interfaces.config!
-		for n in *interface[5].items
+		for n in *interface[6].items
 			if n != "All"
 				resetInterface n
 
@@ -181,10 +182,11 @@ OffsettingDialog = (sub, sel, activeLine) ->
 	if button != "Cancel"
 		cfg = getConfigElements!
 		ass = Ass sub, sel, activeLine, not cfg.saveLines
-		{:strokeWeight, :strokeAlign, :cornerStyle, :miterLimit, :arcPrecision} = elements
+		{:strokeWeight, :strokeAlign, :cornerStyle, :miterLimit, :arcPrecision, :simplifyCurves} = elements
 		if strokeWeight < 0
 			strokeAlign = "Inside"
 		cornerStyle = cornerStyle\lower!
+		simplifyRatio = 0.1
 		for l, s, i, n in ass\iterSel!
 			ass\progressLine s, i, n
 			ass\removeLine l, s
@@ -207,18 +209,25 @@ OffsettingDialog = (sub, sel, activeLine) ->
 
 				if strokeAlign == "Inside"
 					line.tags\insert {{"c", line.data.color3}}
-					line.shape = clip\difference(path)\export!
+					line.shape = clip\difference path
+					if simplifyCurves
+						path\simplify simplifyRatio
+						line.shape = line.shape\simplify(simplifyRatio)\export!
 					ass\insertLine line, s
 					-- adding fill color
 					line.tags\insert {{"c", line.data.color1}}
 				elseif strokeAlign == "Center"
 					line.tags\insert {{"c", line.data.color1}}
-					line.shape = clip\difference(path)\export!
+					line.shape = clip\difference path
+					if simplifyCurves
+						path\simplify simplifyRatio
+						line.shape = line.shape\simplify(simplifyRatio)\export!
 					ass\insertLine line, s
 					-- adding stroke color
 					line.tags\insert {{"c", line.data.color3}}
 				elseif strokeAlign == "Outside"
 					path\difference clip
+					path\simplify simplifyRatio if simplifyCurves
 
 				line.shape = path\export!
 				ass\insertLine line, s

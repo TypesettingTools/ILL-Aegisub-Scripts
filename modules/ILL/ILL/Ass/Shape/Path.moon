@@ -1316,4 +1316,356 @@ Path.Simplifier = (paths, tolerance, filterNoise, recreateBezier, angleThreshold
 
 	return newPath
 
+
+-- https://github.com/mourner/simplify-js/blob/master/simplify.js
+-- https://github.com/ynakajima/polyline2bezier/blob/master/src/polyline2bezier.js
+-- This is a port of simplify.js and polyline2bezier adapted for Path
+Path.Simplifier = (paths, tolerance = 0.1, filterNoise, recreateBezier, angleThreshold) ->
+	simplifyRadialDist = (points, sqTolerance) ->
+		prevPoint = points[1]
+		newPoints = {prevPoint}
+		local point
+
+		for i = 2, #points
+			point = points[i]
+
+			if point\sqDistance(prevPoint) > sqTolerance
+				insert newPoints, point
+				prevPoint = point
+
+		if (prevPoint.x != point.x) and (prevPoint.y != point.y)
+			insert newPoints, point
+
+		return newPoints
+
+	simplifyDPStep = (points, first, last, sqTolerance, simplified) ->
+		maxSqDist, index = sqTolerance
+
+		for i = first + 1, last
+			sqDist = points[i]\sqSegDistance points[first], points[last]
+
+			if (sqDist > maxSqDist)
+				index = i
+				maxSqDist = sqDist
+
+		if (maxSqDist > sqTolerance)
+			if (index - first > 1)
+				simplifyDPStep(points, first, index, sqTolerance, simplified)
+			insert simplified, points[index]
+
+			if (last - index > 1)
+				simplifyDPStep(points, index, last, sqTolerance, simplified)
+
+	simplifyDouglasPeucker = (points, sqTolerance) ->
+		last = #points
+		simplified = {points[1]}
+
+		simplifyDPStep(points, 1, last, sqTolerance, simplified)
+		insert simplified, points[last]
+
+		return simplified
+
+	-- bezier
+	computeLeftTangent = (d, _end) ->
+		tHat1 = d[_end + 1]\subtract(d[_end])
+		return tHat1\vecNormalize!
+
+	computeRightTangent = (d, _end) ->
+		tHat2 = d[_end - 1]\subtract(d[_end])
+		return tHat2\vecNormalize!
+
+	computeCenterTangent = (d, center) ->
+		V1 = d[center - 1]\subtract(d[center])
+		V2 = d[center]\subtract(d[center + 1])
+		tHatCenter = Point!
+		tHatCenter.x = (V1.x + V2.x) / 2
+		tHatCenter.y = (V1.y + V2.y) / 2
+		return tHatCenter\vecNormalize!
+
+	chordLengthParameterize = (d, first, last) ->
+		u = {0}
+		for i = first + 1, last
+			u[i - first + 1] = u[i - first] + d[i]\distance d[i - 1]
+		for i = first + 1, last
+			u[i - first + 1] /= u[last - first + 1]
+		return u
+
+	bezierII = (degree, V, t) ->
+		Vtemp = {}
+		for i = 0, degree
+			Vtemp[i] = Point V[i + 1].x, V[i + 1].y
+
+		for i = 1, degree
+			for j = 0, degree - i
+				Vtemp[j].x = (1 - t) * Vtemp[j].x + t * Vtemp[j + 1].x
+				Vtemp[j].y = (1 - t) * Vtemp[j].y + t * Vtemp[j + 1].y
+
+		return Point Vtemp[0].x, Vtemp[0].y
+
+	computeMaxError = (d, first, last, bezCurve, u, splitPoint) ->
+		splitPoint = (last - first + 1) / 2
+
+		maxError = 0
+		for i = first + 1, last - 1
+			P = bezierII(3, bezCurve, u[i - first + 1])
+			v = P\subtract d[i]
+			dist = v\vecLength!
+			if dist >= maxError
+				maxError = dist
+				splitPoint = i
+
+		return {:maxError, :splitPoint}
+
+	newtonRaphsonRootFind = (_Q, _P, u) ->
+		Q1, Q2 = {}, {}
+
+		Q = {
+			Point _Q[1].x, _Q[1].y
+			Point _Q[2].x, _Q[2].y
+			Point _Q[3].x, _Q[3].y
+			Point _Q[4].x, _Q[4].y
+		}
+	
+		P = Point _P.x, _P.y
+
+		Q_u = bezierII(3, Q, u)
+		for i = 1, 3
+			Q1[i] = Point!
+			Q1[i].x = (Q[i + 1].x - Q[i].x) * 3
+			Q1[i].y = (Q[i + 1].y - Q[i].y) * 3
+
+		for i = 1, 2
+			Q2[i] = Point!
+			Q2[i].x = (Q1[i + 1].x - Q1[i].x) * 2
+			Q2[i].y = (Q1[i + 1].y - Q1[i].y) * 2
+	
+		Q1_u = bezierII(2, Q1, u)
+		Q2_u = bezierII(1, Q2, u)
+
+		numerator = (Q_u.x - P.x) * (Q1_u.x) + (Q_u.y - P.y) * (Q1_u.y)
+		denominator = (Q1_u.x) * (Q1_u.x) + (Q1_u.y) * (Q1_u.y) + (Q_u.x - P.x) * (Q2_u.x) + (Q_u.y - P.y) * (Q2_u.y)
+
+		if denominator == 0
+			return u
+
+		return u - (numerator / denominator)
+
+	reparameterize = (d, first, last, u, bezCurve) ->
+		_bezCurve = {
+			Point bezCurve[1].x, bezCurve[1].y
+			Point bezCurve[2].x, bezCurve[2].y
+			Point bezCurve[3].x, bezCurve[3].y
+			Point bezCurve[4].x, bezCurve[4].y
+		}
+		uPrime = {}
+		for i = first, last
+			uPrime[i - first + 1] = newtonRaphsonRootFind(_bezCurve, d[i], u[i - first + 1])
+		return uPrime
+
+	BM = (u, tp) ->
+		switch tp
+			when 1 then 3 * u * ((1 - u) ^ 2)
+			when 2 then 3 * (u ^ 2) * (1 - u)
+			when 3 then u ^ 3
+			else        (1 - u) ^ 3
+
+	generateBezier = (d, first, last, uPrime, tHat1, tHat2) ->
+		C, A, bezCurve = {{0, 0}, {0, 0}, {0, 0}}, {}, {}
+		nPts = last - first + 1
+
+		for i = 1, nPts
+			v1 = Point tHat1.x, tHat1.y
+			v2 = Point tHat2.x, tHat2.y
+			v1 = v1\vecScale BM(uPrime[i], 1)
+			v2 = v2\vecScale BM(uPrime[i], 2)
+			A[i] = {v1, v2}
+
+		for i = 1, nPts
+			C[1][1] += A[i][1]\dot A[i][1]
+			C[1][2] += A[i][1]\dot A[i][2]
+
+			C[2][1] = C[1][2]
+			C[2][2] += A[i][2]\dot A[i][2]
+
+			b0 = d[first]\multiply(BM(uPrime[i]), BM(uPrime[i]))
+			b1 = d[first]\multiply(BM(uPrime[i], 1))
+			b2 = d[last]\multiply(BM(uPrime[i], 2))
+			b3 = d[last]\multiply(BM(uPrime[i], 3))
+
+			tm0 = b2\add b3
+			tm1 = b1\add tm0
+			tm2 = b0\add tm1
+			tmp = d[first + i - 1]\subtract tm2
+
+			C[3][1] += A[i][1]\dot tmp
+			C[3][2] += A[i][2]\dot tmp
+
+		det_C0_C1 = C[1][1] * C[2][2] - C[2][1] * C[1][2]
+		det_C0_X = C[1][1] * C[3][2] - C[2][1] * C[3][1]
+		det_X_C1 = C[3][1] * C[2][2] - C[3][2] * C[1][2]
+
+		alpha_l = det_C0_C1 == 0 and 0 or det_X_C1 / det_C0_C1
+		alpha_r = det_C0_C1 == 0 and 0 or det_C0_X / det_C0_C1
+
+		segLength = d[last]\distance d[first]
+		epsilon = 1e-6 * segLength
+
+		if alpha_l < epsilon or alpha_r < epsilon
+			dist = segLength / 3
+			bezCurve[1] = d[first]
+			bezCurve[4] = d[last]
+			bezCurve[2] = bezCurve[1]\add tHat1\vecScale dist
+			bezCurve[3] = bezCurve[4]\add tHat2\vecScale dist
+			bezCurve[1].id, bezCurve[2].id, bezCurve[3].id, bezCurve[4].id = "l", "b", "b", "b"
+			return bezCurve
+
+		bezCurve[1] = d[first]
+		bezCurve[4] = d[last]
+		bezCurve[2] = bezCurve[1]\add tHat1\vecScale alpha_l
+		bezCurve[3] = bezCurve[4]\add tHat2\vecScale alpha_r
+		bezCurve[1].id, bezCurve[2].id, bezCurve[3].id, bezCurve[4].id = "l", "b", "b", "b"
+		return bezCurve
+	
+	addtoB = (b, bez) ->
+		if b[#b]\equals bez[1]
+			table.remove bez, 1
+		for i = 1, #bez
+			insert(b, bez[i])
+		
+	fitCubic = (b, d, first, last, tHat1, tHat2, _error) ->
+		u, uPrime, maxIterations, tHatCenter = {}, {}, 4, Point!
+		iterationError = _error ^ 2
+		nPts = last - first + 1
+	
+		if nPts == 2
+			dist = d[last]\distance(d[first]) / 3
+
+			bezCurve = {}
+			bezCurve[1] = d[first]
+			bezCurve[4] = d[last]
+			tHat1 = tHat1\vecScale dist
+			tHat2 = tHat2\vecScale dist
+			bezCurve[2] = bezCurve[1]\add tHat1
+			bezCurve[3] = bezCurve[4]\add tHat2
+			bezCurve[1].id, bezCurve[2].id, bezCurve[3].id, bezCurve[4].id = "l", "b", "b", "b"
+			addtoB(b, bezCurve)
+			return
+
+		u = chordLengthParameterize(d, first, last)
+		bezCurve = generateBezier(d, first, last, u, tHat1, tHat2)
+
+		resultMaxError = computeMaxError(d, first, last, bezCurve, u, nil)
+		maxError = resultMaxError.maxError
+		splitPoint = resultMaxError.splitPoint
+
+		if maxError < _error
+			addtoB(b, bezCurve)
+			return
+
+		if maxError < iterationError
+			for i = 1, maxIterations
+				uPrime = reparameterize(d, first, last, u, bezCurve)
+				bezCurve = generateBezier(d, first, last, uPrime, tHat1, tHat2)
+				resultMaxError = computeMaxError(d, first, last, bezCurve, uPrime, splitPoint)
+				maxError = resultMaxError.maxError
+				splitPoint = resultMaxError.splitPoint
+				if maxError < _error
+					addtoB(b, bezCurve)
+					return
+				u = uPrime
+
+		tHatCenter = computeCenterTangent(d, splitPoint)
+		fitCubic(b, d, first, splitPoint, tHat1, tHatCenter, _error)
+		tHatCenter = tHatCenter\negate!
+		fitCubic(b, d, splitPoint, last, tHatCenter, tHat2, _error)
+
+	fitCurve = (b, d, nPts, _error = 1) ->
+		tHat1 = computeLeftTangent(d, 1)
+		tHat2 = computeRightTangent(d, nPts)
+		fitCubic(b, d, 1, nPts, tHat1, tHat2, _error)
+	
+	getAngle = (p1, p2, p3) ->
+		x1, y1 = p1.x, p1.y
+		x2, y2 = p2.x, p2.y
+		x3, y3 = p3.x, p3.y
+		angle = math.atan2(y3 - y2, x3 - x2) - math.atan2(y1 - y2, x1 - x2)
+		return math.deg(angle)
+
+	elaborateSelected = (selected, final, tolerance) ->
+
+		if #selected <= 4
+			for i = 1, #selected
+				insert final, selected[i]
+			return
+		
+		b = {selected[1]}
+			
+		fitCurve(b, selected, #selected, tolerance)
+		
+		for i = 1, #b
+			insert final, b[i]
+
+	isInRange = (cs, ls) ->
+		if not (cs > ls * 2) and not (cs < ls / 2)
+			return true
+		return false
+
+	simplify = (points, tolerance, angleThreshold) ->
+		at1, at2 = angleThreshold, 360 - angleThreshold
+		final = {}
+
+		-- first and last points are duplicated for checks but ignored
+		insert points, 1, points[#points]
+		insert points, points[2]
+
+		lastSegmentLength = 0
+		selected = {points[1]}
+		-- the current work around to remove duplicated points
+		-- close the contour by duplicating the first point
+		-- in this foor loop is possible to change to #points - 2
+		-- if you want to have an open contour
+		for i = 2, #points - 1
+			
+			-- first point must not be a control point
+			if i == 2
+				lastSegmentLength = points[2]\distance(points[3])
+				points[i].id = "l"
+				selected = {points[i]}
+				continue
+			insert selected, points[i]
+			
+			currSegmentLength = points[i]\distance(points[i + 1])
+			if not isInRange(currSegmentLength, lastSegmentLength)
+				elaborateSelected(selected, final, tolerance)
+				selected = {}
+				lastSegmentLength = currSegmentLength
+				continue
+			
+			ang = math.abs getAngle(points[i-1], points[i], points[i+1])
+			if ang < at1 or ang > at2
+				elaborateSelected(selected, final, tolerance)
+				selected = {}
+				lastSegmentLength = currSegmentLength
+				continue
+			
+			lastSegmentLength = currSegmentLength
+
+		elaborateSelected(selected, final, tolerance)
+		return final
+
+	newPath = Path!
+	sqTolerance = tolerance ^ 2
+
+	for i = 1, #paths
+		if recreateBezier
+			paths[i] = simplifyRadialDist paths[i], 0.5
+			paths[i] = simplify paths[i], tolerance, angleThreshold
+		else
+			unless highestQuality
+				paths[i] = simplifyRadialDist paths[i], sqTolerance
+			paths[i] = simplifyDouglasPeucker paths[i], sqTolerance
+		insert newPath.path, paths[i]
+
+	return newPath
+
 {:Path}
