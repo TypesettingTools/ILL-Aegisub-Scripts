@@ -17,6 +17,8 @@ class Line
 
 	-- processes the line values by extending its information pool
 	process: (ass, l) ->
+		return if l.processed
+
 		{:styles, :meta} = ass
 		{:res_x, :res_y, :video_x_correct_factor} = meta
 
@@ -186,11 +188,14 @@ class Line
 					.top = .bottom - .height
 					.y = .bottom
 
+			-- this indicates that the line has already been processed
+			.processed = true
+
 	-- gets all the data values from the tags blocks
 	tagsBlocks: (ass, l, noblank = false) ->
 		data = {width: 0, height: 0, n: 0}
 
-		unless l.data
+		unless l.processed
 			Line.process ass, l
 
 		-- text alignment
@@ -212,6 +217,9 @@ class Line
 			-- support for the \r tag in line processing
 			if reset = line.tags\getTag "r"
 				line.reset = {data: l.data, name: reset.tag.value}
+
+			-- ensures that the block is processed
+			line.processed = false
 
 			-- extends the values of each tag layer
 			Line.process ass, line
@@ -264,7 +272,7 @@ class Line
 	lineBreaks: (ass, l, noblank = false) ->
 		data = {width: 0, height: 0, n: 0}
 
-		unless l.data
+		unless l.processed
 			Line.process ass, l
 
 		-- text alignment
@@ -343,6 +351,7 @@ class Line
 		l.data = nil
 		l.styleref = nil
 		l.extended = false
+		l.processed = false
 		l.text = l.text\__tostring!
 		Line.extend ass, l, noblank
 

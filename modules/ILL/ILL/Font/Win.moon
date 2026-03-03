@@ -164,6 +164,9 @@ utf16_to_utf8 = (ws) ->
 class WindowsGDI extends Init
 
 	init: =>
+		-- skip initialization if already initialized
+		return if FONT_INITIALIZED
+
 		-- Create device context and set light resources deleter
 		local resources_deleter
 		@dc = gc C.CreateCompatibleDC(nil), ->
@@ -202,6 +205,9 @@ class WindowsGDI extends Init
 
 		@dx = FONT_DOWNSCALE * @xscale
 		@dy = FONT_DOWNSCALE * @yscale
+
+		-- Mark font as initialized
+		FONT_INITIALIZED = true
 
 	-- Get font metrics
 	getMetrics: =>
