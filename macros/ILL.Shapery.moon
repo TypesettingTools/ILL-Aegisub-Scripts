@@ -194,7 +194,6 @@ OffsettingDialog = (sub, sel, activeLine) ->
 				clip = path\clone!
 
 				line.tags\insert {{"bord", 0}}
-
 				if strokeAlign == "Outside"
 					line.shape = path\export!
 					ass\insertLine line, s
@@ -205,15 +204,17 @@ OffsettingDialog = (sub, sel, activeLine) ->
 					when "Inside"  then path\offset -math.abs(strokeWeight), cornerStyle, "polygon", miterLimit, arcPrecision
 
 				if strokeAlign == "Center" or strokeAlign == "Inside"
+					line.tags\insert {{"c", line.data.color3}}
 					line.shape = clip\difference(path)\export!
 					ass\insertLine line, s
+					-- adding stroke color
+					line.tags\insert {{"c", line.data.color1}}
 
 				if strokeAlign == "Outside"
+					line.tags\insert {{"c", line.data.color3}}
 					line.shape = path\difference(clip)\export!
 
-				line.tags\insert {{"bord", 0}}, {{"c", line.data.color3}}
 				line.shape = path\export!
-
 				ass\insertLine line, s
 		return ass\getNewSelection!
 
