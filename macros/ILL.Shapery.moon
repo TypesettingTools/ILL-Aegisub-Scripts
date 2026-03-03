@@ -1,6 +1,6 @@
 export script_name        = "Shapery"
 export script_description = "Does several types of shape manipulations from the simplest to the most complex"
-export script_version     = "2.6.2"
+export script_version     = "2.6.3"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
