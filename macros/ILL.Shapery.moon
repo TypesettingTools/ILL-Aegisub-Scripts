@@ -1,6 +1,6 @@
 export script_name        = "Shapery"
 export script_description = "Does several types of shape manipulations from the simplest to the most complex"
-export script_version     = "2.6.3"
+export script_version     = "2.6.4"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
@@ -197,22 +197,28 @@ OffsettingDialog = (sub, sel, activeLine) ->
 				if strokeAlign == "Outside"
 					line.shape = path\export!
 					ass\insertLine line, s
+					-- adding stroke color
+					line.tags\insert {{"c", line.data.color3}}
 
 				switch strokeAlign
 					when "Outside" then path\offset strokeWeight, cornerStyle, "polygon", miterLimit, arcPrecision
 					when "Center"  then path\offset strokeWeight, cornerStyle, "joined", miterLimit, arcPrecision
 					when "Inside"  then path\offset -math.abs(strokeWeight), cornerStyle, "polygon", miterLimit, arcPrecision
 
-				if strokeAlign == "Center" or strokeAlign == "Inside"
+				if strokeAlign == "Inside"
 					line.tags\insert {{"c", line.data.color3}}
 					line.shape = clip\difference(path)\export!
 					ass\insertLine line, s
-					-- adding stroke color
+					-- adding fill color
 					line.tags\insert {{"c", line.data.color1}}
-
-				if strokeAlign == "Outside"
+				elseif strokeAlign == "Center"
+					line.tags\insert {{"c", line.data.color1}}
+					line.shape = clip\difference(path)\export!
+					ass\insertLine line, s
+					-- adding stroke color
 					line.tags\insert {{"c", line.data.color3}}
-					line.shape = path\difference(clip)\export!
+				elseif strokeAlign == "Outside"
+					path\difference clip
 
 				line.shape = path\export!
 				ass\insertLine line, s
