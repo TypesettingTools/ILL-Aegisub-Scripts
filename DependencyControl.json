@@ -480,13 +480,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.7.8",
+                    "version": "1.7.9",
                     "released": "2026-03-03",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "7bdec98ab4d82615b17ea1fa85138010b8db98d4"
+                            "sha1": "61be4eb795304d101c93faf64ceafa3b7dafb800"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -536,12 +536,12 @@
                         {
                             "name": "/Font/Font.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "04c0cada1c03af54db318461c5452f712f4c54e7"
+                            "sha1": "efcb3754abcf0f2ea358abc4943d9128d7458a4f"
                         },
                         {
                             "name": "/Font/Init.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "84f8a0f04ea07e888badc7c03c434984750d62f5"
+                            "sha1": "29f02704e0626b81f3b7f872689ae42e6f347855"
                         },
                         {
                             "name": "/Font/Unx.moon",
@@ -551,7 +551,7 @@
                         {
                             "name": "/Font/Win.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "f6d5784c4c58f6b5c144d91b502f39c2d518f7fc"
+                            "sha1": "68decb74c31c94e3ffb55abe594edff8a2773a84"
                         },
                         {
                             "name": "/Aegi.moon",
@@ -768,6 +768,9 @@
                 ],
                 "1.7.8": [
                     "Prevent GDI handle leak"
+                ],
+                "1.7.9": [
+                    "Prevent GDI handle leak attempt"
                 ]
             }
         },
