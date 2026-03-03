@@ -85,11 +85,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.6.3",
+                    "version": "2.6.4",
                     "released": "2026-03-03",
                     "files": [
                         {
-                            "sha1": "ce27979dc7e7436156fc43db96ea8ecc6e3bc883",
+                            "sha1": "ae0dc371dab51784a0b35028084b00c3d249b05b",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -188,6 +188,9 @@
                 ],
                 "2.6.3": [
                     "Fix 'Shapery/Offsetting' stroke color"
+                ],
+                "2.6.4": [
+                    "Fixed stroke color on Shapery/offsetting"
                 ]
             },
             "name": "Shapery",
