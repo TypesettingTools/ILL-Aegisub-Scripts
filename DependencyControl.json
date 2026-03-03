@@ -85,11 +85,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.6.4",
+                    "version": "2.6.5",
                     "released": "2026-03-03",
                     "files": [
                         {
-                            "sha1": "ae0dc371dab51784a0b35028084b00c3d249b05b",
+                            "sha1": "84fdd5db9317f3a138103b6da02299499dd70927",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -191,6 +191,9 @@
                 ],
                 "2.6.4": [
                     "Fixed stroke color on Shapery/offsetting"
+                ],
+                "2.6.5": [
+                    "Add simplify to offsetting and back to old simplify (stable)"
                 ]
             },
             "name": "Shapery",
@@ -492,13 +495,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.8.0",
+                    "version": "1.8.1",
                     "released": "2026-03-03",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "88c9bdd2dafa09ad624eb5f123a888111ba8ada9"
+                            "sha1": "33d1f1d25212be5d8ce062db9a056e1f2dc714fd"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -508,7 +511,7 @@
                         {
                             "name": "/Ass/Shape/Path.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "592b7e880a45c3efcf3182d8c592bd0a68601cc2"
+                            "sha1": "fe2abe579d90d261cdb96cc599197cc9a13d7d1f"
                         },
                         {
                             "name": "/Ass/Shape/Point.moon",
@@ -789,6 +792,9 @@
                     "",
                     "- Fixed 'Shapery/Offsetting': Now works in a more simplified way.",
                     "- Moved 'Shapery macros:/Shape without holes' to a Path class function."
+                ],
+                "1.8.1": [
+                    "Add simplify to offsetting and back to old simplify (stable)"
                 ]
             }
         },
