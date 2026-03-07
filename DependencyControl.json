@@ -498,13 +498,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.8.2",
-                    "released": "2026-03-03",
+                    "version": "1.8.3",
+                    "released": "2026-03-07",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "faf2e61d7feef06dce81fa03be1e7c36cab275e6"
+                            "sha1": "e288dc170a65ad33e8716a4b1687b1b9e9aabb68"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -549,7 +549,7 @@
                         {
                             "name": "/Ass/Line.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "dd55f2a647f7780ab9acbbe4efbf674afd1c7eba"
+                            "sha1": "ae6abd16d612c65871ef3c2caf03df1a6266b8ed"
                         },
                         {
                             "name": "/Font/Font.moon",
@@ -801,6 +801,9 @@
                 ],
                 "1.8.2": [
                     "Remove old Simplify"
+                ],
+                "1.8.3": [
+                    "Fix Line.callBackFBF"
                 ]
             }
         },
