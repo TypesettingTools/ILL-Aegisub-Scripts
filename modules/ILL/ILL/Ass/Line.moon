@@ -518,7 +518,7 @@ class Line
 			error "You have to extend the line before you get the tags", 2
 
 	-- callback to access the line values frame by frame
-	callBackFBF: (ass, l, fn) -> callBackFBFWithStep ass, l, nil, fn
+	callBackFBF: (ass, l, fn) -> Line.callBackFBFWithStep ass, l, nil, fn
 
 	-- callback to access the line values frame by frame
 	callBackFBFWithStep: (ass, l, step = 1, fn) ->
