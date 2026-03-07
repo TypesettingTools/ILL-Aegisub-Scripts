@@ -1,6 +1,6 @@
 export script_name        = "Shapery"
 export script_description = "Does several types of shape manipulations from the simplest to the most complex"
-export script_version     = "2.6.5"
+export script_version     = "2.6.6"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.Shapery"
 
@@ -13,7 +13,7 @@ if haveDepCtrl
 		{
 			{
 				"ILL.ILL"
-				version: "1.8.0"
+				version: "1.8.2"
 				url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
 				feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}
@@ -51,10 +51,11 @@ interfaces = {
 		{class: "dropdown", items: {"Miter", "Round", "Square"}, x: 1, y: 3, name: "cornerStyle", value: "Round"}
 		{class: "label", label: "Align Stroke", x: 0, y: 4}
 		{class: "dropdown", items: {"Outside", "Center", "Inside"}, x: 1, y: 4, name: "strokeAlign", value: "Outside"}
-		{class: "label", label: "Miter Limit", x: 0, y: 6}
-		{class: "floatedit", x: 0, y: 7, name: "miterLimit", value: 2}
-		{class: "label", label: "Arc Precision", x: 1, y: 6}
-		{class: "floatedit", x: 1, y: 7, name: "arcPrecision", value: 0.25}
+		{class: "checkbox", x: 1, y: 5, label: "Clip Fill?", name: "clipFill", value: true}
+		{class: "label", label: "Miter Limit", x: 0, y: 7}
+		{class: "floatedit", x: 0, y: 8, name: "miterLimit", value: 2}
+		{class: "label", label: "Arc Precision", x: 1, y: 7}
+		{class: "floatedit", x: 1, y: 8, name: "arcPrecision", value: 0.25}
 	}
 	manipulate: -> {
 		{class: "label", label: "Fit Curves", x: 0, y: 0}
@@ -182,7 +183,7 @@ OffsettingDialog = (sub, sel, activeLine) ->
 	if button != "Cancel"
 		cfg = getConfigElements!
 		ass = Ass sub, sel, activeLine, not cfg.saveLines
-		{:strokeWeight, :strokeAlign, :cornerStyle, :miterLimit, :arcPrecision, :simplifyCurves} = elements
+		{:strokeWeight, :strokeAlign, :cornerStyle, :miterLimit, :arcPrecision, :simplifyCurves, :clipFill} = elements
 		if strokeWeight < 0
 			strokeAlign = "Inside"
 		cornerStyle = cornerStyle\lower!
@@ -196,7 +197,7 @@ OffsettingDialog = (sub, sel, activeLine) ->
 				clip = path\clone!
 
 				line.tags\insert {{"bord", 0}}
-				if strokeAlign == "Outside"
+				if strokeAlign == "Outside" and clipFill
 					line.shape = path\export!
 					ass\insertLine line, s
 					-- adding stroke color
@@ -207,7 +208,7 @@ OffsettingDialog = (sub, sel, activeLine) ->
 					when "Center"  then path\offset strokeWeight, cornerStyle, "joined", miterLimit, arcPrecision
 					when "Inside"  then path\offset -math.abs(strokeWeight), cornerStyle, "polygon", miterLimit, arcPrecision
 
-				if strokeAlign == "Inside"
+				if strokeAlign == "Inside" and clipFill
 					line.tags\insert {{"c", line.data.color3}}
 					line.shape = clip\difference path
 					if simplifyCurves
@@ -217,15 +218,19 @@ OffsettingDialog = (sub, sel, activeLine) ->
 					-- adding fill color
 					line.tags\insert {{"c", line.data.color1}}
 				elseif strokeAlign == "Center"
-					line.tags\insert {{"c", line.data.color1}}
-					line.shape = clip\difference path
-					if simplifyCurves
-						path\simplify simplifyRatio
-						line.shape = line.shape\simplify(simplifyRatio)\export!
-					ass\insertLine line, s
-					-- adding stroke color
-					line.tags\insert {{"c", line.data.color3}}
-				elseif strokeAlign == "Outside"
+					if clipFill
+						line.tags\insert {{"c", line.data.color1}}
+						line.shape = clip\difference path
+						if simplifyCurves
+							path\simplify simplifyRatio
+							line.shape = line.shape\simplify(simplifyRatio)\export!
+						ass\insertLine line, s
+						-- adding stroke color
+						line.tags\insert {{"c", line.data.color3}}
+					else
+						path\unite clip
+						path\simplify simplifyRatio if simplifyCurves
+				elseif strokeAlign == "Outside" and clipFill
 					path\difference clip
 					path\simplify simplifyRatio if simplifyCurves
 
