@@ -85,11 +85,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "2.6.5",
-                    "released": "2026-03-03",
+                    "version": "2.6.6",
+                    "released": "2026-03-07",
                     "files": [
                         {
-                            "sha1": "84fdd5db9317f3a138103b6da02299499dd70927",
+                            "sha1": "f60ef43e3764fa2837b4b285c3fc4313e45b3e98",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -194,6 +194,9 @@
                 ],
                 "2.6.5": [
                     "Add simplify to offsetting and back to old simplify (stable)"
+                ],
+                "2.6.6": [
+                    "Add optional clip fill for Shapery/Offsetting"
                 ]
             },
             "name": "Shapery",
