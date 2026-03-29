@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Geometry - ILL Aegisub Scripts</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">ILL Aegisub Scripts</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Guides</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../macros/" class="dropdown-item">Macros</a>
+</li>
+                                    
+<li>
+    <a href="../modules/" class="dropdown-item">Modules</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Module Reference</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../core/" class="dropdown-item">Core</a>
+</li>
+                                    
+<li>
+    <a href="../text-and-tags/" class="dropdown-item">Text and Tags</a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">Geometry</a>
+</li>
+                                    
+<li>
+    <a href="../image/" class="dropdown-item">Image</a>
+</li>
+                                    
+<li>
+    <a href="../clipper2/" class="dropdown-item">Clipper2</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../text-and-tags/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../image/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#ill-geometry-module-reference" class="nav-link">ILL Geometry Module Reference</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#what-this-module-does" class="nav-link">What This Module Does</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#conventions" class="nav-link">Conventions</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#point" class="nav-link">Point</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#segment" class="nav-link">Segment</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#curve" class="nav-link">Curve</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#path" class="nav-link">Path</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#typical-workflow" class="nav-link">Typical Workflow</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="ill-geometry-module-reference">ILL Geometry Module Reference</h1>
+<h2 id="what-this-module-does">What This Module Does</h2>
+<p>The geometry layer is what lets <code>ILL</code> stop thinking in terms of raw ASS drawing strings and start thinking in terms of points, segments, curves, and paths.</p>
+<p>This is the module family used most heavily by <code>Shapery</code> and <code>Envelope Distort</code>, and it is also the bridge between text-derived shapes and boolean operations powered by Clipper2.</p>
+<h2 id="conventions">Conventions</h2>
+<pre><code class="language-moon">ILL = require &quot;ILL.ILL&quot;
+{:Point, :Segment, :Curve, :Path} = ILL
+</code></pre>
+<p>When this page shows <code>Point(...)</code>, <code>Segment(...)</code>, <code>Curve(...)</code>, or <code>Path(...)</code>, it is using the constructor form seen from library code.</p>
+<h2 id="point"><code>Point</code></h2>
+<p><code>Point</code> is the atomic coordinate object used throughout the geometry stack.</p>
+<h3 id="pointx-0-y-0"><code>Point(x = 0, y = 0)</code></h3>
+<p>Creates a point.</p>
+<pre><code class="language-moon">p = Point 100, 50
+</code></pre>
+<h3 id="pointclone"><code>point\clone()</code></h3>
+<p>Returns an independent copy.</p>
+<h3 id="pointmovedx-dy"><code>point\move(dx, dy)</code></h3>
+<p>Translates the point.</p>
+<pre><code class="language-moon">p\move 20, -10
+</code></pre>
+<h3 id="pointrotateangle-origin-point0-0"><code>point\rotate(angle, origin = Point(0, 0))</code></h3>
+<p>Rotates the point around an origin.</p>
+<h3 id="pointrotatefrzangle-origin-point0-0"><code>point\rotatefrz(angle, origin = Point(0, 0))</code></h3>
+<p>Rotation helper aligned with the ASS <code>\frz</code> convention.</p>
+<h3 id="pointscalesx-sy-sx-origin-point0-0"><code>point\scale(sx, sy = sx, origin = Point(0, 0))</code></h3>
+<p>Scales the point relative to an origin.</p>
+<h3 id="pointlerpother-t"><code>point\lerp(other, t)</code></h3>
+<p>Interpolates toward another point.</p>
+<p>This is useful in morphing, path trimming, and curve evaluation flows.</p>
+<h3 id="pointdistanceother"><code>point\distance(other)</code></h3>
+<p>Returns the Euclidean distance to another point.</p>
+<h3 id="pointangleother"><code>point\angle(other)</code></h3>
+<p>Returns the angle from the current point to another point.</p>
+<h2 id="segment"><code>Segment</code></h2>
+<p><code>Segment</code> represents a straight geometric segment between two points.</p>
+<h3 id="segmentp1-p2"><code>Segment(p1, p2)</code></h3>
+<p>Creates a straight segment.</p>
+<h3 id="segmentgetptattimet"><code>segment\getPTatTime(t)</code></h3>
+<p>Returns one point along the segment for <code>0 &lt;= t &lt;= 1</code>.</p>
+<h3 id="segmentflattenreduce-1"><code>segment\flatten(reduce = 1)</code></h3>
+<p>Returns a discretized representation of the segment.</p>
+<h3 id="segmentsplitt"><code>segment\split(t)</code></h3>
+<p>Splits the segment into two smaller segments.</p>
+<h3 id="segmentlinetobezier"><code>segment\lineToBezier()</code></h3>
+<p>Returns a cubic-bezier equivalent of the straight segment.</p>
+<p>This is useful when later stages expect a unified curve representation.</p>
+<h2 id="curve"><code>Curve</code></h2>
+<p><code>Curve</code> represents a cubic bezier.</p>
+<h3 id="curvep1-p2-p3-p4"><code>Curve(p1, p2, p3, p4)</code></h3>
+<p>Creates a cubic curve.</p>
+<h3 id="curvegetptattimet"><code>curve\getPTatTime(t)</code></h3>
+<p>Evaluates one point on the curve.</p>
+<h3 id="curveflattenreduce-2"><code>curve\flatten(reduce = 2)</code></h3>
+<p>Discretizes the curve into sampled points.</p>
+<p>This is one of the core operations behind exporting curves into point-based backends.</p>
+<h3 id="curvesplitt"><code>curve\split(t)</code></h3>
+<p>Splits the curve into two curves at parameter <code>t</code>.</p>
+<h3 id="curvegetlengthreduce-2"><code>curve\getLength(reduce = 2)</code></h3>
+<p>Returns an estimated curve length.</p>
+<h3 id="curveuniformtimecurve-n-reduce-2"><code>Curve.uniformTime(curve, n, reduce = 2)</code></h3>
+<p>Builds a more uniform parameter distribution for sampling.</p>
+<p>This matters when equal visual spacing is more important than raw bezier parameter spacing.</p>
+<h2 id="path"><code>Path</code></h2>
+<p><code>Path</code> is the main high-level geometry object in the library.</p>
+<p>It can represent a whole ASS drawing, including multiple contours, and exposes the operations used by the shape macros.</p>
+<h3 id="pathshape"><code>Path(shape = "")</code></h3>
+<p>Parses ASS drawing data into a geometry object.</p>
+<pre><code class="language-moon">path = Path l.text
+</code></pre>
+<h3 id="pathexport"><code>path\export()</code></h3>
+<p>Serializes the geometry back into ASS drawing syntax.</p>
+<pre><code class="language-moon">l.text = path\export!
+</code></pre>
+<h3 id="pathclone"><code>path\clone()</code></h3>
+<p>Returns an independent copy of the full path.</p>
+<h3 id="pathboundingbox"><code>path\boundingBox()</code></h3>
+<p>Returns the path bounding box.</p>
+<p>This is what powers operations such as <code>Shape bounding box</code>.</p>
+<h3 id="pathmovedx-dy"><code>path\move(dx, dy)</code></h3>
+<p>Translates the path.</p>
+<h3 id="pathscalesx-sy-sx-origin-nil"><code>path\scale(sx, sy = sx, origin = nil)</code></h3>
+<p>Scales the path.</p>
+<h3 id="pathrotatefrzangle-origin-nil"><code>path\rotatefrz(angle, origin = nil)</code></h3>
+<p>Rotates the path in ASS-friendly screen space.</p>
+<h3 id="pathtoorigin-pathtocenter-and-related-recentering-helpers"><code>path\toOrigin()</code>, <code>path\toCenter()</code>, and related recentering helpers</h3>
+<p>Recenters the drawing relative to its own bounds.</p>
+<p>These are the operations behind helper macros such as <code>Shape to origin</code> and <code>Shape to center</code>.</p>
+<h3 id="pathreallocatepos"><code>path\reallocate(pos)</code></h3>
+<p>Moves the geometry to a new logical anchor position.</p>
+<h3 id="pathflattenreduce-2-simplify-nil-area-nil"><code>path\flatten(reduce = 2, simplify = nil, area = nil)</code></h3>
+<p>Converts curves into denser point sequences.</p>
+<p>Use it before backends or workflows that expect mostly linearized geometry.</p>
+<h3 id="pathsimplify"><code>path\simplify(...)</code></h3>
+<p>Reduces redundant geometry.</p>
+<p>This is one of the main operations exposed through the <code>Manipulate</code> dialog.</p>
+<h3 id="pathreverse"><code>path\reverse()</code></h3>
+<p>Reverses contour point order.</p>
+<p>This is the behavior used by the <code>Reverse points</code> helper macro.</p>
+<h3 id="pathwithoutholes"><code>path\withoutHoles()</code></h3>
+<p>Drops inner contours and keeps only outer shells.</p>
+<p>This is the behavior exposed as <code>Shape without holes</code>.</p>
+<h3 id="pathallcurve"><code>path\allCurve()</code></h3>
+<p>Promotes line-based structures toward curve-compatible form.</p>
+<h3 id="pathgetlengthreduce-2"><code>path\getLength(reduce = 2)</code></h3>
+<p>Returns path length.</p>
+<p>This is useful for trimming, progressive reveals, and evenly spaced sampling.</p>
+<h3 id="pathgetnormalized-and-pathgetnormalizedintervala-b"><code>path\getNormalized()</code> and <code>path\getNormalizedInterval(a, b)</code></h3>
+<p>Return normalized geometric intervals suitable for trimming or progressive extraction.</p>
+<p>These are the kinds of helpers used by partial-path workflows such as <code>Shape trim</code>.</p>
+<h3 id="pathperspectivemeshsource-meshtarget"><code>path\perspective(meshSource, meshTarget)</code></h3>
+<p>Applies a perspective-based warp.</p>
+<p>This is part of the machinery used by <code>Envelope Distort</code> when the mesh can be interpreted as a perspective mapping.</p>
+<h3 id="pathenvelopegrid-and-pathenvelopedistortmesh-realmesh-tolerance"><code>path\envelopeGrid(...)</code> and <code>path\envelopeDistort(mesh, realMesh, tolerance)</code></h3>
+<p>Apply grid-driven deformation to the path.</p>
+<p>These are the core mesh-warp operations behind <code>Envelope Distort</code>.</p>
+<h3 id="pathshadow"><code>path\shadow(...)</code></h3>
+<p>Creates geometry derived from shadow displacement.</p>
+<p>This powers the geometry-style shadow tools in <code>Shapery</code>.</p>
+<h3 id="pathmorphother-t"><code>path\morph(other, t)</code></h3>
+<p>Interpolates one path toward another.</p>
+<p>This is the geometric foundation behind <code>Shape morph</code> and related blending workflows.</p>
+<h3 id="pathconverttoclipper-and-pathconvertfromclipperpaths"><code>path\convertToClipper()</code> and <code>Path.convertFromClipper(paths)</code></h3>
+<p>Convert between the library's <code>Path</code> representation and the native Clipper2 representation.</p>
+<p>This is the bridge between the friendly geometry layer and the low-level boolean backend.</p>
+<h3 id="pathuniteother-pathdifferenceother-pathintersectother-and-pathexcludeother"><code>path\unite(other)</code>, <code>path\difference(other)</code>, <code>path\intersect(other)</code>, and <code>path\exclude(other)</code></h3>
+<p>Perform boolean operations between paths.</p>
+<p>These are the core operations used by <code>Shapery/Pathfinder</code>, <code>Cut Contour</code>, and several helper macros.</p>
+<pre><code class="language-moon">result = path\difference clipPath
+</code></pre>
+<h3 id="pathoffsetdelta-jointype-round-endtype-polygon-miterlimit-2-arctolerance-0"><code>path\offset(delta, joinType = "round", endType = "polygon", miterLimit = 2, arcTolerance = 0)</code></h3>
+<p>Builds expanded or contracted geometry around the path.</p>
+<p>This is the implementation-level basis for <code>Shapery/Offsetting</code> and <code>Shape expand</code>.</p>
+<pre><code class="language-moon">outline = path\offset 4, &quot;round&quot;, &quot;polygon&quot;, 2, 0.25
+</code></pre>
+<h3 id="pathroundingpathpath-radius-reduce-2"><code>Path.RoundingPath(path, radius, reduce = 2)</code></h3>
+<p>Returns a rounded-corner version of a path.</p>
+<p>This is the kind of operation used by the <code>Utilities</code> dialog when smoothing corners.</p>
+<h2 id="typical-workflow">Typical Workflow</h2>
+<p>The normal shape workflow in this library looks like this:</p>
+<ol>
+<li>parse a drawing or clip into <code>Path</code></li>
+<li>transform, trim, offset, merge, or warp it</li>
+<li>optionally send it through Clipper2-backed boolean operations</li>
+<li>export it back to ASS drawing syntax</li>
+</ol>
+<p>That is why <code>Path</code> is the real center of the geometry layer, while <code>Point</code>, <code>Segment</code>, and <code>Curve</code> are the building blocks it depends on.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../javascripts/default-dark.js"></script>
+        <script src="../javascripts/moonscript-highlight.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

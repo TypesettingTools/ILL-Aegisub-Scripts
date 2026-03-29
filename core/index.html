@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Core - ILL Aegisub Scripts</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">ILL Aegisub Scripts</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Guides</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../macros/" class="dropdown-item">Macros</a>
+</li>
+                                    
+<li>
+    <a href="../modules/" class="dropdown-item">Modules</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Module Reference</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">Core</a>
+</li>
+                                    
+<li>
+    <a href="../text-and-tags/" class="dropdown-item">Text and Tags</a>
+</li>
+                                    
+<li>
+    <a href="../geometry/" class="dropdown-item">Geometry</a>
+</li>
+                                    
+<li>
+    <a href="../image/" class="dropdown-item">Image</a>
+</li>
+                                    
+<li>
+    <a href="../clipper2/" class="dropdown-item">Clipper2</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../modules/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../text-and-tags/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#ill-core-module-reference" class="nav-link">ILL Core Module Reference</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#what-this-module-covers" class="nav-link">What This Module Covers</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#conventions" class="nav-link">Conventions</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#aegi" class="nav-link">Aegi</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#config" class="nav-link">Config</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#ass" class="nav-link">Ass</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#font" class="nav-link">Font</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#utility-modules" class="nav-link">Utility Modules</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#how-this-module-is-usually-used" class="nav-link">How This Module Is Usually Used</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="ill-core-module-reference">ILL Core Module Reference</h1>
+<h2 id="what-this-module-covers">What This Module Covers</h2>
+<p><code>ILL.ILL</code> is the main library module used by nearly every macro in the project. It contains:</p>
+<ul>
+<li><code>Aegi</code> for Aegisub runtime interaction</li>
+<li><code>Config</code> for persistent macro settings</li>
+<li><code>Ass</code> for script and selection manipulation</li>
+<li><code>Font</code> for font metrics</li>
+<li>utility modules such as <code>Math</code>, <code>Table</code>, <code>Util</code>, and <code>UTF8</code></li>
+</ul>
+<p>Examples on this page are adapted from the shipped macros, especially <code>ILL.Shapery</code>, <code>ILL.MakeImage</code>, <code>ILL.SplitText</code>, and <code>ILL.Line2FBF</code>.</p>
+<h2 id="conventions">Conventions</h2>
+<pre><code class="language-moon">ILL = require &quot;ILL.ILL&quot;
+{:Aegi, :Config, :Math, :Table, :Util, :UTF8, :Ass, :Font} = ILL
+</code></pre>
+<p>When this page shows <code>Ass(...)</code>, <code>Config(...)</code>, <code>UTF8(...)</code>, or <code>Font(...)</code>, that is the constructor form seen from user code after MoonScript lowers <code>new</code>.</p>
+<h2 id="aegi"><code>Aegi</code></h2>
+<p><code>Aegi</code> is the thin integration layer around the Aegisub runtime. It keeps macros from scattering direct calls to <code>aegisub.progress</code>, <code>aegisub.dialog.display</code>, <code>aegisub.debug.out</code>, and <code>aegisub.cancel</code>.</p>
+<h3 id="aegiffmms"><code>Aegi.ffm(ms)</code></h3>
+<p>Converts milliseconds to frame number using the active script timing context.</p>
+<pre><code class="language-moon">startFrame = Aegi.ffm l.start_time
+endFrame = Aegi.ffm l.end_time
+</code></pre>
+<h3 id="aegimffframe"><code>Aegi.mff(frame)</code></h3>
+<p>Converts a frame number back to milliseconds.</p>
+<pre><code class="language-moon">s = Aegi.mff i
+e = Aegi.mff math.min(i + step, endFrame)
+</code></pre>
+<h3 id="aegiprogresstitletitle"><code>Aegi.progressTitle(title)</code></h3>
+<p>Sets the progress window title used by long-running macros.</p>
+<h3 id="aegiprogresstasktask"><code>Aegi.progressTask(task = "")</code></h3>
+<p>Updates the current progress message.</p>
+<p>This is heavily used by macros that process many lines, frames, or image chunks.</p>
+<pre><code class="language-moon">Aegi.progressTask &quot;Tracing image regions&quot;
+</code></pre>
+<h3 id="aegiprogresssetvalue"><code>Aegi.progressSet(value)</code></h3>
+<p>Sets numeric progress.</p>
+<h3 id="aegiprogresscancelled"><code>Aegi.progressCancelled()</code></h3>
+<p>Returns whether the user cancelled the current operation.</p>
+<h3 id="aegiprogresscancel"><code>Aegi.progressCancel()</code></h3>
+<p>Explicitly aborts the current macro execution through the Aegisub runtime.</p>
+<h3 id="aegidebugvalue-and-aegilogvalue"><code>Aegi.debug(value)</code> and <code>Aegi.log(value)</code></h3>
+<p>Convenience wrappers for debug output.</p>
+<h3 id="aegidisplayinterface-buttons-options-title"><code>Aegi.display(interface, buttons, options, title)</code></h3>
+<p>Displays a dialog and returns the selected button and values.</p>
+<p>This is the main entry point used by <code>Shapery</code>, <code>Make Image</code>, and other dialog-driven macros.</p>
+<pre><code class="language-moon">button, elements = Aegi.display interface, {&quot;Ok&quot;, &quot;Cancel&quot;}, {close: &quot;Cancel&quot;}, &quot;Transform&quot;
+</code></pre>
+<h2 id="config"><code>Config</code></h2>
+<p><code>Config</code> is the persistence layer used by dialog-based macros to remember user choices between runs.</p>
+<h3 id="configgetpath"><code>Config.getPath()</code></h3>
+<p>Returns the configuration base path.</p>
+<h3 id="configgetmacropath"><code>Config.getMacroPath()</code></h3>
+<p>Returns the macro-specific path used for config storage.</p>
+<h3 id="configgetelementsinterface"><code>Config.getElements(interface)</code></h3>
+<p>Converts a dialog interface description into a serializable value table.</p>
+<p>This is how <code>Shapery</code> turns its UI definitions into default config payloads.</p>
+<pre><code class="language-moon">cfg = Config.getElements cfgInterface
+</code></pre>
+<h3 id="configinterface"><code>Config(interface = {})</code></h3>
+<p>Creates a configuration object around one interface definition.</p>
+<pre><code class="language-moon">cfg = Config interfaces.pathfinder
+</code></pre>
+<h3 id="configsetpathpath"><code>config\setPath(path)</code></h3>
+<p>Overrides the filesystem path used by this config object.</p>
+<h3 id="configsetjsonpathpath"><code>config\setJsonPath(path)</code></h3>
+<p>Sets the JSON file path used for persistence.</p>
+<pre><code class="language-moon">cfg\setJsonPath script_namespace .. &quot;Config&quot;
+</code></pre>
+<h3 id="configreset"><code>config\reset()</code></h3>
+<p>Resets persisted values back to interface defaults.</p>
+<h3 id="configsaveelements"><code>config\save(elements)</code></h3>
+<p>Writes a set of dialog values to disk.</p>
+<pre><code class="language-moon">cfg\save elements
+</code></pre>
+<h3 id="configgetinterface"><code>config\getInterface()</code></h3>
+<p>Returns the interface definition with stored values applied.</p>
+<p>This is the form normally passed back into <code>Aegi.display</code>.</p>
+<pre><code class="language-moon">button, elements = Aegi.display cfg\getInterface!, {&quot;Ok&quot;, &quot;Cancel&quot;}, {close: &quot;Cancel&quot;}, &quot;Pathfinder&quot;
+</code></pre>
+<h2 id="ass"><code>Ass</code></h2>
+<p><code>Ass</code> is the script-context object used by most macros. It wraps the subtitle data, the current selection, and insertion/removal helpers so a macro can safely rewrite lines.</p>
+<h3 id="asssub-sel-activeline-commit-true"><code>Ass(sub, sel, activeLine, commit = true)</code></h3>
+<p>Creates a working script context.</p>
+<pre><code class="language-moon">ass = Ass sub, sel, activeLine, false
+</code></pre>
+<h3 id="assitersel"><code>ass\iterSel()</code></h3>
+<p>Iterates over the selected lines and yields the line object, selection index, loop index, and total count.</p>
+<p>This is the normal outer loop in most shipped macros.</p>
+<pre><code class="language-moon">for l, s, i, n in ass\iterSel!
+    ass\progressLine s, i, n
+</code></pre>
+<h3 id="assinsertlineline-selectionindex"><code>ass\insertLine(line, selectionIndex)</code></h3>
+<p>Inserts a generated line back into the script.</p>
+<h3 id="assremovelineline-selectionindex"><code>ass\removeLine(line, selectionIndex)</code></h3>
+<p>Removes the current source line.</p>
+<h3 id="assreplacelineline-selectionindex"><code>ass\replaceLine(line, selectionIndex)</code></h3>
+<p>Overwrites a line in place.</p>
+<h3 id="asswarningselectionindex-message-and-asserrorselectionindex-message"><code>ass\warning(selectionIndex, message)</code> and <code>ass\error(selectionIndex, message)</code></h3>
+<p>Emit user-facing messages tied to the current processing context.</p>
+<h3 id="assgetnewselection"><code>ass\getNewSelection()</code></h3>
+<p>Returns the new selection after insertions and removals.</p>
+<p>This is typically the macro return value after rewriting lines.</p>
+<pre><code class="language-moon">return ass\getNewSelection!
+</code></pre>
+<h2 id="font"><code>Font</code></h2>
+<p><code>Font</code> exposes font metrics and shape extraction helpers used when text has to be measured or converted into geometry.</p>
+<h3 id="fontstyle-text-scale-1"><code>Font(style, text = "", scale = 1)</code></h3>
+<p>Creates a font helper for the given ASS style and optional text.</p>
+<h3 id="fontgettextextentstext-nil"><code>font\getTextExtents(text = nil)</code></h3>
+<p>Returns text extents for one string, usually width and height information.</p>
+<h3 id="fonttexttoshapetext-nil"><code>font\textToShape(text = nil)</code></h3>
+<p>Converts text into ASS drawing data.</p>
+<p>This is especially useful when a macro wants to leave text mode and operate on geometry instead.</p>
+<h2 id="utility-modules">Utility Modules</h2>
+<p>These modules support the higher-level workflows above.</p>
+<h3 id="math"><code>Math</code></h3>
+<p>Core numeric helpers used by geometry, interpolation, and frame-aware calculations.</p>
+<h4 id="mathsigna"><code>Math.sign(a)</code></h4>
+<p>Returns <code>1</code>, <code>0</code>, or <code>-1</code> depending on the sign of the number.</p>
+<h4 id="mathclampa-b-c"><code>Math.clamp(a, b, c)</code></h4>
+<p>Limits <code>a</code> so it stays inside the interval <code>[b, c]</code>.</p>
+<h4 id="mathrounda-dec-3"><code>Math.round(a, dec = 3)</code></h4>
+<p>Rounds a number to a given number of decimal places.</p>
+<h4 id="mathlerpt-a-b"><code>Math.lerp(t, a, b)</code></h4>
+<p>Linearly interpolates between <code>a</code> and <code>b</code>, clamping <code>t</code> to the <code>0..1</code> range.</p>
+<pre><code class="language-moon">t = Math.clamp progress, 0, 1
+x = Math.lerp t, x1, x2
+</code></pre>
+<h4 id="mathrandoma-b"><code>Math.random(a, b)</code></h4>
+<p>Returns a random number between <code>a</code> and <code>b</code>.</p>
+<h4 id="mathperlinnoisex-y-freq-depth-seed-2000"><code>Math.perlinNoise(x, y, freq, depth, seed = 2000)</code></h4>
+<p>Generates smooth procedural noise from a 2D coordinate.</p>
+<h4 id="mathcubicrootsa-b-c-d-ep-1e-8"><code>Math.cubicRoots(a, b, c, d, ep = 1e-8)</code></h4>
+<p>Returns the real roots calculated for a cubic equation. This is mainly useful in curve-related internals.</p>
+<h3 id="table"><code>Table</code></h3>
+<p>Table and array helpers used when duplicating lines, building result lists, or editing parsed structures.</p>
+<h4 id="tableisemptytb"><code>Table.isEmpty(tb)</code></h4>
+<p>Returns whether the table has no entries.</p>
+<h4 id="tableshallowcopytb"><code>Table.shallowcopy(tb)</code></h4>
+<p>Creates a shallow copy of the table.</p>
+<h4 id="tabledeepcopytb"><code>Table.deepcopy(tb)</code></h4>
+<p>Creates a deep copy of the table, including nested tables.</p>
+<h4 id="tablecopytb-deepcopy-true"><code>Table.copy(tb, deepcopy = true)</code></h4>
+<p>Copies the table using deep copy by default.</p>
+<pre><code class="language-moon">copy = Table.copy line
+</code></pre>
+<h4 id="tablepushtb"><code>Table.push(tb, ...)</code></h4>
+<p>Appends one or more values to the end of an array.</p>
+<h4 id="tablepoptb"><code>Table.pop(tb)</code></h4>
+<p>Removes and returns the last value of an array.</p>
+<h4 id="tablereversetb"><code>Table.reverse(tb)</code></h4>
+<p>Returns a reversed array copy.</p>
+<h4 id="tableshifttb"><code>Table.shift(tb)</code></h4>
+<p>Removes and returns the first value of an array.</p>
+<h4 id="tableunshifttb"><code>Table.unshift(tb, ...)</code></h4>
+<p>Inserts one or more values at the beginning of an array.</p>
+<h4 id="tableslicetb-f-l-s"><code>Table.slice(tb, f, l, s)</code></h4>
+<p>Returns a sliced array built from the selected interval.</p>
+<h4 id="tablesplicetb-start-delete"><code>Table.splice(tb, start, delete, ...)</code></h4>
+<p>Removes and/or inserts values inside an array, similar to splice operations in other languages.</p>
+<h4 id="tableviewtb-table_name-table_unnamed-indent"><code>Table.view(tb, table_name = "table_unnamed", indent = "")</code></h4>
+<p>Returns a formatted string representation of a table for debugging and inspection.</p>
+<h3 id="util"><code>Util</code></h3>
+<p>Mixed helpers for string handling, ASS tag evaluation, interpolation, filesystem checks, and lightweight type checks.</p>
+<h4 id="utillmatchvalue-pattern"><code>Util.lmatch(value, pattern)</code></h4>
+<p>Returns the last match found for a pattern inside a string.</p>
+<h4 id="utilheadtails-div"><code>Util.headTail(s, div)</code></h4>
+<p>Splits a string into the part before and after the first delimiter match.</p>
+<h4 id="utilsplitbypatterns-div"><code>Util.splitByPattern(s, div)</code></h4>
+<p>Repeatedly splits a string by a delimiter pattern and returns all pieces.</p>
+<h4 id="utilconvertcolormode-value"><code>Util.convertColor(mode, value)</code></h4>
+<p>Converts style-format colors into ASS tag color or alpha format.</p>
+<h4 id="utilgettimeinintervalcurrtime-t1-t2-accel-1"><code>Util.getTimeInInterval(currTime, t1, t2, accel = 1)</code></h4>
+<p>Returns a normalized interpolation time between <code>0</code> and <code>1</code> for a time interval.</p>
+<h4 id="utilgetalphainterpolationcurrtime-t1-t2-t3-t4-a1-a2-a3"><code>Util.getAlphaInterpolation(currTime, t1, t2, t3, t4, a1, a2, a3)</code></h4>
+<p>Computes alpha transitions across fade intervals.</p>
+<h4 id="utilgettagfadecurrtime-linedur-dec"><code>Util.getTagFade(currTime, lineDur, dec, ...)</code></h4>
+<p>Resolves the effective alpha value produced by <code>\fad</code> or <code>\fade</code> at a given time.</p>
+<h4 id="utilgettagtransformcurrtime-linedur"><code>Util.getTagTransform(currTime, lineDur, ...)</code></h4>
+<p>Resolves the effective interpolation factor used by a <code>\t(...)</code> transform at a given time.</p>
+<h4 id="utilgettagmovecurrtime-linedur-x1-y1-x2-y2-t1-t2"><code>Util.getTagMove(currTime, lineDur, x1, y1, x2, y2, t1, t2)</code></h4>
+<p>Resolves the current <code>x</code> and <code>y</code> position produced by a <code>\move(...)</code> tag at a given time.</p>
+<h4 id="utilinterpolationt-05-interpolationtype-auto"><code>Util.interpolation(t = 0.5, interpolationType = "auto", ...)</code></h4>
+<p>Interpolates numbers, alpha values, colors, shapes, or tables. In <code>"auto"</code> mode it detects the value type automatically.</p>
+<h4 id="utilfixpathpath"><code>Util.fixPath(path)</code></h4>
+<p>Normalizes path separators for the current operating system.</p>
+<h4 id="utilfileexistdir-isdir"><code>Util.fileExist(dir, isDir)</code></h4>
+<p>Checks whether a file or directory exists.</p>
+<h4 id="utilisblankt"><code>Util.isBlank(t)</code></h4>
+<p>Returns whether a line or string should be treated as blank.</p>
+<h4 id="utilisshapet"><code>Util.isShape(t)</code></h4>
+<p>Returns whether a text value looks like an ASS drawing shape.</p>
+<h4 id="utilcheckclasscls-name"><code>Util.checkClass(cls, name)</code></h4>
+<p>Checks whether an object is an instance of a given class name.</p>
+<h3 id="utf8"><code>UTF8</code></h3>
+<p>UTF-8 aware text helpers used when a macro must work with characters rather than raw bytes.</p>
+<h4 id="utf8s"><code>UTF8(s)</code></h4>
+<p>Creates a UTF-8 helper around a string.</p>
+<pre><code class="language-moon">utf = UTF8 l.text_stripped
+</code></pre>
+<h4 id="utf8charrangec-i"><code>UTF8.charrange(c, i)</code></h4>
+<p>Returns the byte width of the character starting at position <code>i</code>.</p>
+<h4 id="utf8charcodepointc"><code>UTF8.charcodepoint(c)</code></h4>
+<p>Returns the Unicode codepoint of one UTF-8 character.</p>
+<h4 id="utfchars"><code>utf\chars()</code></h4>
+<p>Iterates through the string character by character in UTF-8 aware form.</p>
+<pre><code class="language-moon">for i, char in utf\chars!
+    -- safe character iteration
+</code></pre>
+<h4 id="utflen"><code>utf\len()</code></h4>
+<p>Returns the number of UTF-8 characters in the string.</p>
+<h2 id="how-this-module-is-usually-used">How This Module Is Usually Used</h2>
+<p>The most common library workflow starts here:</p>
+<ol>
+<li>build an <code>Ass</code> context from the current subtitle selection</li>
+<li>use <code>Aegi.display</code> and <code>Config</code> to collect user options</li>
+<li>parse or transform lines through <code>Line</code>, <code>Text</code>, <code>Tags</code>, and <code>Path</code></li>
+<li>write the resulting lines back with <code>ass\insertLine</code>, <code>ass\replaceLine</code>, or <code>ass\removeLine</code></li>
+</ol>
+<p>That is why <code>ILL.ILL</code> is the real foundation of the project, not just a bag of helpers.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../javascripts/default-dark.js"></script>
+        <script src="../javascripts/moonscript-highlight.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

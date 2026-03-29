@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Macros - ILL Aegisub Scripts</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">ILL Aegisub Scripts</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Guides</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">Macros</a>
+</li>
+                                    
+<li>
+    <a href="../modules/" class="dropdown-item">Modules</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Module Reference</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../core/" class="dropdown-item">Core</a>
+</li>
+                                    
+<li>
+    <a href="../text-and-tags/" class="dropdown-item">Text and Tags</a>
+</li>
+                                    
+<li>
+    <a href="../geometry/" class="dropdown-item">Geometry</a>
+</li>
+                                    
+<li>
+    <a href="../image/" class="dropdown-item">Image</a>
+</li>
+                                    
+<li>
+    <a href="../clipper2/" class="dropdown-item">Clipper2</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href=".." class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../modules/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#macros" class="nav-link">Macros</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#shapery" class="nav-link">Shapery</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#envelope-distort" class="nav-link">Envelope Distort</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#make-image" class="nav-link">Make Image</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#change-alignment" class="nav-link">Change Alignment</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#ill-split-text" class="nav-link">ILL - Split Text</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#line-to-fbf" class="nav-link">Line To FBF</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="macros">Macros</h1>
+<p>This page documents the shipped macros as working tools, not just menu entries. The descriptions below are based on the implementation in the project macros and on the module methods each macro actually calls.</p>
+<h2 id="shapery">Shapery</h2>
+<p><code>Shapery</code> is the main shape-processing macro in the project. It is the largest consumer of the geometry stack exposed by <code>ILL</code>, especially <code>Path</code>, <code>Line</code>, <code>Ass</code>, <code>Config</code>, and the Clipper2-backed boolean operations.</p>
+<p>At a high level, <code>Shapery</code> works by taking selected ASS drawing lines, extending them into parsed <code>Line</code> objects, converting their shape data into <code>Path</code>, applying geometry operations, and then exporting the result back into ASS drawing syntax. Depending on the operation, it may also consume <code>\clip</code> or <code>\iclip</code>, preserve or rewrite <code>\pos</code> and <code>\move</code>, and split one source line into multiple generated lines.</p>
+<p>Registered entries:</p>
+<ul>
+<li><code>Shapery/Pathfinder</code></li>
+<li><code>Shapery/Offsetting</code></li>
+<li><code>Shapery/Manipulate</code></li>
+<li><code>Shapery/Transform</code></li>
+<li><code>Shapery/Utilities</code></li>
+<li><code>Shapery/Cut Contour</code></li>
+<li><code>Shapery/Config</code></li>
+</ul>
+<p>Helper macros:</p>
+<ul>
+<li><code>Shape expand</code></li>
+<li><code>Shape clipper</code></li>
+<li><code>Clip to shape</code></li>
+<li><code>Shape to clip</code></li>
+<li><code>Shape to clip (clipboard)</code></li>
+<li><code>Shape merge</code></li>
+<li><code>Shape blend</code></li>
+<li><code>Shape morph</code></li>
+<li><code>Shape trim</code></li>
+<li><code>Shape to 0,0</code></li>
+<li><code>Shape to pos</code></li>
+<li><code>Shape to origin</code></li>
+<li><code>Shape to center</code></li>
+<li><code>Shape without holes</code></li>
+<li><code>Shape bounding box</code></li>
+<li><code>Reverse points</code></li>
+</ul>
+<h3 id="pathfinder">Pathfinder</h3>
+<p>This dialog is the high-level UI for boolean shape operations. Internally it is the place where shape and clip geometry are turned into <code>Path</code> objects and then combined through union, intersection, difference, and related pathfinder-style operations.</p>
+<p>Use it when the goal is to combine or subtract shapes as geometry, not to visually fake the result with tags.</p>
+<h3 id="offsetting">Offsetting</h3>
+<p>This dialog creates real expanded or contracted geometry around an existing path. Its implementation relies on path offsetting rather than ASS border rendering, so the result is new shape data that can be edited, trimmed, merged, or reused in later shape operations.</p>
+<p>Use it when you want an actual geometric outline, inset, or growth operation.</p>
+<h3 id="manipulate">Manipulate</h3>
+<p>This group changes the internal structure of the path. In implementation terms, it calls operations such as flattening, simplification, and curve rebuilding on parsed geometry rather than moving the shape as a whole.</p>
+<p>Use it when the problem is the contour itself: too many points, the wrong kind of segments, or geometry that needs to be normalized before another operation.</p>
+<h3 id="transform">Transform</h3>
+<p>This group applies direct spatial transforms such as translation, scaling, and rotation. The important implementation detail is that these transforms are applied to parsed shape coordinates, then written back to the line, instead of being delegated to ASS transforms.</p>
+<p>Use it when you want deterministic geometry changes rather than runtime visual transforms.</p>
+<h3 id="utilities">Utilities</h3>
+<p>This group exposes helper geometry operations such as shadow-derived shape generation and corner processing. These are implemented as real path manipulations and shape generation, not as style-only shortcuts.</p>
+<p>Use it when you need derived shapes generated from the existing contour.</p>
+<h3 id="cut-contour">Cut Contour</h3>
+<p>This tool combines the current line shape with another contour supplied by the user. The input contour is parsed as geometry and then processed through the same boolean shape logic used by the larger <code>Shapery</code> workflows.</p>
+<p>Use it when the cutting geometry is not already available as another selected line.</p>
+<h3 id="config">Config</h3>
+<p>This screen persists <code>Shapery</code> settings through <code>Config</code>, allowing the dialogs and helper macros to reuse stored defaults instead of forcing the user to re-enter them every run.</p>
+<h3 id="helper-macros">Helper Macros</h3>
+<p>The helper macros are not just shortcuts to menu categories. Each one is a very specific geometry routine built on top of <code>Line.extend</code>, <code>Line.callBackExpand</code>, <code>Path</code>, and line/tag rewriting.</p>
+<h4 id="shape-expand"><code>Shape expand</code></h4>
+<p>This helper expands a shape into separate outline and shadow geometry derived from the line's current border and shadow values.</p>
+<p>Implementation-wise, it removes the original line, expands it if needed, duplicates the working line, strips outline and shadow tags from both copies, and then reconstructs the visible layers as actual shapes. If outline expansion is needed, it creates an offset path. If shadow expansion is needed, it resolves the effective shadow vector with <code>Line.solveShadow</code>, moves the relevant geometry, and then subtracts or merges shapes depending on the relationship between outline and shadow colors. The macro can therefore emit multiple resulting lines: one for the original fill, one for the generated outline, and one for the generated shadow shape.</p>
+<p>This is why <code>Shape expand</code> is much more than "add border": it materializes border and shadow as editable geometry.</p>
+<h4 id="shape-clipper"><code>Shape clipper</code></h4>
+<p>This helper applies the line's own <code>\clip</code> or <code>\iclip</code> to the shape itself.</p>
+<p>For each expanded working line, it reads the current shape, reads the clip, repositions the clip from screen space into the shape's local coordinate space by subtracting the line position, and then applies either <code>difference</code> for <code>\iclip</code> or <code>intersect</code> for regular <code>\clip</code>. If the result is non-empty, it removes the original clip tags and writes the clipped shape back as actual drawing data.</p>
+<p>The key point is that this macro converts runtime clipping into permanent geometry.</p>
+<h4 id="shape-to-clip"><code>Shape to clip</code></h4>
+<p>This helper converts the visible shape into a <code>\clip</code> or <code>\iclip</code> tag on the same line.</p>
+<p>Internally it expands the line if needed, moves each generated shape from local shape coordinates into screen space using the line's position, concatenates all resulting contours, and inserts the final path string into either <code>\clip</code> or <code>\iclip</code> depending on what the line already uses. If the line is text rather than shape, the tag block is rewritten into the text content.</p>
+<p>Use it when the shape should stop being the main drawable content and start acting as clipping geometry.</p>
+<h4 id="shape-to-clip-clipboard"><code>Shape to clip (clipboard)</code></h4>
+<p>This behaves like <code>Shape to clip</code>, but instead of writing the result back to the subtitle line, it writes the generated <code>\clip(...)</code> string to the clipboard.</p>
+<p>That makes it useful as an extraction helper when you want to reuse the clip manually elsewhere.</p>
+<h4 id="clip-to-shape"><code>Clip to shape</code></h4>
+<p>This helper does the inverse conversion: it turns <code>\clip</code> or <code>\iclip</code> data into the line's shape content.</p>
+<p>The macro reads the clip, reallocates it into the line's shape coordinate system with respect to the current alignment and position, removes clip-related tags, and, if the line was originally text, converts it into a shape line by stripping font-related state and inserting the required <code>\pos</code>, <code>\an</code>, <code>\fscx100</code>, <code>\fscy100</code>, <code>\frz0</code>, and <code>\p1</code> tags.</p>
+<p>Use it when the clip should become editable drawing data instead of remaining embedded as a tag.</p>
+<h4 id="shape-bounding-box"><code>Shape bounding box</code></h4>
+<p>This helper replaces the current shape with the rectangle returned by <code>Path.boundingBox()</code>.</p>
+<p>It does not merely report the box; it rewrites the shape into that box as ASS drawing data.</p>
+<p>Use it when you need the exact rectangular bounds of a drawing as a new shape.</p>
+<h4 id="shape-morph"><code>Shape morph</code></h4>
+<p>This helper creates frame-by-frame interpolated shapes between exactly two selected shape lines.</p>
+<p>Implementation-wise, it first expands each selected line, moves their shapes into screen-space coordinates, stores them, and then, once both source shapes are available, uses <code>Path.morph</code> inside <code>Line.callBackFBF</code> to generate one interpolated shape per frame across the timing of the first line. The generated lines are then inserted back into the script.</p>
+<p>This makes <code>Shape morph</code> a real geometry interpolation tool rather than a simple point shuffle.</p>
+<h4 id="shape-merge"><code>Shape merge</code></h4>
+<p>This helper merges selected shapes by grouping them according to their visible color and alpha signature.</p>
+<p>The implementation computes a grouping key from fill, outline, shadow, and alpha-related values. Shapes with the same visual signature are collected together, expanded if needed, repositioned into a shared local space, concatenated into one combined drawing, and then emitted as a single line per group. At the end, the original selected lines are deleted and replaced by the grouped merged output.</p>
+<p>This means <code>Shape merge</code> is not just geometric union. It is a practical batch merge that preserves visual grouping by color state.</p>
+<h4 id="shape-blend"><code>Shape blend</code></h4>
+<p>This helper turns multiple selected shape lines into a single line that contains multiple drawing segments with tag transitions between them.</p>
+<p>In implementation terms, each shape is expanded, moved into global coordinates, normalized to <code>\pos(0,0)</code>, and stored with its tag state. The macro then lays the shapes out sequentially in one combined line by offsetting each subsequent shape according to the accumulated bounding-box widths, removing redundant tags through <code>tags\difference</code>, and concatenating the resulting tagged drawing text into one non-shape line.</p>
+<p>The result is closer to a packed composite drawing line than to a boolean merge.</p>
+<h4 id="shape-without-holes"><code>Shape without holes</code></h4>
+<p>This helper removes inner contours from the current shape by calling <code>Path.withoutHoles()</code>.</p>
+<p>Use it when the desired result is only the outer shell of a complex shape, with interior cutouts discarded.</p>
+<h4 id="shape-trim"><code>Shape trim</code></h4>
+<p>This helper trims a stack of overlapping shapes by subtracting later shapes from earlier ones.</p>
+<p>The macro expands each selected shape and moves it into screen space. After all lines are collected, it iterates backward so that each earlier shape is cut by the geometry of the shapes that come after it. It then deletes the original selection, moves each surviving result back into its local coordinate system, and reinserts the trimmed lines.</p>
+<p>In practice, this is a staged subtractive cleanup tool for overlapping shape sets.</p>
+<h4 id="shape-to-00"><code>Shape to 0,0</code></h4>
+<p>This helper rebases the shape so that the drawing itself is moved into global coordinates and the line position becomes <code>\pos(0,0)</code>.</p>
+<p>The macro moves the path by the current line position, removes <code>\move</code>, inserts <code>\pos(0,0)</code>, and writes the moved drawing back. The visible result stays in place, but the coordinate system of the line becomes origin-based.</p>
+<p>Use it when you want fully absolute drawing coordinates.</p>
+<h4 id="shape-to-pos"><code>Shape to pos</code></h4>
+<p>This helper aligns the drawing origin with the first coordinate found in the line's <code>\clip</code>.</p>
+<p>Implementation-wise, it parses the first clip coordinate pair, computes the delta between that point and the line's current <code>\pos</code>, moves the shape accordingly, removes <code>\move</code> and <code>\clip</code>, and replaces the line position with the extracted clip point.</p>
+<p>Use it when a clip already encodes the anchor point you want the shape to use.</p>
+<h4 id="shape-to-origin"><code>Shape to origin</code></h4>
+<p>This helper shifts the drawing so that the bounding-box top-left corner becomes the local origin of the shape.</p>
+<p>After computing the bounding box, the macro moves the path to origin, then compensates the line's <code>\pos</code> or <code>\move</code> so the rendered result remains visually stationary.</p>
+<p>Use it when you want a cleaner local coordinate system anchored at the top-left corner of the shape bounds.</p>
+<h4 id="shape-to-center"><code>Shape to center</code></h4>
+<p>This helper shifts the drawing so that the bounding-box center becomes the local origin of the shape.</p>
+<p>It computes the center from the bounding box, moves the geometry to center, compensates <code>\pos</code> or <code>\move</code> by the same amount, and finally forces alignment to <code>\an7</code> through <code>Line.changeAlign</code> so the line metadata matches the new geometric anchor.</p>
+<p>Use it when you want the shape centered around its own local origin.</p>
+<h4 id="reverse-points"><code>Reverse points</code></h4>
+<p>This helper reverses contour direction for the shape, the clip, or both, depending on the stored configuration flags.</p>
+<p>If shape reversal is enabled, it parses the shape into <code>Path</code>, reverses the point order, and writes it back. If clip reversal is enabled and a clip exists, it does the same for the clip geometry and rewrites either <code>\clip</code> or <code>\iclip</code>. The line is then updated with the modified geometry.</p>
+<p>Use it when contour direction matters for interpolation, fill behavior, or downstream geometry operations.</p>
+<h2 id="envelope-distort">Envelope Distort</h2>
+<p><code>Envelope Distort</code> is a mesh-driven shape warping macro.</p>
+<p>Registered entry:</p>
+<ul>
+<li><code>Envelope Distort / Make with Mesh</code></li>
+</ul>
+<p>The macro can either read a mesh already stored in <code>line.grid</code> or reconstruct one from <code>\clip</code>. It removes the active clip, converts the source shape and the mesh into <code>Path</code>, and then decides between a perspective transform and a denser envelope-distortion workflow depending on the structure of the mesh. In the non-perspective case it flattens the source shape and distorts each region against the real mesh pieces before rewriting the line.</p>
+<p>Use it when a shape must be bent into a custom deformation field rather than moved by a standard transform.</p>
+<h2 id="make-image">Make Image</h2>
+<p><code>Make Image</code> is the raster-to-ASS macro family and the primary consumer of <code>ILL.IMG</code>.</p>
+<p>Registered entries:</p>
+<ul>
+<li><code>Make Image / Image Tracer</code></li>
+<li><code>Make Image / Pixels</code></li>
+<li><code>Make Image / Potrace</code></li>
+</ul>
+<h3 id="image-tracer">Image Tracer</h3>
+<p>This mode opens an image, decodes it through <code>IMG</code>, and then traces color regions with <code>Tracer.imagedataToTracedata</code>. The traced regions are converted into ASS lines with <code>Tracer.getAssLines</code>, which means the output is region-based rather than pixel-by-pixel.</p>
+<p>If the source is animated, the macro can iterate frames and emit output frame by frame.</p>
+<h3 id="pixels">Pixels</h3>
+<p>This mode performs direct raster conversion through <code>img\toAss(...)</code>.</p>
+<p>It is the most literal image path in the project: instead of tracing vector regions, it converts image pixels into ASS drawing lines and emits the result directly.</p>
+<h3 id="potrace">Potrace</h3>
+<p>This mode creates a <code>Potrace</code> object from the decoded image and extracts a traced monochrome shape with <code>pot\getShape()</code>.</p>
+<p>Compared to <code>Image Tracer</code>, it is focused on one clean black-and-white vectorized contour rather than multi-color region tracing.</p>
+<h2 id="change-alignment">Change Alignment</h2>
+<p><code>Change Alignment</code> changes <code>\an</code> for text or shape lines without moving the visible result on screen.</p>
+<p>Registered entry:</p>
+<ul>
+<li><code>Change Alignment</code></li>
+</ul>
+<p>The macro presents a 3x3 alignment picker, requires exactly one target alignment, parses each selected line with <code>Line.extend</code>, and then delegates the actual compensation work to <code>Line.changeAlign</code>. The implementation therefore does not just rewrite the alignment number; it also recomputes the placement data required to preserve the rendered position.</p>
+<h2 id="ill-split-text">ILL - Split Text</h2>
+<p><code>ILL - Split Text</code> is a structural line-expansion macro built on top of <code>Ass</code>, <code>Line</code>, <code>Text</code>, and <code>Tags</code>.</p>
+<p>Registered entries:</p>
+<ul>
+<li><code>By Chars</code></li>
+<li><code>By Words</code></li>
+<li><code>By Tags Blocks</code></li>
+<li><code>By Line Breaks</code></li>
+</ul>
+<p>The macro removes each original non-shape line, extends it into a parsed <code>Line</code>, and then calls one of four splitters: <code>Line.chars</code>, <code>Line.words</code>, <code>Line.tags</code>, or <code>Line.breaks</code>. Each generated fragment is inspected for angle and transform state, optionally receives an <code>\org</code>, and then has either <code>\pos</code> or <code>\move</code> recalculated through <code>Line.reallocate</code>. The updated tags are written back into the fragment text before the new lines are inserted into the script.</p>
+<p>The result is not just textual splitting. It is a placement-aware expansion of one ASS line into multiple stable fragments.</p>
+<h2 id="line-to-fbf">Line To FBF</h2>
+<p><code>Line To FBF</code> is a frame-baking macro.</p>
+<p>Registered entry:</p>
+<ul>
+<li><code>Line To FBF</code></li>
+</ul>
+<p>The macro asks for a frame step, removes the original line, processes it with <code>Line.process</code>, and then expands it through <code>Line.callBackFBFWithStep</code>. For each generated frame slice it inserts one new line into the script.</p>
+<p>Use it when transforms, movement, or timing-dependent line state must be materialized into explicit frame-by-frame ASS output rather than left as runtime tags.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../javascripts/default-dark.js"></script>
+        <script src="../javascripts/moonscript-highlight.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

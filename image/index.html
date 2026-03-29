@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Image - ILL Aegisub Scripts</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">ILL Aegisub Scripts</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Guides</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../macros/" class="dropdown-item">Macros</a>
+</li>
+                                    
+<li>
+    <a href="../modules/" class="dropdown-item">Modules</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Module Reference</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../core/" class="dropdown-item">Core</a>
+</li>
+                                    
+<li>
+    <a href="../text-and-tags/" class="dropdown-item">Text and Tags</a>
+</li>
+                                    
+<li>
+    <a href="../geometry/" class="dropdown-item">Geometry</a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">Image</a>
+</li>
+                                    
+<li>
+    <a href="../clipper2/" class="dropdown-item">Clipper2</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../geometry/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../clipper2/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#ill-image-module-reference" class="nav-link">ILL Image Module Reference</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#what-this-module-is" class="nav-link">What This Module Is</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#conventions-used-in-examples" class="nav-link">Conventions Used In Examples</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#imgfilename" class="nav-link">IMG(filename)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#imgsetinfosframe-1" class="nav-link">img\setInfos(frame = 1)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#imgtoassreduce-frame" class="nav-link">img\toAss(reduce, frame)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#tracercheckoptionsoptions" class="nav-link">Tracer.checkoptions(options = {})</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#tracerimagedatatotracedataimgd-options" class="nav-link">Tracer.imagedataToTracedata(imgd, options)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#tracergetasslinestracedata-options" class="nav-link">Tracer.getAssLines(tracedata, options)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#potraceimg-frame-turnpolicy-turdsize-optcurve-alphamax-opttolerance" class="nav-link">Potrace(img, frame, turnpolicy, turdsize, optcurve, alphamax, opttolerance)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#potprocess" class="nav-link">pot\process()</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#potgetshapedec-3" class="nav-link">pot\getShape(dec = 3)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#typical-workflows" class="nav-link">Typical Workflows</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="ill-image-module-reference">ILL Image Module Reference</h1>
+<h2 id="what-this-module-is">What This Module Is</h2>
+<p><code>ILL.IMG</code> is the image-processing side of the library. In practice, there are three public workflows that matter:</p>
+<ul>
+<li>load an image and convert it directly to ASS pixels with <code>IMG</code></li>
+<li>vectorize a colored image with <code>Tracer</code></li>
+<li>vectorize a monochrome image with <code>Potrace</code></li>
+</ul>
+<p>This page focuses on those public entry points and how they are used in the project's own macros.</p>
+<h2 id="conventions-used-in-examples">Conventions Used In Examples</h2>
+<pre><code class="language-moon">IMGMod = require &quot;ILL.IMG&quot;
+{:IMG, :Tracer, :Potrace} = IMGMod
+</code></pre>
+<p>Examples on this page are adapted from <a href="/c:/Users/klsru/OneDrive/Documents/github/ILL-Aegisub-Scripts/macros/ILL.MakeImage.moon"><code>ILL.MakeImage.moon</code></a>.</p>
+<h2 id="imgfilename"><code>IMG(filename)</code></h2>
+<p>Creates an image object and decodes the file immediately.</p>
+<ul>
+<li>Use this when you want pixel-based conversion or when you want raw decoded frames to feed into <code>Tracer</code> or <code>Potrace</code>.</li>
+<li>Accepted extensions are <code>png</code>, <code>jpg</code>/<code>jpeg</code>, <code>bmp</code>, and <code>gif</code>.</li>
+<li>The constructor stores the decoded result in <code>img.infos</code> and also records <code>img.extension</code>.</li>
+<li>If the file type is unsupported, it raises an error instead of returning a partially usable object.</li>
+</ul>
+<h3 id="example">Example</h3>
+<pre><code class="language-moon">filename = aegisub.dialog.open &quot;Open Image&quot;, &quot;&quot;, &quot;&quot;, &quot;Images|*.png;*.jpg;*.jpeg;*.bmp;*.gif;&quot;, false, true
+img = IMG filename
+</code></pre>
+<h2 id="imgsetinfosframe-1"><code>img\setInfos(frame = 1)</code></h2>
+<p>Promotes one decoded frame into the fields the rest of the library expects to read directly.</p>
+<ul>
+<li>For static images, it copies the decoded image into <code>img.width</code>, <code>img.height</code>, and <code>img.data</code>.</li>
+<li>For GIFs, it selects one frame from <code>img.infos.frames</code> and also exposes <code>img.delayMs</code>, <code>img.x</code>, and <code>img.y</code>.</li>
+<li>Call this before reading <code>img.width</code>, <code>img.height</code>, or <code>img.data</code> yourself.</li>
+</ul>
+<h3 id="example_1">Example</h3>
+<pre><code class="language-moon">img = IMG filename
+img\setInfos!
+
+width = img.width
+height = img.height
+pixels = img.data
+</code></pre>
+<h2 id="imgtoassreduce-frame"><code>img\toAss(reduce, frame)</code></h2>
+<p>Converts the image into ASS <code>\p1</code> drawing lines.</p>
+<ul>
+<li><code>reduce = false</code> or <code>nil</code> generates one 1x1 rectangle per visible pixel.</li>
+<li><code>reduce = true</code> merges horizontally adjacent pixels that share the same color and alpha.</li>
+<li><code>reduce = "oneLine"</code> does the same reduction, but collapses all rows into a single ASS line.</li>
+<li>Transparent pixels are skipped.</li>
+<li>The generated lines already contain a ready-to-use prefix with <code>\an7</code>, <code>\pos</code>, <code>\bord0</code>, <code>\shad0</code>, <code>\frz0</code>, and <code>\p1</code>.</li>
+</ul>
+<p>This is the method used by the <code>Make Image / Pixels</code> macro.</p>
+<h3 id="example_2">Example</h3>
+<pre><code class="language-moon">img = IMG filename
+
+asslines = img\toAss true
+for pixel in *asslines
+  line = Table.copy sub[activeLine]
+  line.isShape = true
+  line.shape = pixel\gsub &quot;}{&quot;, &quot;&quot;
+  ass\insertLine line, activeLine
+</code></pre>
+<h2 id="tracercheckoptionsoptions"><code>Tracer.checkoptions(options = {})</code></h2>
+<p>Normalizes a tracing options table.</p>
+<ul>
+<li>If you pass a preset name as a string, it resolves it through <code>Tracer.optionpresets</code>.</li>
+<li>If you pass a partial table, it fills in whatever is missing from the default preset.</li>
+<li>Use this whenever you build tracing options yourself instead of relying on the macro UI.</li>
+</ul>
+<h3 id="example_3">Example</h3>
+<pre><code class="language-moon">preset = Tracer.checkoptions {
+  ltres: 1
+  qtres: 1
+  pathomit: 8
+  colorsampling: 2
+  numberofcolors: 16
+  layering: 0
+}
+</code></pre>
+<h2 id="tracerimagedatatotracedataimgd-options"><code>Tracer.imagedataToTracedata(imgd, options)</code></h2>
+<p>Runs the full color-tracing pipeline and returns an intermediate traced representation.</p>
+<ul>
+<li><code>imgd</code> is any object with <code>width</code>, <code>height</code>, and <code>data</code>, so you can pass either <code>img</code> after <code>img\setInfos!</code> or a GIF frame object from <code>img.infos.frames[i]</code>.</li>
+<li>Internally this performs color quantization, layer extraction, path scanning, internode generation, and spline fitting.</li>
+<li>The result is not final ASS yet. It is a structured traced object meant to be consumed by <code>Tracer.getAssLines</code>.</li>
+</ul>
+<p>The returned object contains:</p>
+<ul>
+<li><code>layers</code>: traced path data grouped by palette layer</li>
+<li><code>palette</code>: final color palette used in quantization</li>
+<li><code>width</code></li>
+<li><code>height</code></li>
+</ul>
+<h3 id="example_4">Example</h3>
+<pre><code class="language-moon">img = IMG filename
+img\setInfos!
+
+preset = Tracer.checkoptions &quot;detailed&quot;
+tracedata = Tracer.imagedataToTracedata img, preset
+</code></pre>
+<h2 id="tracergetasslinestracedata-options"><code>Tracer.getAssLines(tracedata, options)</code></h2>
+<p>Converts traced layer data into final ASS drawing lines.</p>
+<ul>
+<li>Shapes with the same color/alpha combination are merged into fewer ASS lines.</li>
+<li>The result is ready to insert into subtitle lines.</li>
+<li>This is the last step used by the <code>Make Image / Image Tracer</code> macro before insertion into the script.</li>
+</ul>
+<h3 id="example_5">Example</h3>
+<pre><code class="language-moon">img = IMG filename
+img\setInfos!
+
+preset = Tracer.checkoptions &quot;default&quot;
+tracedata = Tracer.imagedataToTracedata img, preset
+asslines = Tracer.getAssLines tracedata, preset
+
+for trace in *asslines
+  line = Table.copy sub[activeLine]
+  line.isShape = true
+  line.tags = ILL.Tags trace\match &quot;%b{}&quot;
+  line.shape = trace\gsub &quot;%b{}&quot;, &quot;&quot;
+  ass\insertLine line, activeLine
+</code></pre>
+<h2 id="potraceimg-frame-turnpolicy-turdsize-optcurve-alphamax-opttolerance"><code>Potrace(img, frame, turnpolicy, turdsize, optcurve, alphamax, opttolerance)</code></h2>
+<p>Creates a monochrome vectorizer configured for one image frame.</p>
+<ul>
+<li>This is the low-level entry point behind the <code>Make Image / Potrace</code> macro.</li>
+<li>The constructor calls <code>img\setInfos(frame)</code> internally, so you usually pass the <code>IMG</code> instance directly.</li>
+<li>Transparent pixels are first composited over white, then thresholded to black/white before tracing.</li>
+</ul>
+<p>Parameters in practice:</p>
+<ul>
+<li><code>turnpolicy</code>: <code>"right"</code>, <code>"black"</code>, <code>"white"</code>, <code>"majority"</code>, or <code>"minority"</code></li>
+<li><code>turdsize</code>: minimum blob area to keep</li>
+<li><code>optcurve</code>: whether to optimize curves</li>
+<li><code>alphamax</code>: corner threshold</li>
+<li><code>opttolerance</code>: optimization tolerance</li>
+</ul>
+<h3 id="example_6">Example</h3>
+<pre><code class="language-moon">img = IMG filename
+pot = Potrace img, 1, &quot;minority&quot;, 2, true, 1, 0.2
+</code></pre>
+<h2 id="potprocess"><code>pot\process()</code></h2>
+<p>Runs the full Potrace pipeline.</p>
+<ul>
+<li>First it extracts raw bitmap contours.</li>
+<li>Then it fits polygons and curves.</li>
+<li>After this call, <code>pot.pathlist</code> contains the traced internal paths and the object is ready for serialization.</li>
+</ul>
+<h3 id="example_7">Example</h3>
+<pre><code class="language-moon">pot = Potrace img, 1, &quot;minority&quot;, 2, true, 1, 0.2
+pot\process!
+</code></pre>
+<h2 id="potgetshapedec-3"><code>pot\getShape(dec = 3)</code></h2>
+<p>Serializes the traced Potrace result as one ASS drawing string.</p>
+<ul>
+<li>The returned value is just the shape commands, not a complete subtitle line.</li>
+<li>In the project macros, the result is usually wrapped in tags and sometimes moved with <code>Path(shape)\move(...)</code>.</li>
+<li>The current implementation accepts <code>dec</code> in the signature, but the rounding flow is effectively fixed by the internal <code>Potrace.round</code> calls.</li>
+</ul>
+<h3 id="example_8">Example</h3>
+<pre><code class="language-moon">pot = Potrace img, 1, &quot;minority&quot;, 2, true, 1, 0.2
+pot\process!
+
+shape = pot\getShape!
+line = Table.copy sub[activeLine]
+line.isShape = true
+line.shape = &quot;{\\an7\\pos(0,0)\\bord0\\shad0\\fscx100\\fscy100\\fr0\\p1}#{shape}&quot;
+ass\insertLine line, activeLine
+</code></pre>
+<h2 id="typical-workflows">Typical Workflows</h2>
+<h3 id="pixel-workflow">Pixel workflow</h3>
+<pre><code class="language-moon">img = IMG filename
+asslines = img\toAss true
+</code></pre>
+<p>Use this when you want a faithful raster-to-ASS conversion and you do not care about vector simplification.</p>
+<h3 id="color-vector-workflow">Color vector workflow</h3>
+<pre><code class="language-moon">img = IMG filename
+img\setInfos!
+preset = Tracer.checkoptions &quot;default&quot;
+tracedata = Tracer.imagedataToTracedata img, preset
+asslines = Tracer.getAssLines tracedata, preset
+</code></pre>
+<p>Use this when you want layered vector output by color.</p>
+<h3 id="monochrome-vector-workflow">Monochrome vector workflow</h3>
+<pre><code class="language-moon">img = IMG filename
+pot = Potrace img, 1, &quot;minority&quot;, 2, true, 1, 0.2
+pot\process!
+shape = pot\getShape!
+</code></pre>
+<p>Use this when you want a single monochrome traced shape instead of multi-color layers.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../javascripts/default-dark.js"></script>
+        <script src="../javascripts/moonscript-highlight.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
