@@ -1,13 +1,30 @@
-Welcome to Zeref and Alen's new project!
-Both the macros and the modules are ready to be used. In the upcoming days, we'll write the documentation for the macros.
-After that, we'll focus on explaining the ILL module with documentation and examples.
+# ILL Aegisub Scripts
 
-If you have questions, advice, requests, or anything to say, please do.
-We hope that ILL can become a community project and not just a module of two people.
-For that, we need a lot feedback, both from users and macro developers.
+ILL is a library and macro collection for Aegisub focused on ASS text processing, shape manipulation, image conversion, and geometric workflows.
 
-About ILL...
-ILL is a module that eases the creation of macros. It can be compared to two of the most commonly used libraries: AssFoundation and Yutils.
-Currently, the macros that use ILL are primarily designed for handling shapes, so ILL may be a bit immature for managing subtitles.
+The project was built to make macro development easier and more structured. In practice, `ILL` provides reusable modules for working with tags, lines, shapes, paths, and images, while also shipping a set of ready-to-use macros built on top of that same library.
 
-That's all for now. Be sure to check the documentation when it comes out!
+The current toolset is especially strong for shape-based workflows, but the library also includes utilities for text splitting, frame-by-frame expansion, alignment handling, and image tracing.
+
+## Documentation
+
+Project documentation is available here:
+
+https://typesettingtools.github.io/ILL-Aegisub-Scripts/
+
+## Included Macros
+
+- Shapery
+- Envelope Distort
+- Make Image
+- Change Alignment
+- ILL - Split Text
+- Line To FBF
+
+## Included Modules
+
+- `ILL.ILL`
+- `ILL.IMG`
+- `clipper2.clipper2`
+
+If you use the project and have feedback, bug reports, or ideas for improvement, contributions and suggestions are welcome.
