@@ -2,13 +2,11 @@
 
 ## What This Module Is
 
-`ILL.IMG` is the image-processing side of the library. In practice, there are three public workflows that matter:
+`ILL.IMG` is the image-processing side of the library. In practice, there are three workflows that matter:
 
-- load an image and convert it directly to ASS pixels with `IMG`
-- vectorize a colored image with `Tracer`
-- vectorize a monochrome image with `Potrace`
-
-This page focuses on those public entry points and how they are used in the project's own macros.
+- decode an image and convert it directly into ASS pixel lines with `IMG`
+- trace a colored image into layered vector output with `Tracer`
+- trace a monochrome image into one vector shape with `Potrace`
 
 ## Conventions Used In Examples
 
@@ -17,197 +15,239 @@ IMGMod = require "ILL.IMG"
 {:IMG, :Tracer, :Potrace} = IMGMod
 ```
 
-Examples on this page are adapted from [`ILL.MakeImage.moon`](/c:/Users/klsru/OneDrive/Documents/github/ILL-Aegisub-Scripts/macros/ILL.MakeImage.moon).
+## `IMG`
 
-## `IMG(filename)`
+`IMG` is the decode-and-export entry point. It loads the file immediately and stores the decoded metadata in `img.infos`.
+
+### `IMG(filename)`
 
 Creates an image object and decodes the file immediately.
 
-- Use this when you want pixel-based conversion or when you want raw decoded frames to feed into `Tracer` or `Potrace`.
-- Accepted extensions are `png`, `jpg`/`jpeg`, `bmp`, and `gif`.
-- The constructor stores the decoded result in `img.infos` and also records `img.extension`.
-- If the file type is unsupported, it raises an error instead of returning a partially usable object.
+Arguments:
 
-### Example
+- `filename`: path to a supported image file.
+
+Supported formats in the current implementation:
+
+- `png`
+- `jpg` / `jpeg` / `jpe` / `jfif` / `jfi`
+- `bmp` / `dib`
+- `gif`
+
+Example:
 
 ```moon
-filename = aegisub.dialog.open "Open Image", "", "", "Images|*.png;*.jpg;*.jpeg;*.bmp;*.gif;", false, true
-img = IMG filename
+img = IMG "C:/work/logo.png"
 ```
 
-## `img\setInfos(frame = 1)`
+### `img\setInfos(frame = 1)`
 
-Promotes one decoded frame into the fields the rest of the library expects to read directly.
+Promotes one decoded frame into the fields the rest of the API reads directly: `img.width`, `img.height`, and `img.data`.
 
-- For static images, it copies the decoded image into `img.width`, `img.height`, and `img.data`.
-- For GIFs, it selects one frame from `img.infos.frames` and also exposes `img.delayMs`, `img.x`, and `img.y`.
-- Call this before reading `img.width`, `img.height`, or `img.data` yourself.
+For GIFs, this also exposes frame-local `img.delayMs`, `img.x`, and `img.y`.
 
-### Example
+Arguments:
+
+- `frame`: 1-based GIF frame index. Ignored for static images.
+
+Example:
 
 ```moon
 img = IMG filename
-img\setInfos!
+img\setInfos 1
 
 width = img.width
 height = img.height
 pixels = img.data
 ```
 
-## `img\toAss(reduce, frame)`
+### `img\toAss(reduce = nil, frame = 1)`
 
-Converts the image into ASS `\p1` drawing lines.
+Converts the decoded image into ASS `\p1` drawing lines.
 
-- `reduce = false` or `nil` generates one 1x1 rectangle per visible pixel.
-- `reduce = true` merges horizontally adjacent pixels that share the same color and alpha.
-- `reduce = "oneLine"` does the same reduction, but collapses all rows into a single ASS line.
-- Transparent pixels are skipped.
-- The generated lines already contain a ready-to-use prefix with `\an7`, `\pos`, `\bord0`, `\shad0`, `\frz0`, and `\p1`.
+This is the lowest-level raster export in the module and is what the pixel mode of `Make Image` is built on.
 
-This is the method used by the `Make Image / Pixels` macro.
+Arguments:
 
-### Example
+- `reduce`: `nil` or `false` emits one rectangle per visible pixel, `true` merges horizontal runs, and `"oneLine"` also collapses every row into a single subtitle line.
+- `frame`: GIF frame index to convert.
+
+Behavior notes:
+
+- fully transparent pixels are skipped
+- generated lines already contain a usable prefix with `\an7`, `\pos`, `\bord0`, `\shad0`, and `\p1`
+- reduction only merges horizontal neighbors with the same color and alpha
+
+Example:
 
 ```moon
 img = IMG filename
+assLines = img\toAss true
 
-asslines = img\toAss true
-for pixel in *asslines
+for pixel in *assLines
   line = Table.copy sub[activeLine]
   line.isShape = true
   line.shape = pixel\gsub "}{", ""
   ass\insertLine line, activeLine
 ```
 
-## `Tracer.checkoptions(options = {})`
+## `Tracer`
+
+`Tracer` is the colored-vector workflow. It quantizes colors, scans connected regions, traces outlines, and exports layered ASS drawings.
+
+### `Tracer.checkoptions(options = {})`
 
 Normalizes a tracing options table.
 
-- If you pass a preset name as a string, it resolves it through `Tracer.optionpresets`.
-- If you pass a partial table, it fills in whatever is missing from the default preset.
-- Use this whenever you build tracing options yourself instead of relying on the macro UI.
+Use this first when you are building tracing settings manually instead of going through the macro UI.
 
-### Example
+Arguments:
+
+- `options`: preset name string or partial options table.
+
+Important fields recognized by the tracer:
+
+- `ltres`: line-fitting error tolerance.
+- `qtres`: quadratic/spline fitting tolerance.
+- `pathomit`: minimum path size retained after scan.
+- `rightangleenhance`: preserves sharper corners during internode processing.
+- `colorsampling`: palette sampling mode.
+- `numberofcolors`: target palette size.
+- `mincolorratio`: minimum palette ratio kept during quantization.
+- `colorquantcycles`: refinement passes for quantization.
+- `layering`: layer extraction mode.
+- `strokewidth`: stroke width used during ASS export.
+- `scale`: exported coordinate scale.
+- `roundcoords`: coordinate rounding precision during export.
+- `blurradius`: blur radius applied before quantization.
+- `blurdelta`: blur sensitivity threshold.
+- `pal`: optional fixed palette.
+
+Example:
 
 ```moon
 preset = Tracer.checkoptions {
+  numberofcolors: 16
+  pathomit: 8
   ltres: 1
   qtres: 1
-  pathomit: 8
-  colorsampling: 2
-  numberofcolors: 16
-  layering: 0
 }
 ```
 
-## `Tracer.imagedataToTracedata(imgd, options)`
+### `Tracer.imagedataToTracedata(imgd, options)`
 
-Runs the full color-tracing pipeline and returns an intermediate traced representation.
+Runs the color-tracing pipeline and returns the intermediate traced representation.
 
-- `imgd` is any object with `width`, `height`, and `data`, so you can pass either `img` after `img\setInfos!` or a GIF frame object from `img.infos.frames[i]`.
-- Internally this performs color quantization, layer extraction, path scanning, internode generation, and spline fitting.
-- The result is not final ASS yet. It is a structured traced object meant to be consumed by `Tracer.getAssLines`.
+This is not final ASS yet. The result is meant to be passed to `Tracer.getAssLines`.
+
+Arguments:
+
+- `imgd`: image-like object with `width`, `height`, and `data`.
+- `options`: normalized tracer options, usually from `Tracer.checkoptions`.
 
 The returned object contains:
 
-- `layers`: traced path data grouped by palette layer
-- `palette`: final color palette used in quantization
+- `layers`
+- `palette`
 - `width`
 - `height`
 
-### Example
+Example:
 
 ```moon
 img = IMG filename
 img\setInfos!
 
-preset = Tracer.checkoptions "detailed"
-tracedata = Tracer.imagedataToTracedata img, preset
+options = Tracer.checkoptions "default"
+tracedata = Tracer.imagedataToTracedata img, options
 ```
 
-## `Tracer.getAssLines(tracedata, options)`
+### `Tracer.getAssLines(tracedata, options)`
 
-Converts traced layer data into final ASS drawing lines.
+Converts traced layer data into ready-to-insert ASS drawing lines.
 
-- Shapes with the same color/alpha combination are merged into fewer ASS lines.
-- The result is ready to insert into subtitle lines.
-- This is the last step used by the `Make Image / Image Tracer` macro before insertion into the script.
+This is the final export stage of the color tracer.
 
-### Example
+Arguments:
+
+- `tracedata`: result of `Tracer.imagedataToTracedata`.
+- `options`: tracer options used to export coordinates and style.
+
+Behavior notes:
+
+- output is already grouped by traced color layers
+- each string is ready to insert into subtitle lines
+- the options still matter here because export scale, rounding, and stroke behavior are applied at this stage
+
+Example:
 
 ```moon
 img = IMG filename
 img\setInfos!
 
-preset = Tracer.checkoptions "default"
-tracedata = Tracer.imagedataToTracedata img, preset
-asslines = Tracer.getAssLines tracedata, preset
-
-for trace in *asslines
-  line = Table.copy sub[activeLine]
-  line.isShape = true
-  line.tags = ILL.Tags trace\match "%b{}"
-  line.shape = trace\gsub "%b{}", ""
-  ass\insertLine line, activeLine
+options = Tracer.checkoptions "default"
+tracedata = Tracer.imagedataToTracedata img, options
+assLines = Tracer.getAssLines tracedata, options
 ```
 
-## `Potrace(img, frame, turnpolicy, turdsize, optcurve, alphamax, opttolerance)`
+## `Potrace`
+
+`Potrace` is the monochrome tracing workflow. It turns one bitmap frame into one vector shape instead of multiple color layers.
+
+### `Potrace(img, frame, turnpolicy, turdsize, optcurve, alphamax, opttolerance)`
 
 Creates a monochrome vectorizer configured for one image frame.
 
-- This is the low-level entry point behind the `Make Image / Potrace` macro.
-- The constructor calls `img\setInfos(frame)` internally, so you usually pass the `IMG` instance directly.
-- Transparent pixels are first composited over white, then thresholded to black/white before tracing.
+Arguments:
 
-Parameters in practice:
+- `img`: `IMG` instance that provides the decoded pixel data.
+- `frame`: 1-based GIF frame index passed to `img\setInfos(frame)`.
+- `turnpolicy`: ambiguity rule used while walking bitmap contours. Common values are `"right"`, `"black"`, `"white"`, `"majority"`, and `"minority"`.
+- `turdsize`: minimum connected-component area kept by the tracer.
+- `optcurve`: enables curve optimization after polygon fitting.
+- `alphamax`: corner threshold used during optimization.
+- `opttolerance`: optimization tolerance.
 
-- `turnpolicy`: `"right"`, `"black"`, `"white"`, `"majority"`, or `"minority"`
-- `turdsize`: minimum blob area to keep
-- `optcurve`: whether to optimize curves
-- `alphamax`: corner threshold
-- `opttolerance`: optimization tolerance
+Behavior notes:
 
-### Example
+- the constructor calls `img\setInfos(frame)` internally
+- transparent pixels are composited into a white background before thresholding
+- the trace is fundamentally monochrome
+
+Example:
 
 ```moon
 img = IMG filename
 pot = Potrace img, 1, "minority", 2, true, 1, 0.2
 ```
 
-## `pot\process()`
+### `pot\process()`
 
-Runs the full Potrace pipeline.
+Runs the full tracing pipeline and fills `pot.pathlist`.
 
-- First it extracts raw bitmap contours.
-- Then it fits polygons and curves.
-- After this call, `pot.pathlist` contains the traced internal paths and the object is ready for serialization.
+After this call the object is ready for serialization.
 
-### Example
+Example:
 
 ```moon
 pot = Potrace img, 1, "minority", 2, true, 1, 0.2
 pot\process!
 ```
 
-## `pot\getShape(dec = 3)`
+### `pot\getShape(dec = 3)`
 
-Serializes the traced Potrace result as one ASS drawing string.
+Serializes the traced result as one ASS drawing string.
 
-- The returned value is just the shape commands, not a complete subtitle line.
-- In the project macros, the result is usually wrapped in tags and sometimes moved with `Path(shape)\move(...)`.
-- The current implementation accepts `dec` in the signature, but the rounding flow is effectively fixed by the internal `Potrace.round` calls.
+Arguments:
 
-### Example
+- `dec`: requested decimal precision. The parameter exists in the API, but the current implementation does not expose it as a strong external precision control.
+
+Example:
 
 ```moon
 pot = Potrace img, 1, "minority", 2, true, 1, 0.2
 pot\process!
-
 shape = pot\getShape!
-line = Table.copy sub[activeLine]
-line.isShape = true
-line.shape = "{\\an7\\pos(0,0)\\bord0\\shad0\\fscx100\\fscy100\\fr0\\p1}#{shape}"
-ass\insertLine line, activeLine
 ```
 
 ## Typical Workflows
@@ -216,22 +256,22 @@ ass\insertLine line, activeLine
 
 ```moon
 img = IMG filename
-asslines = img\toAss true
+assLines = img\toAss true
 ```
 
-Use this when you want a faithful raster-to-ASS conversion and you do not care about vector simplification.
+Use this when you want faithful raster output and do not need vector simplification.
 
 ### Color vector workflow
 
 ```moon
 img = IMG filename
 img\setInfos!
-preset = Tracer.checkoptions "default"
-tracedata = Tracer.imagedataToTracedata img, preset
-asslines = Tracer.getAssLines tracedata, preset
+options = Tracer.checkoptions "default"
+tracedata = Tracer.imagedataToTracedata img, options
+assLines = Tracer.getAssLines tracedata, options
 ```
 
-Use this when you want layered vector output by color.
+Use this when you want one or more vector layers grouped by color.
 
 ### Monochrome vector workflow
 
@@ -242,4 +282,4 @@ pot\process!
 shape = pot\getShape!
 ```
 
-Use this when you want a single monochrome traced shape instead of multi-color layers.
+Use this when you want one traced shape instead of a layered color export.

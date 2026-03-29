@@ -11,8 +11,6 @@ ASS dialogue is not just plain text. A usable macro needs to understand:
 
 That is the job of `Tag`, `Tags`, `Text`, and `Line`.
 
-Examples on this page are based on how the project macros actually use these classes, especially `ILL.SplitText`, `ILL.Shapery`, `ILL.EnvelopeDistort`, and `ILL.Line2FBF`.
-
 ## Conventions
 
 ```moon
@@ -20,263 +18,453 @@ ILL = require "ILL.ILL"
 {:Tag, :Tags, :Text, :Line, :Ass} = ILL
 ```
 
-When this page shows `Tag(...)`, `Tags(...)`, or `Text(...)`, it is using the constructor form seen from user code rather than exposing MoonScript's internal `new`.
-
 ## `Tag`
 
-`Tag` represents one parsed ASS tag with a normalized value.
+`Tag` is the smallest ASS text unit handled by the library. It stores one parsed tag and converts its payload into something easier to work with in code.
 
 ### `Tag(raw, name, value, i)`
 
-Creates a parsed tag object.
+Creates one parsed ASS tag.
 
-The important point is that this is not just a stored raw string: the constructor converts the payload into something useful for code. Coordinate tags become structured values, booleans become booleans, and compound tags such as `\t(...)` keep their internal parts.
+Arguments:
+
+- `raw`: original tag text, such as `"\pos(100,200)"`.
+- `name`: normalized tag name, such as `"pos"` or `"bord"`.
+- `value`: raw payload extracted from the tag. The constructor normalizes it into numbers, booleans, coordinate arrays, or transform tables.
+- `i`: original character position inside the tag block, used to preserve order.
+
+Example:
 
 ```moon
-tag = Tag "\\pos(100,200)", "pos", "100,200", 1
+tag = Tag "\\move(100,200,150,240,0,300)", "move", "100,200,150,240,0,300", 1
 coords = tag\getValue!
 ```
 
-### `tag\setValue(name, value, i)`
+### `tag\setValue(name, value, i = nil)`
 
-Builds or rebuilds a tag from a logical value instead of from already-written ASS text.
+Builds a tag from logical data instead of raw ASS text.
 
-Use this when a macro is generating a new tag to inject back into the line.
+Arguments:
+
+- `name`: tag name to build.
+- `value`: normalized Lua value. Examples: number for `\bord`, table for `\pos`, boolean for `\b`.
+- `i`: optional original index metadata.
+
+Example:
 
 ```moon
-tag = Tag!\setValue "bord", 4
+tag = Tag!\setValue "pos", {320, 240}
 raw = tostring tag
 ```
 
 ### `tag\getValue()`
 
-Returns the normalized value stored by the tag.
+Returns the normalized tag value.
 
-This is what matters when a macro needs to read `\pos`, `\move`, `\clip`, `\alpha`, and similar tags without reparsing strings manually.
+This is what you usually want when reading `\pos`, `\move`, `\clip`, `\fad`, or `\t(...)` from parsed text.
 
 ### `tag\copy()`
 
 Returns an independent copy of the tag object.
 
-### `Tag.getPattern(name)`
+### `Tag.getPattern(name, withValue = false)`
 
-Returns the matching pattern used by the parser for a tag family.
+Returns the parser pattern for one tag family.
 
-### `tag\__tostring()`
+Arguments:
 
-Serializes the object back into ASS tag syntax.
+- `name`: tag family name.
+- `withValue`: when `true`, returns the capture pattern used to extract only the value.
 
 ## `Tags`
 
 `Tags` represents one full tag block, not just one tag.
 
-It is the normal abstraction used when a macro needs to inspect, remove, or insert multiple tags on a line.
-
 ### `Tags(tags = "")`
 
-Parses a tag block into an object that can be queried and rewritten.
+Creates one parsed tag block.
+
+Arguments:
+
+- `tags`: raw tag-block string. The constructor also normalizes nested transforms, `\1c` aliases, and `\fr` aliases.
+
+Example:
 
 ```moon
 tags = Tags "{\\an7\\bord2\\shad0}"
 ```
 
-### `tags\get(name)`
+### `tags\get()`
 
-Returns the normalized value of one tag if it exists.
+Returns the current raw tag string.
 
-```moon
-align = tags\get "an"
-```
+### `tags\open()` and `tags\close()`
 
-### `tags\getTag(name)`
+Remove or add the surrounding `{}` delimiters.
 
-Returns the underlying `Tag` object.
+These helpers are used internally so tags can be rewritten without worrying about braces at every step.
 
-Use this when you need tag metadata or want to clone and alter the tag itself.
+### `tags\animated(cmd = "hide")`
 
-### `tags\insert(tagSpec, replace = false)`
+Temporarily hides or restores `\t(...)` tags so non-transform operations can inspect the rest of the block safely.
 
-Inserts a tag or tag specification into the block.
+Arguments:
 
-This is heavily used in `Split Text` after fragment positions are recalculated and the macro needs to write `\pos`, `\move`, or helper tags back into each split line.
-
-```moon
-line.tags\insert {{"pos", Line.reallocate l, line}, true}
-```
+- `cmd`: `"hide"` replaces the leading slash inside `\t` payloads, anything else restores it.
 
 ### `tags\remove(...)`
 
-Removes one or more tags from the block.
+Removes one or more tags or tag groups.
 
-`Envelope Distort` uses this pattern before re-inserting updated `\clip` data.
+Arguments:
+
+- `...`: each argument may be `"name"`, `{"name", replacement, n}`, or a group alias such as `"all"`, `"font"`, `"perspective"`, `"colors"`, `"shadow"`, or `"outline"`.
+
+Example:
 
 ```moon
 line.tags\remove "clip", "iclip"
+line.tags\remove "font"
 ```
 
-### `tags\existsTag(name)` and `tags\existsTagOr(...)`
+### `tags\insert(...)`
 
-Checks whether a tag is present.
+Inserts one or more tags into the block.
+
+Arguments:
+
+- `...`: each argument may be `"rawTag"`, `{"rawTag", invert}`, or `{{name, value}, invert}`.
+
+This is the method most macros use when writing updated `\pos`, `\move`, `\clip`, or helper tags back into generated fragments.
+
+Example:
+
+```moon
+line.tags\insert {{"pos", {320, 240}}, true}
+line.tags\insert "\\bord0\\shad0"
+```
+
+### `tags\getTag(name, subTags = tags\get())`
+
+Returns the underlying `Tag` object for one tag.
+
+Arguments:
+
+- `name`: tag name to search.
+- `subTags`: optional source text used during internal parsing.
 
 ### `tags\split()`
 
-Returns the parsed tag list in a form suitable for deeper inspection.
+Returns the full parsed tag list as `Tag` objects sorted by original position.
+
+Use this when you need to inspect the exact tag sequence instead of just querying one name at a time.
 
 ### `tags\clean()`
 
-Normalizes the block by removing parser noise and collapsing redundant structure.
+Rebuilds the block into a normalized order and removes parser noise.
 
-### `tags\clear()`
+### `tags\clear(styleref = nil)`
 
-Removes all tags from the block.
+Removes duplicate tags and optionally strips tags that only restate the style defaults.
+
+Arguments:
+
+- `styleref`: optional style table, usually `line.styleref`.
 
 ### `tags\difference(other)`
 
-Computes a tag-level difference against another tag block.
+Keeps only the tag values that differ from another block.
 
-This is useful when a macro wants to preserve only the tags that changed.
+Arguments:
 
-### `tags\__tostring()`
+- `other`: another `Tags` object used as the comparison source.
 
-Serializes the tag block back into `{...}` syntax.
+This is useful when rebuilding split lines and wanting to emit only the tags that actually changed between blocks.
+
+### `tags\existsTag(name)`, `tags\existsTagAnd(...)`, and `tags\existsTagOr(...)`
+
+Presence checks for tag names.
 
 ## `Text`
 
-`Text` represents one line as alternating text and tag blocks.
+`Text` represents one dialogue line as alternating tag and text layers.
 
-This is the layer that lets macros work on the structure of the line instead of on raw substring operations.
+### `Text(text = "", isShape = false)`
 
-### `Text(text = "")`
+Parses a full dialogue string into alternating tag and text blocks.
 
-Parses a line string into blocks.
+Arguments:
+
+- `text`: full line text.
+- `isShape`: when `true`, treats the body as ASS drawing data and skips normal text splitting logic.
+
+Example:
 
 ```moon
-text = Text l.text
+text = Text "{\\bord2}Hello {\\i1}world"
 ```
+
+### `text\stripped()`
+
+Returns the text with all tag blocks removed.
 
 ### `text\iter()`
 
-Iterates through parsed blocks.
+Iterates over parsed blocks, yielding `(tags, text, i, n)`.
 
-Use it when you need to inspect the original text structure without rewriting it immediately.
+This is the read-only traversal method when you want to inspect the structure of the original line.
 
 ### `text\callBack(fn)`
 
-Maps the parsed blocks through a callback.
+Maps the blocks through a callback.
 
-### `text\modifyBlock(block)`
+Arguments:
 
-Replaces or inserts one block in the parsed structure.
+- `fn`: callback receiving `(tags, text, i, n)` and returning replacement `(tags, text)`.
 
-In `Split Text`, this is part of the final step where recalculated tags are written back into each generated line fragment.
+Example:
 
 ```moon
-line.text\modifyBlock line.tags
+line.text\callBack (tags, text, i, n) ->
+  return tags, text\upper!
 ```
+
+### `text\modifyBlock(newTags, newText = nil, i = 1)`
+
+Replaces one parsed block.
+
+Arguments:
+
+- `newTags`: replacement `Tags` object for the selected block.
+- `newText`: optional replacement text for that block.
+- `i`: 1-based block index.
 
 ### `text\moveToFirstLayer()`
 
-Moves pending tag data to the first text layer where it should be rendered.
+Moves first-category tags such as `\pos`, `\move`, `\clip`, and `\fad` into the first tag block.
 
-### `text\insertPendingTags()`
+This mirrors how ASS effectively treats tags that should only have one active value per rendered line.
 
-Flushes pending tag changes into the text structure.
+### `text\insertPendingTags(add_all = false, add_transforms = false)`
 
-### `text\existsTag(name)` and `text\existsTagOr(...)`
+Propagates missing previous tags into later blocks.
 
-Checks whether the line text contains a tag anywhere in the parsed structure.
+Arguments:
+
+- `add_all`: when `true`, propagates all missing tags.
+- `add_transforms`: when `true`, also propagates `\t(...)`.
+
+This is especially useful before splitting a line into blocks or explicit line-break fragments.
+
+### `text\existsTag(name)`, `text\existsTagAnd(...)`, and `text\existsTagOr(...)`
+
+Presence checks across all parsed blocks.
 
 ### `Text.getLineBreaks(text)`
 
-Splits a text string by explicit ASS line breaks in a parser-aware way.
+Splits one raw line by explicit ASS line breaks while preserving the tags that remain in effect on each fragment.
+
+Arguments:
+
+- `text`: raw dialogue string containing optional `\N`.
+
+Example:
+
+```moon
+breaks, n = Text.getLineBreaks "{\\fs50}AB\\N{\\bord3}CD"
+```
 
 ## `Line`
 
-`Line` is the high-level line object built on top of parsed ASS content.
+`Line` is the high-level helper that turns one subtitle line into something macros can split, reposition, expand frame by frame, or convert into geometry.
 
-It is what turns one subtitle line into something a macro can split, reshape, move, convert to geometry, or expand frame by frame.
+### `Line.process(ass, line)`
 
-### `Line.process(ass, line, doCopy = true)`
+Processes one line in place and fills cached style, metric, and positioning data.
 
-Parses a raw subtitle line into a richer object with cached data such as tags, style-driven metrics, and detected shape/text state.
+Arguments:
 
-### `Line.extend(ass, line, doCopy = true)`
+- `ass`: `Ass` context with styles and script metadata.
+- `line`: dialogue line to enrich.
 
-Extends a line so the rest of the higher-level helpers can operate on it safely.
+This is the base step behind most text macros. It resolves the effective style, parses tags, computes metrics, and establishes the line's anchor position.
 
-Most project macros do this before they attempt text splitting or geometry conversion.
+### `Line.extend(ass, line, noblank = true)`
 
-```moon
-Line.extend ass, l, false
-```
+Extends one processed line with line-break-level structures in `line.lines`.
 
-### `Line.words(ass, line, doCopy = true)`
+Arguments:
 
-Splits the line into one line per word.
+- `ass`: `Ass` context.
+- `line`: source line.
+- `noblank`: when `true`, blank fragments are filtered out.
 
-`ILL.SplitText` uses this to create independent dialogue fragments while preserving positioning.
-
-### `Line.chars(ass, line, doCopy = true)`
-
-Splits the line into one line per character using UTF-8 aware iteration.
-
-### `Line.breaks(ass, line, doCopy = true)`
-
-Splits the line by ASS line breaks.
-
-### `Line.tags(ass, line, doCopy = true)`
-
-Splits the line by tag block boundaries.
-
-This is useful when the author already encoded semantic structure into tag groups.
-
-### `Line.reallocate(sourceLine, generatedLine, keepMove = false)`
-
-Computes a new `\pos` or `\move` payload so the generated fragment stays visually aligned after splitting.
-
-This is one of the most important internal steps in `ILL.SplitText`.
+Example:
 
 ```moon
-line.tags\insert {{"move", Line.reallocate l, line, true}, true}
+Line.extend ass, l
 ```
+
+### `Line.update(ass, line, noblank = true)`
+
+Clears cached data and recomputes the extended structures.
+
+Arguments:
+
+- `ass`: `Ass` context.
+- `line`: line to refresh.
+- `noblank`: forwarded to `Line.extend`.
+
+### `Line.words(ass, line, noblank = false)`
+
+Splits an extended line into word fragments.
+
+Arguments:
+
+- `ass`: `Ass` context.
+- `line`: extended line.
+- `noblank`: when `true`, blank-only fragments are skipped.
+
+Example:
+
+```moon
+Line.extend ass, l
+words = Line.words ass, l, true
+```
+
+### `Line.chars(ass, line, noblank = false)`
+
+Splits an extended line into UTF-8-aware character fragments.
+
+Arguments:
+
+- `ass`: `Ass` context.
+- `line`: extended line.
+- `noblank`: when `true`, blank-only fragments are skipped.
+
+### `Line.breaks(ass, line, noblank = false)`
+
+Splits an extended line by `\N`.
+
+Arguments:
+
+- `ass`: `Ass` context.
+- `line`: extended line.
+- `noblank`: when `true`, empty break fragments are skipped.
+
+### `Line.tags(ass, line, noblank = false)`
+
+Splits an extended line into one fragment per text/tag block.
+
+Arguments:
+
+- `ass`: `Ass` context.
+- `line`: extended line.
+- `noblank`: when `true`, blank-only blocks are skipped.
+
+### `Line.reallocate(sourceLine, generatedLine, isMove = false)`
+
+Recomputes `\pos` or `\move` so a generated fragment keeps the same visual placement as the source line.
+
+Arguments:
+
+- `sourceLine`: original unsplit line.
+- `generatedLine`: derived fragment line.
+- `isMove`: when `true`, returns a six-value `\move` payload instead of a two-value `\pos`.
+
+This is one of the core helpers behind `Split Text`.
 
 ### `Line.callBackTags(ass, line, fn)`
 
-Runs a callback over parsed tag data.
+Calls `fn` once for each generated tag-block fragment after position tags are updated.
+
+Arguments:
+
+- `ass`: `Ass` context.
+- `line`: extended source line.
+- `fn`: callback receiving `(lineBlock, index)`.
 
 ### `Line.callBackShape(ass, line, fn)`
 
-Runs a callback over shape data after converting the line into geometry.
+Calls `fn` once for each fragment after converting it to shape mode.
 
-This is the hook style used by shape-processing macros.
+Arguments:
 
-### `Line.callBackExpand(ass, line, fn)`
+- `ass`: `Ass` context.
+- `line`: source line.
+- `fn`: callback receiving `(shapeLine, index)`.
 
-Expands a line into several derived lines through a callback pipeline.
+This is the bridge between text workflows and geometry workflows.
 
-### `Line.callBackFBF(ass, line, fn)` and `Line.callBackFBFWithStep(ass, line, step, fn)`
+### `Line.callBackExpand(ass, line, grid = nil, fn)`
 
-Expand a line frame by frame.
+Calls `fn` once for each fragment after expanding style transforms into final geometry.
 
-`Line To FBF` uses the stepped version to materialize transforms into explicit per-frame lines.
+Arguments:
+
+- `ass`: `Ass` context.
+- `line`: source line.
+- `grid`: optional `{rows, cols, isBezier}` descriptor used by envelope workflows.
+- `fn`: callback receiving `(expandedShapeLine, index)`.
+
+### `Line.callBackFBF(ass, line, fn)`
+
+Expands one line frame by frame using a step of `1`.
+
+Arguments:
+
+- `ass`: `Ass` context.
+- `line`: processed source line.
+- `fn`: callback receiving `(line, frame, endFrame, relativeIndex, totalFrames)`.
+
+### `Line.callBackFBFWithStep(ass, line, step = 1, fn)`
+
+Expands one line into frame slices while materializing `\move`, `\fade`, and `\t(...)`.
+
+Arguments:
+
+- `ass`: `Ass` context.
+- `line`: processed source line.
+- `step`: number of frames merged into each slice.
+- `fn`: callback receiving `(line, frame, endFrame, relativeIndex, totalFrames)`.
+
+Example:
 
 ```moon
-Line.callBackFBFWithStep ass, l, elements.step, (line, i, endFrame, j, n) ->
-    -- generate one frame slice
+Line.callBackFBFWithStep ass, l, 2, (line, frame, endFrame, i, n) ->
+  ass\insertLine line, s
 ```
 
-### `Line.changeAlign(line, an)`
+### `Line.changeAlign(line, an, width = nil, height = nil)`
 
-Changes alignment while computing the position compensation needed to keep the rendered result stable.
+Changes alignment while compensating position so the rendered result stays visually stable.
 
-This is the core idea behind the `Change Alignment` macro.
+Arguments:
+
+- `line`: source line.
+- `an`: target ASS alignment.
+- `width`: optional precomputed width.
+- `height`: optional precomputed height.
 
 ### `Line.solveShadow(line)`
 
-Resolves shadow-related data into a usable form for geometry workflows.
+Returns the effective `xshad` and `yshad` values after reconciling `\shad`, `\xshad`, and `\yshad`.
 
-### `Line.toShape(ass, line)` and `Line.toPath(ass, line)`
+Arguments:
 
-Convert a line into ASS drawing data or into a `Path` object so the geometry module can take over.
+- `line`: processed line.
 
-These methods are the bridge between text-level macros and shape-level macros.
+### `Line.toShape(line)` and `Line.toPath(line)`
+
+Convert text into ASS drawing data or a `Path`.
+
+Arguments:
+
+- `line`: line whose `line.data` and `line.text_stripped` should be converted.
+
+Example:
+
+```moon
+shape = Line.toShape l
+path = Line.toPath l
+```
