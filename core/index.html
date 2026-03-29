@@ -141,10 +141,6 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-bs-level="2"><a href="#how-this-module-is-usually-used" class="nav-link">How This Module Is Usually Used</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
               </ul>
             </li>
         </ul>
@@ -162,217 +158,381 @@
 <li><code>Font</code> for font metrics</li>
 <li>utility modules such as <code>Math</code>, <code>Table</code>, <code>Util</code>, and <code>UTF8</code></li>
 </ul>
-<p>Examples on this page are adapted from the shipped macros, especially <code>ILL.Shapery</code>, <code>ILL.MakeImage</code>, <code>ILL.SplitText</code>, and <code>ILL.Line2FBF</code>.</p>
 <h2 id="conventions">Conventions</h2>
 <pre><code class="language-moon">ILL = require &quot;ILL.ILL&quot;
 {:Aegi, :Config, :Math, :Table, :Util, :UTF8, :Ass, :Font} = ILL
 </code></pre>
-<p>When this page shows <code>Ass(...)</code>, <code>Config(...)</code>, <code>UTF8(...)</code>, or <code>Font(...)</code>, that is the constructor form seen from user code after MoonScript lowers <code>new</code>.</p>
 <h2 id="aegi"><code>Aegi</code></h2>
-<p><code>Aegi</code> is the thin integration layer around the Aegisub runtime. It keeps macros from scattering direct calls to <code>aegisub.progress</code>, <code>aegisub.dialog.display</code>, <code>aegisub.debug.out</code>, and <code>aegisub.cancel</code>.</p>
+<p><code>Aegi</code> is the thin integration layer around Aegisub's runtime helpers.</p>
 <h3 id="aegiffmms"><code>Aegi.ffm(ms)</code></h3>
-<p>Converts milliseconds to frame number using the active script timing context.</p>
+<p>Converts milliseconds to a frame index.</p>
+<ul>
+<li><code>ms</code>: time in milliseconds.</li>
+</ul>
+<p>Example:</p>
 <pre><code class="language-moon">startFrame = Aegi.ffm l.start_time
-endFrame = Aegi.ffm l.end_time
 </code></pre>
 <h3 id="aegimffframe"><code>Aegi.mff(frame)</code></h3>
-<p>Converts a frame number back to milliseconds.</p>
-<pre><code class="language-moon">s = Aegi.mff i
-e = Aegi.mff math.min(i + step, endFrame)
-</code></pre>
+<p>Converts a frame index back to milliseconds.</p>
+<ul>
+<li><code>frame</code>: video frame index.</li>
+</ul>
 <h3 id="aegiprogresstitletitle"><code>Aegi.progressTitle(title)</code></h3>
-<p>Sets the progress window title used by long-running macros.</p>
+<p>Sets the title of the progress dialog.</p>
+<ul>
+<li><code>title</code>: progress window title.</li>
+</ul>
 <h3 id="aegiprogresstasktask"><code>Aegi.progressTask(task = "")</code></h3>
 <p>Updates the current progress message.</p>
-<p>This is heavily used by macros that process many lines, frames, or image chunks.</p>
-<pre><code class="language-moon">Aegi.progressTask &quot;Tracing image regions&quot;
-</code></pre>
-<h3 id="aegiprogresssetvalue"><code>Aegi.progressSet(value)</code></h3>
+<ul>
+<li><code>task</code>: progress message.</li>
+</ul>
+<h3 id="aegiprogresssetvalue-max-100"><code>Aegi.progressSet(value, max = 100)</code></h3>
 <p>Sets numeric progress.</p>
+<ul>
+<li><code>value</code>: current progress value.</li>
+<li><code>max</code>: total progress range.</li>
+</ul>
 <h3 id="aegiprogresscancelled"><code>Aegi.progressCancelled()</code></h3>
 <p>Returns whether the user cancelled the current operation.</p>
 <h3 id="aegiprogresscancel"><code>Aegi.progressCancel()</code></h3>
-<p>Explicitly aborts the current macro execution through the Aegisub runtime.</p>
-<h3 id="aegidebugvalue-and-aegilogvalue"><code>Aegi.debug(value)</code> and <code>Aegi.log(value)</code></h3>
-<p>Convenience wrappers for debug output.</p>
+<p>Aborts the current macro execution.</p>
 <h3 id="aegidisplayinterface-buttons-options-title"><code>Aegi.display(interface, buttons, options, title)</code></h3>
-<p>Displays a dialog and returns the selected button and values.</p>
-<p>This is the main entry point used by <code>Shapery</code>, <code>Make Image</code>, and other dialog-driven macros.</p>
+<p>Shows an Aegisub dialog and returns the pressed button plus collected values.</p>
+<ul>
+<li><code>interface</code>: Aegisub dialog definition array.</li>
+<li><code>buttons</code>: button labels shown in the dialog.</li>
+<li><code>options</code>: dialog options table.</li>
+<li><code>title</code>: dialog title.</li>
+</ul>
+<p>Example:</p>
 <pre><code class="language-moon">button, elements = Aegi.display interface, {&quot;Ok&quot;, &quot;Cancel&quot;}, {close: &quot;Cancel&quot;}, &quot;Transform&quot;
 </code></pre>
 <h2 id="config"><code>Config</code></h2>
-<p><code>Config</code> is the persistence layer used by dialog-based macros to remember user choices between runs.</p>
-<h3 id="configgetpath"><code>Config.getPath()</code></h3>
-<p>Returns the configuration base path.</p>
-<h3 id="configgetmacropath"><code>Config.getMacroPath()</code></h3>
-<p>Returns the macro-specific path used for config storage.</p>
+<p><code>Config</code> is the persistence helper used by dialog-driven macros.</p>
+<h3 id="configgetpathdir"><code>Config.getPath(dir)</code></h3>
+<p>Builds the base config directory under <code>?user</code>.</p>
+<ul>
+<li><code>dir</code>: relative directory under <code>?user</code>.</li>
+</ul>
+<h3 id="configgetmacropathdir-namespace-script_namespace"><code>Config.getMacroPath(dir, namespace = script_namespace)</code></h3>
+<p>Builds the macro-specific config path without the <code>.json</code> extension.</p>
+<ul>
+<li><code>dir</code>: base config directory.</li>
+<li><code>namespace</code>: filename stem used for the macro config.</li>
+</ul>
 <h3 id="configgetelementsinterface"><code>Config.getElements(interface)</code></h3>
-<p>Converts a dialog interface description into a serializable value table.</p>
-<p>This is how <code>Shapery</code> turns its UI definitions into default config payloads.</p>
-<pre><code class="language-moon">cfg = Config.getElements cfgInterface
+<p>Extracts a <code>{name = value}</code> table from a dialog definition.</p>
+<ul>
+<li><code>interface</code>: dialog definition array whose <code>name</code>/<code>value</code> pairs should be extracted.</li>
+</ul>
+<h3 id="configinterface-dir-config"><code>Config(interface = {}, dir = "/config/")</code></h3>
+<p>Creates a configuration helper for one dialog schema.</p>
+<ul>
+<li><code>interface</code>: dialog schema whose <code>value</code> fields act as defaults.</li>
+<li><code>dir</code>: relative config directory under <code>?user</code>.</li>
+</ul>
+<p>Example:</p>
+<pre><code class="language-moon">cfg = Config interface
 </code></pre>
-<h3 id="configinterface"><code>Config(interface = {})</code></h3>
-<p>Creates a configuration object around one interface definition.</p>
-<pre><code class="language-moon">cfg = Config interfaces.pathfinder
-</code></pre>
-<h3 id="configsetpathpath"><code>config\setPath(path)</code></h3>
-<p>Overrides the filesystem path used by this config object.</p>
-<h3 id="configsetjsonpathpath"><code>config\setJsonPath(path)</code></h3>
-<p>Sets the JSON file path used for persistence.</p>
-<pre><code class="language-moon">cfg\setJsonPath script_namespace .. &quot;Config&quot;
-</code></pre>
-<h3 id="configreset"><code>config\reset()</code></h3>
-<p>Resets persisted values back to interface defaults.</p>
+<h3 id="configsetpathdir-configdir"><code>config\setPath(dir = config.dir)</code></h3>
+<p>Overrides the config directory.</p>
+<ul>
+<li><code>dir</code>: relative config directory.</li>
+</ul>
+<h3 id="configsetjsonpathnamespace-script_namespace"><code>config\setJsonPath(namespace = script_namespace)</code></h3>
+<p>Overrides the JSON filename used by the config object.</p>
+<ul>
+<li><code>namespace</code>: filename stem before <code>.json</code>.</li>
+</ul>
 <h3 id="configsaveelements"><code>config\save(elements)</code></h3>
-<p>Writes a set of dialog values to disk.</p>
-<pre><code class="language-moon">cfg\save elements
-</code></pre>
+<p>Writes one set of collected UI values to disk.</p>
+<ul>
+<li><code>elements</code>: table keyed by element name. The method also injects <code>__VERSION__</code>.</li>
+</ul>
 <h3 id="configgetinterface"><code>config\getInterface()</code></h3>
-<p>Returns the interface definition with stored values applied.</p>
-<p>This is the form normally passed back into <code>Aegi.display</code>.</p>
-<pre><code class="language-moon">button, elements = Aegi.display cfg\getInterface!, {&quot;Ok&quot;, &quot;Cancel&quot;}, {close: &quot;Cancel&quot;}, &quot;Pathfinder&quot;
-</code></pre>
+<p>Returns the interface with stored values applied when a compatible config file exists.</p>
 <h2 id="ass"><code>Ass</code></h2>
-<p><code>Ass</code> is the script-context object used by most macros. It wraps the subtitle data, the current selection, and insertion/removal helpers so a macro can safely rewrite lines.</p>
-<h3 id="asssub-sel-activeline-commit-true"><code>Ass(sub, sel, activeLine, commit = true)</code></h3>
-<p>Creates a working script context.</p>
-<pre><code class="language-moon">ass = Ass sub, sel, activeLine, false
+<p><code>Ass</code> is the working subtitle context used by the macros. It wraps the subtitle data, the current selection, style metadata, and insertion/removal helpers.</p>
+<h3 id="asssub-sel-activeline-remline-true"><code>Ass(sub, sel, activeLine, remLine = true)</code></h3>
+<ul>
+<li><code>sub</code>: subtitle object received by the macro.</li>
+<li><code>sel</code>: selected line indexes.</li>
+<li><code>activeLine</code>: active selected line index.</li>
+<li><code>remLine</code>: when <code>true</code>, removed lines are deleted from the script.</li>
+</ul>
+<p>Example:</p>
+<pre><code class="language-moon">ass = Ass sub, sel, activeLine
 </code></pre>
-<h3 id="assitersel"><code>ass\iterSel()</code></h3>
-<p>Iterates over the selected lines and yields the line object, selection index, loop index, and total count.</p>
-<p>This is the normal outer loop in most shipped macros.</p>
+<h3 id="assitersubcopy-false-and-assiterselcopy-false"><code>ass\iterSub(copy = false)</code> and <code>ass\iterSel(copy = false)</code></h3>
+<p>Iterate over subtitle lines or selected dialogue lines.</p>
+<ul>
+<li><code>copy</code>: when <code>true</code>, also yields a deep-copied editable line.</li>
+</ul>
+<p>Example:</p>
 <pre><code class="language-moon">for l, s, i, n in ass\iterSel!
-    ass\progressLine s, i, n
+  ass\progressLine s, i, n
 </code></pre>
+<h3 id="asssetlineline-selectionindex"><code>ass\setLine(line, selectionIndex)</code></h3>
+<p>Overwrites one existing line.</p>
+<ul>
+<li><code>line</code>: replacement line object.</li>
+<li><code>selectionIndex</code>: selected line index relative to the current processing context.</li>
+</ul>
 <h3 id="assinsertlineline-selectionindex"><code>ass\insertLine(line, selectionIndex)</code></h3>
-<p>Inserts a generated line back into the script.</p>
+<p>Inserts a generated line after the referenced selection entry.</p>
+<ul>
+<li><code>line</code>: line object to insert.</li>
+<li><code>selectionIndex</code>: selected line index used as the insertion reference.</li>
+</ul>
 <h3 id="assremovelineline-selectionindex"><code>ass\removeLine(line, selectionIndex)</code></h3>
-<p>Removes the current source line.</p>
-<h3 id="assreplacelineline-selectionindex"><code>ass\replaceLine(line, selectionIndex)</code></h3>
-<p>Overwrites a line in place.</p>
+<p>Comments and optionally deletes a source line.</p>
+<ul>
+<li><code>line</code>: source line object.</li>
+<li><code>selectionIndex</code>: selected line index of that source line.</li>
+</ul>
+<h3 id="assprogresslineselectionindex-i-n"><code>ass\progressLine(selectionIndex, i, n)</code></h3>
+<p>Updates the progress window for one source line.</p>
+<ul>
+<li><code>selectionIndex</code>: original selected line index.</li>
+<li><code>i</code>: current loop index.</li>
+<li><code>n</code>: total selected lines.</li>
+</ul>
 <h3 id="asswarningselectionindex-message-and-asserrorselectionindex-message"><code>ass\warning(selectionIndex, message)</code> and <code>ass\error(selectionIndex, message)</code></h3>
-<p>Emit user-facing messages tied to the current processing context.</p>
-<h3 id="assgetnewselection"><code>ass\getNewSelection()</code></h3>
-<p>Returns the new selection after insertions and removals.</p>
-<p>This is typically the macro return value after rewriting lines.</p>
-<pre><code class="language-moon">return ass\getNewSelection!
-</code></pre>
+<p>Emit contextual warnings or errors tied to the current source line.</p>
+<ul>
+<li><code>selectionIndex</code>: original selected line index.</li>
+<li><code>message</code>: user-facing explanation.</li>
+</ul>
 <h2 id="font"><code>Font</code></h2>
-<p><code>Font</code> exposes font metrics and shape extraction helpers used when text has to be measured or converted into geometry.</p>
-<h3 id="fontstyle-text-scale-1"><code>Font(style, text = "", scale = 1)</code></h3>
-<p>Creates a font helper for the given ASS style and optional text.</p>
+<p><code>Font</code> exposes metrics and text-to-shape conversion.</p>
+<h3 id="fontstyledata"><code>Font(styleData)</code></h3>
+<p>Creates a font helper configured from effective style/tag data.</p>
+<ul>
+<li><code>styleData</code>: processed style/tag table, usually <code>line.data</code>.</li>
+</ul>
 <h3 id="fontgettextextentstext-nil"><code>font\getTextExtents(text = nil)</code></h3>
-<p>Returns text extents for one string, usually width and height information.</p>
-<h3 id="fonttexttoshapetext-nil"><code>font\textToShape(text = nil)</code></h3>
-<p>Converts text into ASS drawing data.</p>
-<p>This is especially useful when a macro wants to leave text mode and operate on geometry instead.</p>
+<p>Measures one text string.</p>
+<ul>
+<li><code>text</code>: string to measure.</li>
+</ul>
+<h3 id="fontgetmetrics"><code>font\getMetrics()</code></h3>
+<p>Returns ascent, descent, and related font metrics.</p>
+<h3 id="fontgettexttoshapetext-nil"><code>font\getTextToShape(text = nil)</code></h3>
+<p>Converts one text string into ASS drawing commands.</p>
+<ul>
+<li><code>text</code>: string to convert into ASS drawing commands.</li>
+</ul>
+<p>Example:</p>
+<pre><code class="language-moon">font = Font l.data
+shape = font\getTextToShape l.text_stripped
+</code></pre>
 <h2 id="utility-modules">Utility Modules</h2>
-<p>These modules support the higher-level workflows above.</p>
 <h3 id="math"><code>Math</code></h3>
-<p>Core numeric helpers used by geometry, interpolation, and frame-aware calculations.</p>
+<p>Small numeric helpers used throughout interpolation and geometry code.</p>
 <h4 id="mathsigna"><code>Math.sign(a)</code></h4>
-<p>Returns <code>1</code>, <code>0</code>, or <code>-1</code> depending on the sign of the number.</p>
+<ul>
+<li><code>a</code>: number to inspect.</li>
+</ul>
 <h4 id="mathclampa-b-c"><code>Math.clamp(a, b, c)</code></h4>
-<p>Limits <code>a</code> so it stays inside the interval <code>[b, c]</code>.</p>
+<p>Clamps a value into an interval.</p>
+<ul>
+<li><code>a</code>: value being clamped.</li>
+<li><code>b</code>: lower bound.</li>
+<li><code>c</code>: upper bound.</li>
+</ul>
 <h4 id="mathrounda-dec-3"><code>Math.round(a, dec = 3)</code></h4>
-<p>Rounds a number to a given number of decimal places.</p>
+<p>Rounds a number.</p>
+<ul>
+<li><code>a</code>: number to round.</li>
+<li><code>dec</code>: decimal precision.</li>
+</ul>
 <h4 id="mathlerpt-a-b"><code>Math.lerp(t, a, b)</code></h4>
-<p>Linearly interpolates between <code>a</code> and <code>b</code>, clamping <code>t</code> to the <code>0..1</code> range.</p>
-<pre><code class="language-moon">t = Math.clamp progress, 0, 1
-x = Math.lerp t, x1, x2
-</code></pre>
+<p>Linearly interpolates between two values.</p>
+<ul>
+<li><code>t</code>: interpolation factor.</li>
+<li><code>a</code>: start value.</li>
+<li><code>b</code>: end value.</li>
+</ul>
 <h4 id="mathrandoma-b"><code>Math.random(a, b)</code></h4>
-<p>Returns a random number between <code>a</code> and <code>b</code>.</p>
+<p>Returns a random number inside the requested interval.</p>
+<ul>
+<li><code>a</code>: lower bound.</li>
+<li><code>b</code>: upper bound.</li>
+</ul>
 <h4 id="mathperlinnoisex-y-freq-depth-seed-2000"><code>Math.perlinNoise(x, y, freq, depth, seed = 2000)</code></h4>
-<p>Generates smooth procedural noise from a 2D coordinate.</p>
+<p>Generates procedural 2D noise.</p>
+<ul>
+<li><code>x</code>: sample x coordinate.</li>
+<li><code>y</code>: sample y coordinate.</li>
+<li><code>freq</code>: base frequency.</li>
+<li><code>depth</code>: number of octaves.</li>
+<li><code>seed</code>: random seed.</li>
+</ul>
 <h4 id="mathcubicrootsa-b-c-d-ep-1e-8"><code>Math.cubicRoots(a, b, c, d, ep = 1e-8)</code></h4>
-<p>Returns the real roots calculated for a cubic equation. This is mainly useful in curve-related internals.</p>
+<p>Returns the real roots of a cubic polynomial.</p>
+<ul>
+<li><code>a</code>, <code>b</code>, <code>c</code>, <code>d</code>: cubic polynomial coefficients.</li>
+<li><code>ep</code>: epsilon used when testing near-zero values.</li>
+</ul>
 <h3 id="table"><code>Table</code></h3>
-<p>Table and array helpers used when duplicating lines, building result lists, or editing parsed structures.</p>
-<h4 id="tableisemptytb"><code>Table.isEmpty(tb)</code></h4>
-<p>Returns whether the table has no entries.</p>
-<h4 id="tableshallowcopytb"><code>Table.shallowcopy(tb)</code></h4>
-<p>Creates a shallow copy of the table.</p>
-<h4 id="tabledeepcopytb"><code>Table.deepcopy(tb)</code></h4>
-<p>Creates a deep copy of the table, including nested tables.</p>
+<p>Helpers for copying and editing plain Lua arrays/tables.</p>
 <h4 id="tablecopytb-deepcopy-true"><code>Table.copy(tb, deepcopy = true)</code></h4>
-<p>Copies the table using deep copy by default.</p>
-<pre><code class="language-moon">copy = Table.copy line
-</code></pre>
+<ul>
+<li><code>tb</code>: source table.</li>
+<li><code>deepcopy</code>: when <code>true</code>, recursively copies nested tables.</li>
+</ul>
 <h4 id="tablepushtb"><code>Table.push(tb, ...)</code></h4>
-<p>Appends one or more values to the end of an array.</p>
-<h4 id="tablepoptb"><code>Table.pop(tb)</code></h4>
-<p>Removes and returns the last value of an array.</p>
-<h4 id="tablereversetb"><code>Table.reverse(tb)</code></h4>
-<p>Returns a reversed array copy.</p>
-<h4 id="tableshifttb"><code>Table.shift(tb)</code></h4>
-<p>Removes and returns the first value of an array.</p>
+<ul>
+<li><code>tb</code>: target array.</li>
+<li><code>...</code>: values appended to the end.</li>
+</ul>
 <h4 id="tableunshifttb"><code>Table.unshift(tb, ...)</code></h4>
-<p>Inserts one or more values at the beginning of an array.</p>
+<ul>
+<li><code>tb</code>: target array.</li>
+<li><code>...</code>: values inserted at the beginning.</li>
+</ul>
 <h4 id="tableslicetb-f-l-s"><code>Table.slice(tb, f, l, s)</code></h4>
-<p>Returns a sliced array built from the selected interval.</p>
-<h4 id="tablesplicetb-start-delete"><code>Table.splice(tb, start, delete, ...)</code></h4>
-<p>Removes and/or inserts values inside an array, similar to splice operations in other languages.</p>
+<ul>
+<li><code>tb</code>: source array.</li>
+<li><code>f</code>: first index.</li>
+<li><code>l</code>: last index.</li>
+<li><code>s</code>: step.</li>
+</ul>
+<h4 id="tablesplicetb-start-deletecount"><code>Table.splice(tb, start, deleteCount, ...)</code></h4>
+<ul>
+<li><code>tb</code>: array to edit.</li>
+<li><code>start</code>: starting index.</li>
+<li><code>deleteCount</code>: number of items to remove.</li>
+<li><code>...</code>: optional items to insert.</li>
+</ul>
 <h4 id="tableviewtb-table_name-table_unnamed-indent"><code>Table.view(tb, table_name = "table_unnamed", indent = "")</code></h4>
-<p>Returns a formatted string representation of a table for debugging and inspection.</p>
+<p>Formats a table for debugging.</p>
+<ul>
+<li><code>tb</code>: table to format.</li>
+<li><code>table_name</code>: label used in the formatted output.</li>
+<li><code>indent</code>: current indentation prefix.</li>
+</ul>
 <h3 id="util"><code>Util</code></h3>
-<p>Mixed helpers for string handling, ASS tag evaluation, interpolation, filesystem checks, and lightweight type checks.</p>
-<h4 id="utillmatchvalue-pattern"><code>Util.lmatch(value, pattern)</code></h4>
-<p>Returns the last match found for a pattern inside a string.</p>
+<p>Mixed helpers for string handling, ASS evaluation, interpolation, and filesystem checks.</p>
+<h4 id="utillmatchvalue-pattern-last-false"><code>Util.lmatch(value, pattern, last = false)</code></h4>
+<p>Returns the last match of a pattern.</p>
+<ul>
+<li><code>value</code>: source string.</li>
+<li><code>pattern</code>: Lua pattern to search.</li>
+<li><code>last</code>: internal recursion cursor.</li>
+</ul>
 <h4 id="utilheadtails-div"><code>Util.headTail(s, div)</code></h4>
 <p>Splits a string into the part before and after the first delimiter match.</p>
+<ul>
+<li><code>s</code>: source string.</li>
+<li><code>div</code>: separator pattern.</li>
+</ul>
 <h4 id="utilsplitbypatterns-div"><code>Util.splitByPattern(s, div)</code></h4>
-<p>Repeatedly splits a string by a delimiter pattern and returns all pieces.</p>
+<p>Splits a string repeatedly by a pattern.</p>
+<ul>
+<li><code>s</code>: source string.</li>
+<li><code>div</code>: separator pattern.</li>
+</ul>
 <h4 id="utilconvertcolormode-value"><code>Util.convertColor(mode, value)</code></h4>
-<p>Converts style-format colors into ASS tag color or alpha format.</p>
+<p>Converts between color encodings used by style data and ASS tags.</p>
+<ul>
+<li><code>mode</code>: conversion mode.</li>
+<li><code>value</code>: input color string.</li>
+</ul>
 <h4 id="utilgettimeinintervalcurrtime-t1-t2-accel-1"><code>Util.getTimeInInterval(currTime, t1, t2, accel = 1)</code></h4>
-<p>Returns a normalized interpolation time between <code>0</code> and <code>1</code> for a time interval.</p>
-<h4 id="utilgetalphainterpolationcurrtime-t1-t2-t3-t4-a1-a2-a3"><code>Util.getAlphaInterpolation(currTime, t1, t2, t3, t4, a1, a2, a3)</code></h4>
-<p>Computes alpha transitions across fade intervals.</p>
+<p>Returns normalized interpolation time in one interval.</p>
+<ul>
+<li><code>currTime</code>: current relative time.</li>
+<li><code>t1</code>: interval start.</li>
+<li><code>t2</code>: interval end.</li>
+<li><code>accel</code>: easing factor.</li>
+</ul>
+<h4 id="utilgetalphainterpolationcurrtime-t1-t2-t3-t4-a1-a2-a3-a-a3"><code>Util.getAlphaInterpolation(currTime, t1, t2, t3, t4, a1, a2, a3, a = a3)</code></h4>
+<p>Computes alpha progression across multiple fade segments.</p>
+<ul>
+<li><code>currTime</code>: current relative time.</li>
+<li><code>t1</code>, <code>t2</code>, <code>t3</code>, <code>t4</code>: fade boundary times.</li>
+<li><code>a1</code>, <code>a2</code>, <code>a3</code>: alpha values.</li>
+<li><code>a</code>: accumulator seed used internally.</li>
+</ul>
 <h4 id="utilgettagfadecurrtime-linedur-dec"><code>Util.getTagFade(currTime, lineDur, dec, ...)</code></h4>
-<p>Resolves the effective alpha value produced by <code>\fad</code> or <code>\fade</code> at a given time.</p>
+<p>Resolves the effective alpha produced by <code>\fad</code> or <code>\fade</code>.</p>
+<ul>
+<li><code>currTime</code>: current relative time.</li>
+<li><code>lineDur</code>: full line duration.</li>
+<li><code>dec</code>: base alpha already present before fade is applied.</li>
+<li><code>...</code>: values unpacked from <code>\fad</code> or <code>\fade</code>.</li>
+</ul>
 <h4 id="utilgettagtransformcurrtime-linedur"><code>Util.getTagTransform(currTime, lineDur, ...)</code></h4>
-<p>Resolves the effective interpolation factor used by a <code>\t(...)</code> transform at a given time.</p>
+<p>Resolves the interpolation factor of a <code>\t(...)</code>.</p>
+<ul>
+<li><code>currTime</code>: current relative time.</li>
+<li><code>lineDur</code>: full line duration.</li>
+<li><code>...</code>: parsed transform timing fields.</li>
+</ul>
 <h4 id="utilgettagmovecurrtime-linedur-x1-y1-x2-y2-t1-t2"><code>Util.getTagMove(currTime, lineDur, x1, y1, x2, y2, t1, t2)</code></h4>
-<p>Resolves the current <code>x</code> and <code>y</code> position produced by a <code>\move(...)</code> tag at a given time.</p>
+<p>Resolves the current position produced by <code>\move(...)</code>.</p>
+<ul>
+<li><code>currTime</code>: current relative time.</li>
+<li><code>lineDur</code>: full line duration.</li>
+<li><code>x1</code>, <code>y1</code>: move start position.</li>
+<li><code>x2</code>, <code>y2</code>: move end position.</li>
+<li><code>t1</code>, <code>t2</code>: optional move interval.</li>
+</ul>
 <h4 id="utilinterpolationt-05-interpolationtype-auto"><code>Util.interpolation(t = 0.5, interpolationType = "auto", ...)</code></h4>
-<p>Interpolates numbers, alpha values, colors, shapes, or tables. In <code>"auto"</code> mode it detects the value type automatically.</p>
+<p>Interpolates values of several supported types.</p>
+<ul>
+<li><code>t</code>: interpolation factor.</li>
+<li><code>interpolationType</code>: explicit mode such as <code>"number"</code>, <code>"alpha"</code>, <code>"color"</code>, <code>"shape"</code>, <code>"table"</code>, or <code>"auto"</code>.</li>
+<li><code>...</code>: values to interpolate.</li>
+</ul>
 <h4 id="utilfixpathpath"><code>Util.fixPath(path)</code></h4>
-<p>Normalizes path separators for the current operating system.</p>
-<h4 id="utilfileexistdir-isdir"><code>Util.fileExist(dir, isDir)</code></h4>
+<p>Normalizes filesystem path separators.</p>
+<ul>
+<li><code>path</code>: filesystem path to normalize.</li>
+</ul>
+<h4 id="utilfileexistdir-isdir-false"><code>Util.fileExist(dir, isDir = false)</code></h4>
 <p>Checks whether a file or directory exists.</p>
+<ul>
+<li><code>dir</code>: path to test.</li>
+<li><code>isDir</code>: when <code>true</code>, checks directory existence.</li>
+</ul>
 <h4 id="utilisblankt"><code>Util.isBlank(t)</code></h4>
-<p>Returns whether a line or string should be treated as blank.</p>
+<p>Checks whether a string or line-like value is effectively blank.</p>
+<ul>
+<li><code>t</code>: string or line-like value.</li>
+</ul>
 <h4 id="utilisshapet"><code>Util.isShape(t)</code></h4>
-<p>Returns whether a text value looks like an ASS drawing shape.</p>
+<p>Checks whether a string or line-like value looks like ASS drawing data.</p>
+<ul>
+<li><code>t</code>: string or line-like value.</li>
+</ul>
 <h4 id="utilcheckclasscls-name"><code>Util.checkClass(cls, name)</code></h4>
-<p>Checks whether an object is an instance of a given class name.</p>
+<p>Checks whether an object is an instance of the expected class.</p>
+<ul>
+<li><code>cls</code>: object or instance to inspect.</li>
+<li><code>name</code>: expected class name.</li>
+</ul>
 <h3 id="utf8"><code>UTF8</code></h3>
-<p>UTF-8 aware text helpers used when a macro must work with characters rather than raw bytes.</p>
+<p>UTF-8 helpers for character-aware iteration.</p>
 <h4 id="utf8s"><code>UTF8(s)</code></h4>
-<p>Creates a UTF-8 helper around a string.</p>
-<pre><code class="language-moon">utf = UTF8 l.text_stripped
-</code></pre>
+<ul>
+<li><code>s</code>: source UTF-8 string.</li>
+</ul>
 <h4 id="utf8charrangec-i"><code>UTF8.charrange(c, i)</code></h4>
-<p>Returns the byte width of the character starting at position <code>i</code>.</p>
+<ul>
+<li><code>c</code>: source string.</li>
+<li><code>i</code>: byte index of the character start.</li>
+</ul>
 <h4 id="utf8charcodepointc"><code>UTF8.charcodepoint(c)</code></h4>
-<p>Returns the Unicode codepoint of one UTF-8 character.</p>
+<ul>
+<li><code>c</code>: one UTF-8 character.</li>
+</ul>
 <h4 id="utfchars"><code>utf\chars()</code></h4>
-<p>Iterates through the string character by character in UTF-8 aware form.</p>
-<pre><code class="language-moon">for i, char in utf\chars!
-    -- safe character iteration
-</code></pre>
+<p>Iterates over UTF-8 characters.</p>
 <h4 id="utflen"><code>utf\len()</code></h4>
-<p>Returns the number of UTF-8 characters in the string.</p>
-<h2 id="how-this-module-is-usually-used">How This Module Is Usually Used</h2>
-<p>The most common library workflow starts here:</p>
-<ol>
-<li>build an <code>Ass</code> context from the current subtitle selection</li>
-<li>use <code>Aegi.display</code> and <code>Config</code> to collect user options</li>
-<li>parse or transform lines through <code>Line</code>, <code>Text</code>, <code>Tags</code>, and <code>Path</code></li>
-<li>write the resulting lines back with <code>ass\insertLine</code>, <code>ass\replaceLine</code>, or <code>ass\removeLine</code></li>
-</ol>
-<p>That is why <code>ILL.ILL</code> is the real foundation of the project, not just a bag of helpers.</p></div>
+<p>Returns the UTF-8 character count.</p></div>
             </div>
         </div>
 

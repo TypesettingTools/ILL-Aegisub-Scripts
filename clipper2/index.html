@@ -158,128 +158,211 @@
 
 <h1 id="clipper2-module-reference">Clipper2 Module Reference</h1>
 <h2 id="what-this-module-is">What This Module Is</h2>
-<p><code>clipper2.clipper2</code> is the low-level native geometry backend used by <code>Path</code> for boolean operations and offsetting.</p>
-<p>Most users of the library do not need to call it directly. In normal macro code, you usually stay at the <code>Path</code> level:</p>
-<pre><code class="language-moon">result = shapePath\unite otherPath
-outline = shapePath\offset 3
-</code></pre>
-<p>This page matters when you want to understand what <code>Path</code> is doing internally or when you need to work directly with the native path containers.</p>
+<p><code>clipper2.clipper2</code> is the low-level native geometry backend used by <code>ILL.Path</code> for boolean operations and offsetting.</p>
+<p>Most macro code should stay at the <code>Path</code> level, but this module is useful when you want direct access to the native containers that power clipping and inflation.</p>
 <h2 id="conventions">Conventions</h2>
 <pre><code class="language-moon">CPP = require &quot;clipper2.clipper2&quot;
 </code></pre>
-<p>When this page shows <code>CPP.path()</code> or <code>CPP.paths()</code>, it is using the constructor form seen from MoonScript user code.</p>
+<p>The wrapper exposes constructor helpers as <code>CPP.path.new!</code> and <code>CPP.paths.new!</code>.</p>
 <h2 id="module-surface">Module Surface</h2>
-<p>The module exposes:</p>
-<ul>
-<li><code>CPP.version</code></li>
-<li><code>CPP.ffiversion()</code></li>
-<li><code>CPP.viewError()</code></li>
-<li><code>CPP.setPrecision(n = 3)</code></li>
-<li><code>CPP.path(...)</code></li>
-<li><code>CPP.paths(...)</code></li>
-</ul>
 <h3 id="cppversion"><code>CPP.version</code></h3>
-<p>Version string for the Lua-side wrapper.</p>
+<p>Lua-side wrapper version string.</p>
 <h3 id="cppffiversion"><code>CPP.ffiversion()</code></h3>
-<p>Returns the native Clipper2 version.</p>
+<p>Returns the native Clipper2 version string from the loaded library.</p>
 <h3 id="cppviewerror"><code>CPP.viewError()</code></h3>
-<p>Returns the last native error message.</p>
-<p>Use this when a boolean or offset operation fails.</p>
+<p>Returns the last native error message reported by the backend.</p>
 <h3 id="cppsetprecisionn-3"><code>CPP.setPrecision(n = 3)</code></h3>
-<p>Sets the global numeric precision used by the binding.</p>
+<p>Sets the global numeric precision used by the native binding.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>n</code>: number of decimal digits preserved by the backend.</li>
+</ul>
 <h2 id="enums">Enums</h2>
-<p>String names are accepted for the native enums.</p>
+<p>The wrapper accepts either the numeric enum value or the string name.</p>
 <h3 id="fillrule"><code>FillRule</code></h3>
 <ul>
-<li><code>"even_odd"</code></li>
-<li><code>"non_zero"</code></li>
-<li><code>"positive"</code></li>
-<li><code>"negative"</code></li>
+<li><code>"even_odd"</code> = <code>0</code></li>
+<li><code>"non_zero"</code> = <code>1</code></li>
+<li><code>"positive"</code> = <code>2</code></li>
+<li><code>"negative"</code> = <code>3</code></li>
 </ul>
 <h3 id="jointype"><code>JoinType</code></h3>
 <ul>
-<li><code>"square"</code></li>
-<li><code>"round"</code></li>
-<li><code>"miter"</code></li>
+<li><code>"square"</code> = <code>0</code></li>
+<li><code>"round"</code> = <code>1</code></li>
+<li><code>"miter"</code> = <code>2</code></li>
 </ul>
 <h3 id="endtype"><code>EndType</code></h3>
 <ul>
-<li><code>"polygon"</code></li>
-<li><code>"joined"</code></li>
-<li><code>"butt"</code></li>
-<li><code>"square"</code></li>
-<li><code>"round"</code></li>
+<li><code>"polygon"</code> = <code>0</code></li>
+<li><code>"joined"</code> = <code>1</code></li>
+<li><code>"butt"</code> = <code>2</code></li>
+<li><code>"square"</code> = <code>3</code></li>
+<li><code>"round"</code> = <code>4</code></li>
 </ul>
 <h2 id="cpppath"><code>CPP.path</code></h2>
-<p><code>CPP.path</code> is one native path, that is, one ordered point list.</p>
-<h3 id="cpppath_1"><code>CPP.path()</code></h3>
+<p><code>CPP.path</code> is one native path, meaning one ordered point list.</p>
+<h3 id="cpppathnew"><code>CPP.path.new()</code></h3>
 <p>Creates an empty native path.</p>
-<pre><code class="language-moon">p = CPP.path!
-</code></pre>
 <h3 id="pathaddmode-line"><code>path\add(mode = "line", ...)</code></h3>
 <p>Adds geometry to the path.</p>
-<p>Accepted forms:</p>
+<p>Accepted call shapes:</p>
 <ul>
-<li><code>"line", x, y</code></li>
-<li><code>"line", reduce, x1, y1, x2, y2</code></li>
-<li><code>"bezier", reduce, x1, y1, x2, y2, x3, y3, x4, y4</code></li>
+<li><code>path\add "line", x, y</code></li>
+<li><code>path\add "line", reduce, x1, y1, x2, y2</code></li>
+<li><code>path\add "bezier", reduce, x1, y1, x2, y2, x3, y3, x4, y4</code></li>
+</ul>
+<p>Argument meaning:</p>
+<ul>
+<li><code>mode</code>: <code>"line"</code> adds either one point or one flattened line segment, and <code>"bezier"</code> adds one flattened cubic bezier.</li>
+<li><code>reduce</code>: flatten density passed to the native line/bezier flattener. Larger values reduce point count.</li>
+<li><code>x</code>, <code>y</code>: point coordinates for the single-point form.</li>
+<li><code>x1</code>, <code>y1</code>: line or bezier start point.</li>
+<li><code>x2</code>, <code>y2</code>: line end point or first bezier control point.</li>
+<li><code>x3</code>, <code>y3</code>: second bezier control point.</li>
+<li><code>x4</code>, <code>y4</code>: bezier end point.</li>
 </ul>
 <h3 id="pathpush"><code>path\push(...)</code></h3>
-<p>Appends one or more point tables in <code>{x: ..., y: ...}</code> form.</p>
-<pre><code class="language-moon">p\push {x: 0, y: 0}, {x: 100, y: 0}, {x: 100, y: 100}, {x: 0, y: 100}
-</code></pre>
+<p>Appends one or more point-like tables.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>...</code>: tables exposing <code>x</code> and <code>y</code>, such as <code>{x: 0, y: 0}</code> or <code>Point</code> objects from <code>ILL</code>.</li>
+</ul>
 <h3 id="pathlen"><code>path\len()</code></h3>
-<p>Returns the number of points.</p>
+<p>Returns the number of stored points.</p>
 <h3 id="pathgeti-1"><code>path\get(i = 1)</code></h3>
-<p>Returns one point from the native path.</p>
+<p>Returns one native point.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>i</code>: 1-based point index. Values below <code>1</code> are clamped to the first point.</li>
+</ul>
 <h3 id="pathseti-1-x-y"><code>path\set(i = 1, x, y)</code></h3>
-<p>Replaces one point.</p>
-<h3 id="pathmovex-y"><code>path\move(x, y)</code></h3>
-<p>Returns a translated copy.</p>
+<p>Replaces one point in place.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>i</code>: 1-based point index.</li>
+<li><code>x</code>: new x coordinate.</li>
+<li><code>y</code>: new y coordinate.</li>
+</ul>
+<h3 id="pathmovedx-dy"><code>path\move(dx, dy)</code></h3>
+<p>Returns a translated copy of the path.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>dx</code>: horizontal offset.</li>
+<li><code>dy</code>: vertical offset.</li>
+</ul>
 <h3 id="pathflattenreduce-2"><code>path\flatten(reduce = 2)</code></h3>
-<p>Returns a discretized copy.</p>
+<p>Returns a flattened copy of the path.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>reduce</code>: density divisor used by the native flattening routine.</li>
+</ul>
 <h3 id="pathmapfn"><code>path\map(fn)</code></h3>
-<p>Maps each point through a callback.</p>
+<p>Maps every point through a callback and mutates the path in place.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>fn</code>: callback receiving <code>(x, y)</code> and optionally returning replacement <code>(x, y)</code>.</li>
+</ul>
 <h2 id="cpppaths"><code>CPP.paths</code></h2>
-<p><code>CPP.paths</code> is a collection of native paths. This is the object shape used by the boolean engine.</p>
-<h3 id="cpppaths_1"><code>CPP.paths()</code></h3>
+<p><code>CPP.paths</code> is a collection of native paths. This is the container used by the boolean engine.</p>
+<h3 id="cpppathsnew"><code>CPP.paths.new()</code></h3>
 <p>Creates an empty path collection.</p>
-<pre><code class="language-moon">subject = CPP.paths!
-clip = CPP.paths!
-</code></pre>
-<h3 id="pathsaddpath-and-pathspush"><code>paths\add(path)</code> and <code>paths\push(...)</code></h3>
-<p>Add one or more native paths to the collection.</p>
-<h3 id="pathslen-pathsgeti-1-and-pathsseti-1-path"><code>paths\len()</code>, <code>paths\get(i = 1)</code>, and <code>paths\set(i = 1, path)</code></h3>
-<p>Inspect or replace paths in the collection.</p>
-<h3 id="pathsmovex-y-and-pathsflattenreduce-2"><code>paths\move(x, y)</code> and <code>paths\flatten(reduce = 2)</code></h3>
-<p>Return transformed copies of the full collection.</p>
+<h3 id="pathsaddpath"><code>paths\add(path)</code></h3>
+<p>Adds one native path to the collection.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>path</code>: <code>CPP.path</code> instance to append.</li>
+</ul>
+<h3 id="pathspush"><code>paths\push(...)</code></h3>
+<p>Adds one or more native paths.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>...</code>: <code>CPP.path</code> instances.</li>
+</ul>
+<h3 id="pathslen"><code>paths\len()</code></h3>
+<p>Returns the number of contained paths.</p>
+<h3 id="pathsgeti-1"><code>paths\get(i = 1)</code></h3>
+<p>Returns one contained path.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>i</code>: 1-based path index. Values below <code>1</code> are clamped to the first path.</li>
+</ul>
+<h3 id="pathsseti-1-path"><code>paths\set(i = 1, path)</code></h3>
+<p>Replaces one contained path.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>i</code>: 1-based path index.</li>
+<li><code>path</code>: replacement <code>CPP.path</code> instance.</li>
+</ul>
+<h3 id="pathsmovedx-dy"><code>paths\move(dx, dy)</code></h3>
+<p>Returns a translated copy of the full collection.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>dx</code>: horizontal offset.</li>
+<li><code>dy</code>: vertical offset.</li>
+</ul>
+<h3 id="pathsflattenreduce-2"><code>paths\flatten(reduce = 2)</code></h3>
+<p>Returns a flattened copy of every contained path.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>reduce</code>: density divisor used while flattening.</li>
+</ul>
 <h3 id="pathsmapfn"><code>paths\map(fn)</code></h3>
-<p>Applies point remapping to every contained path.</p>
+<p>Applies a point-mapping callback to every contained path.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>fn</code>: callback receiving <code>(x, y)</code> and optionally returning replacement <code>(x, y)</code>.</li>
+</ul>
 <h2 id="boolean-and-offset-operations">Boolean And Offset Operations</h2>
-<p>These methods are the low-level equivalents of the higher-level <code>Path</code> operations.</p>
+<p>These are the backend equivalents of the higher-level <code>Path</code> methods.</p>
 <h3 id="pathsinflatedelta-jt-0-et-0-mt-2-at-0"><code>paths\inflate(delta, jt = 0, et = 0, mt = 2, at = 0)</code></h3>
-<p>Offsets the path collection and returns a new collection.</p>
-<p>This is the native operation behind <code>Path\offset</code>.</p>
-<pre><code class="language-moon">outline = subject\inflate 4, &quot;round&quot;, &quot;polygon&quot;, 2, 0.25
-</code></pre>
+<p>Offsets the path collection and returns a new <code>CPP.paths</code>.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>delta</code>: offset distance. Positive expands and negative contracts.</li>
+<li><code>jt</code>: join type as numeric enum or string name.</li>
+<li><code>et</code>: end type as numeric enum or string name.</li>
+<li><code>mt</code>: miter limit used when <code>jt</code> is miter.</li>
+<li><code>at</code>: arc tolerance used for round joins.</li>
+</ul>
 <h3 id="pathsintersectionpaths-fr-1"><code>paths\intersection(paths, fr = 1)</code></h3>
 <p>Returns the overlap between two path collections.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>paths</code>: clip collection.</li>
+<li><code>fr</code>: fill rule as numeric enum or string name.</li>
+</ul>
 <h3 id="pathsunionpaths-fr-1"><code>paths\union(paths, fr = 1)</code></h3>
 <p>Returns the merged area of two path collections.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>paths</code>: second collection to merge with the subject.</li>
+<li><code>fr</code>: fill rule as numeric enum or string name.</li>
+</ul>
 <h3 id="pathsdifferencepaths-fr-1"><code>paths\difference(paths, fr = 1)</code></h3>
 <p>Subtracts the second collection from the first.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>paths</code>: clip collection subtracted from the subject.</li>
+<li><code>fr</code>: fill rule as numeric enum or string name.</li>
+</ul>
 <h3 id="pathsxorpaths-fr-1"><code>paths\xor(paths, fr = 1)</code></h3>
 <p>Returns the non-overlapping parts of both collections.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>paths</code>: second collection.</li>
+<li><code>fr</code>: fill rule as numeric enum or string name.</li>
+</ul>
 <h2 id="example-workflow">Example Workflow</h2>
 <pre><code class="language-moon">CPP = require &quot;clipper2.clipper2&quot;
 
-subject = CPP.paths!
-clip = CPP.paths!
+subject = CPP.paths.new!
+clip = CPP.paths.new!
 
-base = CPP.path!
+base = CPP.path.new!
 base\push {x: 0, y: 0}, {x: 120, y: 0}, {x: 120, y: 80}, {x: 0, y: 80}
 
-hole = CPP.path!
+hole = CPP.path.new!
 hole\push {x: 40, y: 20}, {x: 100, y: 20}, {x: 100, y: 60}, {x: 40, y: 60}
 
 subject\add base
@@ -289,7 +372,7 @@ cut = subject\difference clip, &quot;non_zero&quot;
 outline = cut\inflate 3, &quot;round&quot;, &quot;polygon&quot;, 2, 0.25
 </code></pre>
 <h2 id="when-to-stay-at-the-path-level-instead">When To Stay At The <code>Path</code> Level Instead</h2>
-<p>Prefer <code>Path</code> unless you specifically need native containers or backend-level control. <code>Path</code> is the intended public geometry layer of the library; <code>clipper2.clipper2</code> is the engine underneath it.</p></div>
+<p>Prefer <code>ILL.Path</code> unless you specifically need the native containers or want to work directly with the backend enum and memory model. <code>clipper2.clipper2</code> is the engine underneath the higher-level geometry API, not the most ergonomic public entry point.</p></div>
             </div>
         </div>
 

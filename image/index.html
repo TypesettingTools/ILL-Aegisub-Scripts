@@ -121,39 +121,15 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-bs-level="2"><a href="#imgfilename" class="nav-link">IMG(filename)</a>
+            <li class="nav-item" data-bs-level="2"><a href="#img" class="nav-link">IMG</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-bs-level="2"><a href="#imgsetinfosframe-1" class="nav-link">img\setInfos(frame = 1)</a>
+            <li class="nav-item" data-bs-level="2"><a href="#tracer" class="nav-link">Tracer</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-bs-level="2"><a href="#imgtoassreduce-frame" class="nav-link">img\toAss(reduce, frame)</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-bs-level="2"><a href="#tracercheckoptionsoptions" class="nav-link">Tracer.checkoptions(options = {})</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-bs-level="2"><a href="#tracerimagedatatotracedataimgd-options" class="nav-link">Tracer.imagedataToTracedata(imgd, options)</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-bs-level="2"><a href="#tracergetasslinestracedata-options" class="nav-link">Tracer.getAssLines(tracedata, options)</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-bs-level="2"><a href="#potraceimg-frame-turnpolicy-turdsize-optcurve-alphamax-opttolerance" class="nav-link">Potrace(img, frame, turnpolicy, turdsize, optcurve, alphamax, opttolerance)</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-bs-level="2"><a href="#potprocess" class="nav-link">pot\process()</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-bs-level="2"><a href="#potgetshapedec-3" class="nav-link">pot\getShape(dec = 3)</a>
+            <li class="nav-item" data-bs-level="2"><a href="#potrace" class="nav-link">Potrace</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -170,193 +146,215 @@
 
 <h1 id="ill-image-module-reference">ILL Image Module Reference</h1>
 <h2 id="what-this-module-is">What This Module Is</h2>
-<p><code>ILL.IMG</code> is the image-processing side of the library. In practice, there are three public workflows that matter:</p>
+<p><code>ILL.IMG</code> is the image-processing side of the library. In practice, there are three workflows that matter:</p>
 <ul>
-<li>load an image and convert it directly to ASS pixels with <code>IMG</code></li>
-<li>vectorize a colored image with <code>Tracer</code></li>
-<li>vectorize a monochrome image with <code>Potrace</code></li>
+<li>decode an image and convert it directly into ASS pixel lines with <code>IMG</code></li>
+<li>trace a colored image into layered vector output with <code>Tracer</code></li>
+<li>trace a monochrome image into one vector shape with <code>Potrace</code></li>
 </ul>
-<p>This page focuses on those public entry points and how they are used in the project's own macros.</p>
 <h2 id="conventions-used-in-examples">Conventions Used In Examples</h2>
 <pre><code class="language-moon">IMGMod = require &quot;ILL.IMG&quot;
 {:IMG, :Tracer, :Potrace} = IMGMod
 </code></pre>
-<p>Examples on this page are adapted from <a href="/c:/Users/klsru/OneDrive/Documents/github/ILL-Aegisub-Scripts/macros/ILL.MakeImage.moon"><code>ILL.MakeImage.moon</code></a>.</p>
-<h2 id="imgfilename"><code>IMG(filename)</code></h2>
+<h2 id="img"><code>IMG</code></h2>
+<p><code>IMG</code> is the decode-and-export entry point. It loads the file immediately and stores the decoded metadata in <code>img.infos</code>.</p>
+<h3 id="imgfilename"><code>IMG(filename)</code></h3>
 <p>Creates an image object and decodes the file immediately.</p>
+<p>Arguments:</p>
 <ul>
-<li>Use this when you want pixel-based conversion or when you want raw decoded frames to feed into <code>Tracer</code> or <code>Potrace</code>.</li>
-<li>Accepted extensions are <code>png</code>, <code>jpg</code>/<code>jpeg</code>, <code>bmp</code>, and <code>gif</code>.</li>
-<li>The constructor stores the decoded result in <code>img.infos</code> and also records <code>img.extension</code>.</li>
-<li>If the file type is unsupported, it raises an error instead of returning a partially usable object.</li>
+<li><code>filename</code>: path to a supported image file.</li>
 </ul>
-<h3 id="example">Example</h3>
-<pre><code class="language-moon">filename = aegisub.dialog.open &quot;Open Image&quot;, &quot;&quot;, &quot;&quot;, &quot;Images|*.png;*.jpg;*.jpeg;*.bmp;*.gif;&quot;, false, true
-img = IMG filename
+<p>Supported formats in the current implementation:</p>
+<ul>
+<li><code>png</code></li>
+<li><code>jpg</code> / <code>jpeg</code> / <code>jpe</code> / <code>jfif</code> / <code>jfi</code></li>
+<li><code>bmp</code> / <code>dib</code></li>
+<li><code>gif</code></li>
+</ul>
+<p>Example:</p>
+<pre><code class="language-moon">img = IMG &quot;C:/work/logo.png&quot;
 </code></pre>
-<h2 id="imgsetinfosframe-1"><code>img\setInfos(frame = 1)</code></h2>
-<p>Promotes one decoded frame into the fields the rest of the library expects to read directly.</p>
+<h3 id="imgsetinfosframe-1"><code>img\setInfos(frame = 1)</code></h3>
+<p>Promotes one decoded frame into the fields the rest of the API reads directly: <code>img.width</code>, <code>img.height</code>, and <code>img.data</code>.</p>
+<p>For GIFs, this also exposes frame-local <code>img.delayMs</code>, <code>img.x</code>, and <code>img.y</code>.</p>
+<p>Arguments:</p>
 <ul>
-<li>For static images, it copies the decoded image into <code>img.width</code>, <code>img.height</code>, and <code>img.data</code>.</li>
-<li>For GIFs, it selects one frame from <code>img.infos.frames</code> and also exposes <code>img.delayMs</code>, <code>img.x</code>, and <code>img.y</code>.</li>
-<li>Call this before reading <code>img.width</code>, <code>img.height</code>, or <code>img.data</code> yourself.</li>
+<li><code>frame</code>: 1-based GIF frame index. Ignored for static images.</li>
 </ul>
-<h3 id="example_1">Example</h3>
+<p>Example:</p>
 <pre><code class="language-moon">img = IMG filename
-img\setInfos!
+img\setInfos 1
 
 width = img.width
 height = img.height
 pixels = img.data
 </code></pre>
-<h2 id="imgtoassreduce-frame"><code>img\toAss(reduce, frame)</code></h2>
-<p>Converts the image into ASS <code>\p1</code> drawing lines.</p>
+<h3 id="imgtoassreduce-nil-frame-1"><code>img\toAss(reduce = nil, frame = 1)</code></h3>
+<p>Converts the decoded image into ASS <code>\p1</code> drawing lines.</p>
+<p>This is the lowest-level raster export in the module and is what the pixel mode of <code>Make Image</code> is built on.</p>
+<p>Arguments:</p>
 <ul>
-<li><code>reduce = false</code> or <code>nil</code> generates one 1x1 rectangle per visible pixel.</li>
-<li><code>reduce = true</code> merges horizontally adjacent pixels that share the same color and alpha.</li>
-<li><code>reduce = "oneLine"</code> does the same reduction, but collapses all rows into a single ASS line.</li>
-<li>Transparent pixels are skipped.</li>
-<li>The generated lines already contain a ready-to-use prefix with <code>\an7</code>, <code>\pos</code>, <code>\bord0</code>, <code>\shad0</code>, <code>\frz0</code>, and <code>\p1</code>.</li>
+<li><code>reduce</code>: <code>nil</code> or <code>false</code> emits one rectangle per visible pixel, <code>true</code> merges horizontal runs, and <code>"oneLine"</code> also collapses every row into a single subtitle line.</li>
+<li><code>frame</code>: GIF frame index to convert.</li>
 </ul>
-<p>This is the method used by the <code>Make Image / Pixels</code> macro.</p>
-<h3 id="example_2">Example</h3>
+<p>Behavior notes:</p>
+<ul>
+<li>fully transparent pixels are skipped</li>
+<li>generated lines already contain a usable prefix with <code>\an7</code>, <code>\pos</code>, <code>\bord0</code>, <code>\shad0</code>, and <code>\p1</code></li>
+<li>reduction only merges horizontal neighbors with the same color and alpha</li>
+</ul>
+<p>Example:</p>
 <pre><code class="language-moon">img = IMG filename
+assLines = img\toAss true
 
-asslines = img\toAss true
-for pixel in *asslines
+for pixel in *assLines
   line = Table.copy sub[activeLine]
   line.isShape = true
   line.shape = pixel\gsub &quot;}{&quot;, &quot;&quot;
   ass\insertLine line, activeLine
 </code></pre>
-<h2 id="tracercheckoptionsoptions"><code>Tracer.checkoptions(options = {})</code></h2>
+<h2 id="tracer"><code>Tracer</code></h2>
+<p><code>Tracer</code> is the colored-vector workflow. It quantizes colors, scans connected regions, traces outlines, and exports layered ASS drawings.</p>
+<h3 id="tracercheckoptionsoptions"><code>Tracer.checkoptions(options = {})</code></h3>
 <p>Normalizes a tracing options table.</p>
+<p>Use this first when you are building tracing settings manually instead of going through the macro UI.</p>
+<p>Arguments:</p>
 <ul>
-<li>If you pass a preset name as a string, it resolves it through <code>Tracer.optionpresets</code>.</li>
-<li>If you pass a partial table, it fills in whatever is missing from the default preset.</li>
-<li>Use this whenever you build tracing options yourself instead of relying on the macro UI.</li>
+<li><code>options</code>: preset name string or partial options table.</li>
 </ul>
-<h3 id="example_3">Example</h3>
+<p>Important fields recognized by the tracer:</p>
+<ul>
+<li><code>ltres</code>: line-fitting error tolerance.</li>
+<li><code>qtres</code>: quadratic/spline fitting tolerance.</li>
+<li><code>pathomit</code>: minimum path size retained after scan.</li>
+<li><code>rightangleenhance</code>: preserves sharper corners during internode processing.</li>
+<li><code>colorsampling</code>: palette sampling mode.</li>
+<li><code>numberofcolors</code>: target palette size.</li>
+<li><code>mincolorratio</code>: minimum palette ratio kept during quantization.</li>
+<li><code>colorquantcycles</code>: refinement passes for quantization.</li>
+<li><code>layering</code>: layer extraction mode.</li>
+<li><code>strokewidth</code>: stroke width used during ASS export.</li>
+<li><code>scale</code>: exported coordinate scale.</li>
+<li><code>roundcoords</code>: coordinate rounding precision during export.</li>
+<li><code>blurradius</code>: blur radius applied before quantization.</li>
+<li><code>blurdelta</code>: blur sensitivity threshold.</li>
+<li><code>pal</code>: optional fixed palette.</li>
+</ul>
+<p>Example:</p>
 <pre><code class="language-moon">preset = Tracer.checkoptions {
+  numberofcolors: 16
+  pathomit: 8
   ltres: 1
   qtres: 1
-  pathomit: 8
-  colorsampling: 2
-  numberofcolors: 16
-  layering: 0
 }
 </code></pre>
-<h2 id="tracerimagedatatotracedataimgd-options"><code>Tracer.imagedataToTracedata(imgd, options)</code></h2>
-<p>Runs the full color-tracing pipeline and returns an intermediate traced representation.</p>
+<h3 id="tracerimagedatatotracedataimgd-options"><code>Tracer.imagedataToTracedata(imgd, options)</code></h3>
+<p>Runs the color-tracing pipeline and returns the intermediate traced representation.</p>
+<p>This is not final ASS yet. The result is meant to be passed to <code>Tracer.getAssLines</code>.</p>
+<p>Arguments:</p>
 <ul>
-<li><code>imgd</code> is any object with <code>width</code>, <code>height</code>, and <code>data</code>, so you can pass either <code>img</code> after <code>img\setInfos!</code> or a GIF frame object from <code>img.infos.frames[i]</code>.</li>
-<li>Internally this performs color quantization, layer extraction, path scanning, internode generation, and spline fitting.</li>
-<li>The result is not final ASS yet. It is a structured traced object meant to be consumed by <code>Tracer.getAssLines</code>.</li>
+<li><code>imgd</code>: image-like object with <code>width</code>, <code>height</code>, and <code>data</code>.</li>
+<li><code>options</code>: normalized tracer options, usually from <code>Tracer.checkoptions</code>.</li>
 </ul>
 <p>The returned object contains:</p>
 <ul>
-<li><code>layers</code>: traced path data grouped by palette layer</li>
-<li><code>palette</code>: final color palette used in quantization</li>
+<li><code>layers</code></li>
+<li><code>palette</code></li>
 <li><code>width</code></li>
 <li><code>height</code></li>
 </ul>
-<h3 id="example_4">Example</h3>
+<p>Example:</p>
 <pre><code class="language-moon">img = IMG filename
 img\setInfos!
 
-preset = Tracer.checkoptions &quot;detailed&quot;
-tracedata = Tracer.imagedataToTracedata img, preset
+options = Tracer.checkoptions &quot;default&quot;
+tracedata = Tracer.imagedataToTracedata img, options
 </code></pre>
-<h2 id="tracergetasslinestracedata-options"><code>Tracer.getAssLines(tracedata, options)</code></h2>
-<p>Converts traced layer data into final ASS drawing lines.</p>
+<h3 id="tracergetasslinestracedata-options"><code>Tracer.getAssLines(tracedata, options)</code></h3>
+<p>Converts traced layer data into ready-to-insert ASS drawing lines.</p>
+<p>This is the final export stage of the color tracer.</p>
+<p>Arguments:</p>
 <ul>
-<li>Shapes with the same color/alpha combination are merged into fewer ASS lines.</li>
-<li>The result is ready to insert into subtitle lines.</li>
-<li>This is the last step used by the <code>Make Image / Image Tracer</code> macro before insertion into the script.</li>
+<li><code>tracedata</code>: result of <code>Tracer.imagedataToTracedata</code>.</li>
+<li><code>options</code>: tracer options used to export coordinates and style.</li>
 </ul>
-<h3 id="example_5">Example</h3>
+<p>Behavior notes:</p>
+<ul>
+<li>output is already grouped by traced color layers</li>
+<li>each string is ready to insert into subtitle lines</li>
+<li>the options still matter here because export scale, rounding, and stroke behavior are applied at this stage</li>
+</ul>
+<p>Example:</p>
 <pre><code class="language-moon">img = IMG filename
 img\setInfos!
 
-preset = Tracer.checkoptions &quot;default&quot;
-tracedata = Tracer.imagedataToTracedata img, preset
-asslines = Tracer.getAssLines tracedata, preset
-
-for trace in *asslines
-  line = Table.copy sub[activeLine]
-  line.isShape = true
-  line.tags = ILL.Tags trace\match &quot;%b{}&quot;
-  line.shape = trace\gsub &quot;%b{}&quot;, &quot;&quot;
-  ass\insertLine line, activeLine
+options = Tracer.checkoptions &quot;default&quot;
+tracedata = Tracer.imagedataToTracedata img, options
+assLines = Tracer.getAssLines tracedata, options
 </code></pre>
-<h2 id="potraceimg-frame-turnpolicy-turdsize-optcurve-alphamax-opttolerance"><code>Potrace(img, frame, turnpolicy, turdsize, optcurve, alphamax, opttolerance)</code></h2>
+<h2 id="potrace"><code>Potrace</code></h2>
+<p><code>Potrace</code> is the monochrome tracing workflow. It turns one bitmap frame into one vector shape instead of multiple color layers.</p>
+<h3 id="potraceimg-frame-turnpolicy-turdsize-optcurve-alphamax-opttolerance"><code>Potrace(img, frame, turnpolicy, turdsize, optcurve, alphamax, opttolerance)</code></h3>
 <p>Creates a monochrome vectorizer configured for one image frame.</p>
+<p>Arguments:</p>
 <ul>
-<li>This is the low-level entry point behind the <code>Make Image / Potrace</code> macro.</li>
-<li>The constructor calls <code>img\setInfos(frame)</code> internally, so you usually pass the <code>IMG</code> instance directly.</li>
-<li>Transparent pixels are first composited over white, then thresholded to black/white before tracing.</li>
+<li><code>img</code>: <code>IMG</code> instance that provides the decoded pixel data.</li>
+<li><code>frame</code>: 1-based GIF frame index passed to <code>img\setInfos(frame)</code>.</li>
+<li><code>turnpolicy</code>: ambiguity rule used while walking bitmap contours. Common values are <code>"right"</code>, <code>"black"</code>, <code>"white"</code>, <code>"majority"</code>, and <code>"minority"</code>.</li>
+<li><code>turdsize</code>: minimum connected-component area kept by the tracer.</li>
+<li><code>optcurve</code>: enables curve optimization after polygon fitting.</li>
+<li><code>alphamax</code>: corner threshold used during optimization.</li>
+<li><code>opttolerance</code>: optimization tolerance.</li>
 </ul>
-<p>Parameters in practice:</p>
+<p>Behavior notes:</p>
 <ul>
-<li><code>turnpolicy</code>: <code>"right"</code>, <code>"black"</code>, <code>"white"</code>, <code>"majority"</code>, or <code>"minority"</code></li>
-<li><code>turdsize</code>: minimum blob area to keep</li>
-<li><code>optcurve</code>: whether to optimize curves</li>
-<li><code>alphamax</code>: corner threshold</li>
-<li><code>opttolerance</code>: optimization tolerance</li>
+<li>the constructor calls <code>img\setInfos(frame)</code> internally</li>
+<li>transparent pixels are composited into a white background before thresholding</li>
+<li>the trace is fundamentally monochrome</li>
 </ul>
-<h3 id="example_6">Example</h3>
+<p>Example:</p>
 <pre><code class="language-moon">img = IMG filename
 pot = Potrace img, 1, &quot;minority&quot;, 2, true, 1, 0.2
 </code></pre>
-<h2 id="potprocess"><code>pot\process()</code></h2>
-<p>Runs the full Potrace pipeline.</p>
-<ul>
-<li>First it extracts raw bitmap contours.</li>
-<li>Then it fits polygons and curves.</li>
-<li>After this call, <code>pot.pathlist</code> contains the traced internal paths and the object is ready for serialization.</li>
-</ul>
-<h3 id="example_7">Example</h3>
+<h3 id="potprocess"><code>pot\process()</code></h3>
+<p>Runs the full tracing pipeline and fills <code>pot.pathlist</code>.</p>
+<p>After this call the object is ready for serialization.</p>
+<p>Example:</p>
 <pre><code class="language-moon">pot = Potrace img, 1, &quot;minority&quot;, 2, true, 1, 0.2
 pot\process!
 </code></pre>
-<h2 id="potgetshapedec-3"><code>pot\getShape(dec = 3)</code></h2>
-<p>Serializes the traced Potrace result as one ASS drawing string.</p>
+<h3 id="potgetshapedec-3"><code>pot\getShape(dec = 3)</code></h3>
+<p>Serializes the traced result as one ASS drawing string.</p>
+<p>Arguments:</p>
 <ul>
-<li>The returned value is just the shape commands, not a complete subtitle line.</li>
-<li>In the project macros, the result is usually wrapped in tags and sometimes moved with <code>Path(shape)\move(...)</code>.</li>
-<li>The current implementation accepts <code>dec</code> in the signature, but the rounding flow is effectively fixed by the internal <code>Potrace.round</code> calls.</li>
+<li><code>dec</code>: requested decimal precision. The parameter exists in the API, but the current implementation does not expose it as a strong external precision control.</li>
 </ul>
-<h3 id="example_8">Example</h3>
+<p>Example:</p>
 <pre><code class="language-moon">pot = Potrace img, 1, &quot;minority&quot;, 2, true, 1, 0.2
 pot\process!
-
 shape = pot\getShape!
-line = Table.copy sub[activeLine]
-line.isShape = true
-line.shape = &quot;{\\an7\\pos(0,0)\\bord0\\shad0\\fscx100\\fscy100\\fr0\\p1}#{shape}&quot;
-ass\insertLine line, activeLine
 </code></pre>
 <h2 id="typical-workflows">Typical Workflows</h2>
 <h3 id="pixel-workflow">Pixel workflow</h3>
 <pre><code class="language-moon">img = IMG filename
-asslines = img\toAss true
+assLines = img\toAss true
 </code></pre>
-<p>Use this when you want a faithful raster-to-ASS conversion and you do not care about vector simplification.</p>
+<p>Use this when you want faithful raster output and do not need vector simplification.</p>
 <h3 id="color-vector-workflow">Color vector workflow</h3>
 <pre><code class="language-moon">img = IMG filename
 img\setInfos!
-preset = Tracer.checkoptions &quot;default&quot;
-tracedata = Tracer.imagedataToTracedata img, preset
-asslines = Tracer.getAssLines tracedata, preset
+options = Tracer.checkoptions &quot;default&quot;
+tracedata = Tracer.imagedataToTracedata img, options
+assLines = Tracer.getAssLines tracedata, options
 </code></pre>
-<p>Use this when you want layered vector output by color.</p>
+<p>Use this when you want one or more vector layers grouped by color.</p>
 <h3 id="monochrome-vector-workflow">Monochrome vector workflow</h3>
 <pre><code class="language-moon">img = IMG filename
 pot = Potrace img, 1, &quot;minority&quot;, 2, true, 1, 0.2
 pot\process!
 shape = pot\getShape!
 </code></pre>
-<p>Use this when you want a single monochrome traced shape instead of multi-color layers.</p></div>
+<p>Use this when you want one traced shape instead of a layered color export.</p></div>
             </div>
         </div>
 

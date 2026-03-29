@@ -137,10 +137,6 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-bs-level="2"><a href="#typical-workflow" class="nav-link">Typical Workflow</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
               </ul>
             </li>
         </ul>
@@ -151,150 +147,385 @@
 <h1 id="ill-geometry-module-reference">ILL Geometry Module Reference</h1>
 <h2 id="what-this-module-does">What This Module Does</h2>
 <p>The geometry layer is what lets <code>ILL</code> stop thinking in terms of raw ASS drawing strings and start thinking in terms of points, segments, curves, and paths.</p>
-<p>This is the module family used most heavily by <code>Shapery</code> and <code>Envelope Distort</code>, and it is also the bridge between text-derived shapes and boolean operations powered by Clipper2.</p>
 <h2 id="conventions">Conventions</h2>
 <pre><code class="language-moon">ILL = require &quot;ILL.ILL&quot;
 {:Point, :Segment, :Curve, :Path} = ILL
 </code></pre>
-<p>When this page shows <code>Point(...)</code>, <code>Segment(...)</code>, <code>Curve(...)</code>, or <code>Path(...)</code>, it is using the constructor form seen from library code.</p>
 <h2 id="point"><code>Point</code></h2>
 <p><code>Point</code> is the atomic coordinate object used throughout the geometry stack.</p>
-<h3 id="pointx-0-y-0"><code>Point(x = 0, y = 0)</code></h3>
-<p>Creates a point.</p>
+<h3 id="pointx-0-y-0-id-l"><code>Point(x = 0, y = 0, id = "l")</code></h3>
+<p>Arguments:</p>
+<ul>
+<li><code>x</code>: x coordinate.</li>
+<li><code>y</code>: y coordinate.</li>
+<li><code>id</code>: internal point kind used in ASS path commands, usually <code>"l"</code> or <code>"b"</code>.</li>
+</ul>
+<p>Example:</p>
 <pre><code class="language-moon">p = Point 100, 50
 </code></pre>
 <h3 id="pointclone"><code>point\clone()</code></h3>
 <p>Returns an independent copy.</p>
 <h3 id="pointmovedx-dy"><code>point\move(dx, dy)</code></h3>
-<p>Translates the point.</p>
-<pre><code class="language-moon">p\move 20, -10
-</code></pre>
+<p>Translates the point in place.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>dx</code>: horizontal offset.</li>
+<li><code>dy</code>: vertical offset.</li>
+</ul>
 <h3 id="pointrotateangle-origin-point0-0"><code>point\rotate(angle, origin = Point(0, 0))</code></h3>
-<p>Rotates the point around an origin.</p>
-<h3 id="pointrotatefrzangle-origin-point0-0"><code>point\rotatefrz(angle, origin = Point(0, 0))</code></h3>
-<p>Rotation helper aligned with the ASS <code>\frz</code> convention.</p>
-<h3 id="pointscalesx-sy-sx-origin-point0-0"><code>point\scale(sx, sy = sx, origin = Point(0, 0))</code></h3>
-<p>Scales the point relative to an origin.</p>
+<p>Rotates the point around an origin in mathematical radians.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>angle</code>: rotation angle in radians.</li>
+<li><code>origin</code>: pivot point.</li>
+</ul>
+<h3 id="pointrotatefrzangle"><code>point\rotatefrz(angle)</code></h3>
+<p>Rotates the point using ASS <code>\frz</code> semantics.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>angle</code>: ASS <code>\frz</code> angle in degrees.</li>
+</ul>
+<h3 id="pointscalehor-ver"><code>point\scale(hor, ver)</code></h3>
+<p>Scales the point using ASS-style percentages.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>hor</code>: horizontal scale in ASS percent units.</li>
+<li><code>ver</code>: vertical scale in ASS percent units.</li>
+</ul>
+<h3 id="pointrounddec-3"><code>point\round(dec = 3)</code></h3>
+<p>Rounds the coordinates in place.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>dec</code>: decimal precision.</li>
+</ul>
 <h3 id="pointlerpother-t"><code>point\lerp(other, t)</code></h3>
-<p>Interpolates toward another point.</p>
-<p>This is useful in morphing, path trimming, and curve evaluation flows.</p>
-<h3 id="pointdistanceother"><code>point\distance(other)</code></h3>
-<p>Returns the Euclidean distance to another point.</p>
-<h3 id="pointangleother"><code>point\angle(other)</code></h3>
+<p>Interpolates from the current point to another point.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>other</code>: destination point.</li>
+<li><code>t</code>: interpolation factor.</li>
+</ul>
+<h3 id="pointdistanceother-and-pointsqdistanceother"><code>point\distance(other)</code> and <code>point\sqDistance(other)</code></h3>
+<p>Return the Euclidean or squared distance to another point.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>other</code>: point to compare against.</li>
+</ul>
+<h3 id="pointangleother-point0-0"><code>point\angle(other = Point(0, 0))</code></h3>
 <p>Returns the angle from the current point to another point.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>other</code>: target point used to measure the angle.</li>
+</ul>
 <h2 id="segment"><code>Segment</code></h2>
-<p><code>Segment</code> represents a straight geometric segment between two points.</p>
-<h3 id="segmentp1-p2"><code>Segment(p1, p2)</code></h3>
-<p>Creates a straight segment.</p>
+<p><code>Segment</code> represents one straight edge between two <code>Point</code>s.</p>
+<h3 id="segmenta-b"><code>Segment(a, b)</code></h3>
+<p>Arguments:</p>
+<ul>
+<li><code>a</code>: start point.</li>
+<li><code>b</code>: end point.</li>
+</ul>
 <h3 id="segmentgetptattimet"><code>segment\getPTatTime(t)</code></h3>
-<p>Returns one point along the segment for <code>0 &lt;= t &lt;= 1</code>.</p>
-<h3 id="segmentflattenreduce-1"><code>segment\flatten(reduce = 1)</code></h3>
-<p>Returns a discretized representation of the segment.</p>
-<h3 id="segmentsplitt"><code>segment\split(t)</code></h3>
+<p>Evaluates one point along the segment.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>t</code>: normalized position on the segment.</li>
+</ul>
+<h3 id="segmentflattenlen-segmentgetlength-reduce-1"><code>segment\flatten(len = segment\getLength(), reduce = 1)</code></h3>
+<p>Returns sampled points along the segment.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>len</code>: sampling length hint.</li>
+<li><code>reduce</code>: density divisor. Larger values produce fewer points.</li>
+</ul>
+<h3 id="segmentsplitt-05"><code>segment\split(t = 0.5)</code></h3>
 <p>Splits the segment into two smaller segments.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>t</code>: split position in normalized segment time.</li>
+</ul>
+<h3 id="segmentsplitatintervalt-0-u-1"><code>segment\splitAtInterval(t = 0, u = 1)</code></h3>
+<p>Extracts one interval from the segment and also returns tangent metadata for both ends.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>t</code>: interval start.</li>
+<li><code>u</code>: interval end.</li>
+</ul>
+<h3 id="segmentgetnormalizedt-inverse-false"><code>segment\getNormalized(t, inverse = false)</code></h3>
+<p>Returns a normalized tangent and point for one position on the segment.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>t</code>: normalized segment time.</li>
+<li><code>inverse</code>: flips the tangent direction.</li>
+</ul>
+<h3 id="segmentgetlengtht-1"><code>segment\getLength(t = 1)</code></h3>
+<p>Returns the segment length, optionally only up to time <code>t</code>.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>t</code>: optional normalized end time.</li>
+</ul>
 <h3 id="segmentlinetobezier"><code>segment\lineToBezier()</code></h3>
-<p>Returns a cubic-bezier equivalent of the straight segment.</p>
-<p>This is useful when later stages expect a unified curve representation.</p>
+<p>Converts the segment into four bezier-compatible points so later code can treat straight and curved segments uniformly.</p>
 <h2 id="curve"><code>Curve</code></h2>
-<p><code>Curve</code> represents a cubic bezier.</p>
-<h3 id="curvep1-p2-p3-p4"><code>Curve(p1, p2, p3, p4)</code></h3>
-<p>Creates a cubic curve.</p>
+<p><code>Curve</code> represents one cubic bezier.</p>
+<h3 id="curvea-b-c-d"><code>Curve(a, b, c, d)</code></h3>
+<p>Arguments:</p>
+<ul>
+<li><code>a</code>: start point.</li>
+<li><code>b</code>: first control point.</li>
+<li><code>c</code>: second control point.</li>
+<li><code>d</code>: end point.</li>
+</ul>
 <h3 id="curvegetptattimet"><code>curve\getPTatTime(t)</code></h3>
-<p>Evaluates one point on the curve.</p>
-<h3 id="curveflattenreduce-2"><code>curve\flatten(reduce = 2)</code></h3>
-<p>Discretizes the curve into sampled points.</p>
-<p>This is one of the core operations behind exporting curves into point-based backends.</p>
+<p>Evaluates one point on the bezier.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>t</code>: normalized bezier parameter.</li>
+</ul>
+<h3 id="curveflattenlen-curvegetlength-reduce-1"><code>curve\flatten(len = curve\getLength(), reduce = 1)</code></h3>
+<p>Returns sampled points along the curve.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>len</code>: sampling length hint.</li>
+<li><code>reduce</code>: density divisor.</li>
+</ul>
+<h3 id="curvepointisincurvepoint-tolerance-2-precision-100"><code>curve\pointIsInCurve(point, tolerance = 2, precision = 100)</code></h3>
+<p>Tests whether a point lies close enough to the curve and returns the approximate time when it does.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>point</code>: point to test.</li>
+<li><code>tolerance</code>: max distance from the curve.</li>
+<li><code>precision</code>: sampling resolution.</li>
+</ul>
 <h3 id="curvesplitt"><code>curve\split(t)</code></h3>
-<p>Splits the curve into two curves at parameter <code>t</code>.</p>
-<h3 id="curvegetlengthreduce-2"><code>curve\getLength(reduce = 2)</code></h3>
-<p>Returns an estimated curve length.</p>
-<h3 id="curveuniformtimecurve-n-reduce-2"><code>Curve.uniformTime(curve, n, reduce = 2)</code></h3>
-<p>Builds a more uniform parameter distribution for sampling.</p>
-<p>This matters when equal visual spacing is more important than raw bezier parameter spacing.</p>
+<p>Splits the bezier into two curves.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>t</code>: split time on the bezier.</li>
+</ul>
+<h3 id="curvesplitatintervalt-u"><code>curve\splitAtInterval(t, u)</code></h3>
+<p>Extracts one interval from the bezier and returns tangent metadata for the interval endpoints.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>t</code>: interval start.</li>
+<li><code>u</code>: interval end.</li>
+</ul>
+<h3 id="curvegetderivativet-coefficients-curvegetcoefficient"><code>curve\getDerivative(t, coefficients = curve\getCoefficient())</code></h3>
+<p>Returns the derivative vector at one bezier time.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>t</code>: normalized bezier time.</li>
+<li><code>coefficients</code>: optional cached polynomial coefficients.</li>
+</ul>
+<h3 id="curvegetnormalizedt-inverse-false"><code>curve\getNormalized(t, inverse = false)</code></h3>
+<p>Returns the normalized tangent and point for one path-progress value.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>t</code>: normalized path progress.</li>
+<li><code>inverse</code>: flips the tangent direction.</li>
+</ul>
+<h3 id="curvegetlengtht-1"><code>curve\getLength(t = 1)</code></h3>
+<p>Returns the curve length, optionally only up to time <code>t</code>.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>t</code>: optional normalized end time.</li>
+</ul>
+<h3 id="curvegetarclengthsprecision-100"><code>curve\getArcLengths(precision = 100)</code></h3>
+<p>Builds the cumulative arc-length table used for more uniform sampling.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>precision</code>: number of samples used to approximate cumulative arc length.</li>
+</ul>
+<h3 id="curveuniformtimelengths-len-u"><code>Curve.uniformTime(lengths, len, u)</code></h3>
+<p>Maps normalized arc progress back into bezier parameter space.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>lengths</code>: cumulative arc-length table.</li>
+<li><code>len</code>: sampling resolution that produced <code>lengths</code>.</li>
+<li><code>u</code>: normalized arc progress to map back into bezier time.</li>
+</ul>
 <h2 id="path"><code>Path</code></h2>
-<p><code>Path</code> is the main high-level geometry object in the library.</p>
-<p>It can represent a whole ASS drawing, including multiple contours, and exposes the operations used by the shape macros.</p>
-<h3 id="pathshape"><code>Path(shape = "")</code></h3>
-<p>Parses ASS drawing data into a geometry object.</p>
-<pre><code class="language-moon">path = Path l.text
+<p><code>Path</code> is the main geometry object of the library. It can hold one or more contours and is the bridge between ASS drawing syntax and the geometry tools used by the macros.</p>
+<h3 id="pathpath"><code>Path(path = "")</code></h3>
+<p>Creates a geometry object from an ASS drawing string, a rectangle table, or another path-like table.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>path</code>: ASS shape string, <code>{l, t, r, b}</code> rectangle-like numeric table, or a path/path-like table.</li>
+</ul>
+<p>Example:</p>
+<pre><code class="language-moon">path = Path &quot;m 0 0 l 100 0 100 50 0 50&quot;
 </code></pre>
-<h3 id="pathexport"><code>path\export()</code></h3>
-<p>Serializes the geometry back into ASS drawing syntax.</p>
-<pre><code class="language-moon">l.text = path\export!
-</code></pre>
+<h3 id="pathexportdecimal-2"><code>path\export(decimal = 2)</code></h3>
+<p>Serializes the path back into ASS drawing syntax.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>decimal</code>: decimal precision used during export.</li>
+</ul>
 <h3 id="pathclone"><code>path\clone()</code></h3>
-<p>Returns an independent copy of the full path.</p>
+<p>Returns an independent copy.</p>
 <h3 id="pathboundingbox"><code>path\boundingBox()</code></h3>
-<p>Returns the path bounding box.</p>
-<p>This is what powers operations such as <code>Shape bounding box</code>.</p>
-<h3 id="pathmovedx-dy"><code>path\move(dx, dy)</code></h3>
-<p>Translates the path.</p>
-<h3 id="pathscalesx-sy-sx-origin-nil"><code>path\scale(sx, sy = sx, origin = nil)</code></h3>
-<p>Scales the path.</p>
-<h3 id="pathrotatefrzangle-origin-nil"><code>path\rotatefrz(angle, origin = nil)</code></h3>
-<p>Rotates the path in ASS-friendly screen space.</p>
-<h3 id="pathtoorigin-pathtocenter-and-related-recentering-helpers"><code>path\toOrigin()</code>, <code>path\toCenter()</code>, and related recentering helpers</h3>
-<p>Recenters the drawing relative to its own bounds.</p>
-<p>These are the operations behind helper macros such as <code>Shape to origin</code> and <code>Shape to center</code>.</p>
-<h3 id="pathreallocatepos"><code>path\reallocate(pos)</code></h3>
-<p>Moves the geometry to a new logical anchor position.</p>
-<h3 id="pathflattenreduce-2-simplify-nil-area-nil"><code>path\flatten(reduce = 2, simplify = nil, area = nil)</code></h3>
-<p>Converts curves into denser point sequences.</p>
-<p>Use it before backends or workflows that expect mostly linearized geometry.</p>
-<h3 id="pathsimplify"><code>path\simplify(...)</code></h3>
-<p>Reduces redundant geometry.</p>
-<p>This is one of the main operations exposed through the <code>Manipulate</code> dialog.</p>
-<h3 id="pathreverse"><code>path\reverse()</code></h3>
-<p>Reverses contour point order.</p>
-<p>This is the behavior used by the <code>Reverse points</code> helper macro.</p>
-<h3 id="pathwithoutholes"><code>path\withoutHoles()</code></h3>
-<p>Drops inner contours and keeps only outer shells.</p>
-<p>This is the behavior exposed as <code>Shape without holes</code>.</p>
+<p>Returns <code>l</code>, <code>t</code>, <code>r</code>, <code>b</code>, <code>width</code>, <code>height</code>, <code>origin</code>, <code>center</code>, and a rectangle <code>assDraw</code>.</p>
+<p>This is the main way to query geometry extents before alignment or deformation operations.</p>
+<h3 id="pathflattendistance-nil-flattenstraight-nil-customlen-nil"><code>path\flatten(distance = nil, flattenStraight = nil, customLen = nil)</code></h3>
+<p>Converts the path into a denser point-based form.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>distance</code>: density/reduction control.</li>
+<li><code>flattenStraight</code>: when <code>true</code>, also subdivides straight segments.</li>
+<li><code>customLen</code>: custom sampling length hint.</li>
+</ul>
+<h3 id="pathsimplifytolerance-05-filternoise-true-recreatebezier-true-anglethreshold-170"><code>path\simplify(tolerance = 0.5, filterNoise = true, recreateBezier = true, angleThreshold = 170)</code></h3>
+<p>Reduces point count while trying to preserve the visible contour.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>tolerance</code>: simplification tolerance.</li>
+<li><code>filterNoise</code>: enables extra cleanup before rebuilding curves.</li>
+<li><code>recreateBezier</code>: rebuilds simplified contours as beziers.</li>
+<li><code>angleThreshold</code>: corner preservation threshold.</li>
+</ul>
+<h3 id="pathmovepx-py"><code>path\move(px, py)</code></h3>
+<p>Translates the path in place.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>px</code>: horizontal offset.</li>
+<li><code>py</code>: vertical offset.</li>
+</ul>
+<h3 id="pathrotatefrzangle"><code>path\rotatefrz(angle)</code></h3>
+<p>Rotates the path using ASS <code>\frz</code> semantics.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>angle</code>: ASS-style Z rotation in degrees.</li>
+</ul>
+<h3 id="pathrotateangle-origin"><code>path\rotate(angle, origin)</code></h3>
+<p>Rotates the path in mathematical radians.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>angle</code>: rotation angle in radians.</li>
+<li><code>origin</code>: pivot point.</li>
+</ul>
+<h3 id="pathscalehor-ver"><code>path\scale(hor, ver)</code></h3>
+<p>Scales the path using ASS-style percentages.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>hor</code>: horizontal scale in ASS percent units.</li>
+<li><code>ver</code>: vertical scale in ASS percent units.</li>
+</ul>
+<h3 id="pathtoorigin-and-pathtocenter"><code>path\toOrigin()</code> and <code>path\toCenter()</code></h3>
+<p>Move the path so its bounding box starts at the origin or is centered at the origin.</p>
+<h3 id="pathreallocatean-box-nil-rev-false-x-0-y-0"><code>path\reallocate(an, box = nil, rev = false, x = 0, y = 0)</code></h3>
+<p>Repositions the path relative to an ASS alignment anchor.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>an</code>: ASS alignment.</li>
+<li><code>box</code>: optional <code>{width, height}</code> box. If omitted, the path bounding box is used.</li>
+<li><code>rev</code>: reverses the reallocation offset.</li>
+<li><code>x</code>: extra x offset.</li>
+<li><code>y</code>: extra y offset.</li>
+</ul>
+<p>This is heavily used when text-derived shapes are moved between ASS alignments.</p>
+<h3 id="pathperspectivemesh-real-nil-mode-nil"><code>path\perspective(mesh, real = nil, mode = nil)</code></h3>
+<p>Applies a quadrilateral-based perspective warp.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>mesh</code>: target quadrilateral points.</li>
+<li><code>real</code>: source quadrilateral. If omitted, the current bounding box corners are used.</li>
+<li><code>mode</code>: <code>"warping"</code> uses <code>mesh</code> as the source path for the warp calculation.</li>
+</ul>
+<h3 id="pathenvelopegridnumrows-numcols-isbezier-false"><code>path\envelopeGrid(numRows, numCols, isBezier = false)</code></h3>
+<p>Builds a mesh grid over the path bounds.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>numRows</code>: row count.</li>
+<li><code>numCols</code>: column count.</li>
+<li><code>isBezier</code>: when <code>true</code>, emits a bezier-friendly grid.</li>
+</ul>
+<h3 id="pathenvelopedistortgridmesh-gridreal-ep-01"><code>path\envelopeDistort(gridMesh, gridReal, ep = 0.1)</code></h3>
+<p>Distorts the path from one grid to another.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>gridMesh</code>: target grid.</li>
+<li><code>gridReal</code>: source grid.</li>
+<li><code>ep</code>: epsilon used in polygon hit-testing.</li>
+</ul>
 <h3 id="pathallcurve"><code>path\allCurve()</code></h3>
-<p>Promotes line-based structures toward curve-compatible form.</p>
-<h3 id="pathgetlengthreduce-2"><code>path\getLength(reduce = 2)</code></h3>
-<p>Returns path length.</p>
-<p>This is useful for trimming, progressive reveals, and evenly spaced sampling.</p>
-<h3 id="pathgetnormalized-and-pathgetnormalizedintervala-b"><code>path\getNormalized()</code> and <code>path\getNormalizedInterval(a, b)</code></h3>
-<p>Return normalized geometric intervals suitable for trimming or progressive extraction.</p>
-<p>These are the kinds of helpers used by partial-path workflows such as <code>Shape trim</code>.</p>
-<h3 id="pathperspectivemeshsource-meshtarget"><code>path\perspective(meshSource, meshTarget)</code></h3>
-<p>Applies a perspective-based warp.</p>
-<p>This is part of the machinery used by <code>Envelope Distort</code> when the mesh can be interpreted as a perspective mapping.</p>
-<h3 id="pathenvelopegrid-and-pathenvelopedistortmesh-realmesh-tolerance"><code>path\envelopeGrid(...)</code> and <code>path\envelopeDistort(mesh, realMesh, tolerance)</code></h3>
-<p>Apply grid-driven deformation to the path.</p>
-<p>These are the core mesh-warp operations behind <code>Envelope Distort</code>.</p>
-<h3 id="pathshadow"><code>path\shadow(...)</code></h3>
-<p>Creates geometry derived from shadow displacement.</p>
-<p>This powers the geometry-style shadow tools in <code>Shapery</code>.</p>
-<h3 id="pathmorphother-t"><code>path\morph(other, t)</code></h3>
-<p>Interpolates one path toward another.</p>
-<p>This is the geometric foundation behind <code>Shape morph</code> and related blending workflows.</p>
-<h3 id="pathconverttoclipper-and-pathconvertfromclipperpaths"><code>path\convertToClipper()</code> and <code>Path.convertFromClipper(paths)</code></h3>
-<p>Convert between the library's <code>Path</code> representation and the native Clipper2 representation.</p>
-<p>This is the bridge between the friendly geometry layer and the low-level boolean backend.</p>
+<p>Converts straight edges into cubic bezier-compatible segments.</p>
+<h3 id="pathgetlength"><code>path\getLength()</code></h3>
+<p>Returns total path length.</p>
+<h3 id="pathgetnormalizedt-05-returnpath-false"><code>path\getNormalized(t = 0.5, returnPath = false)</code></h3>
+<p>Returns the tangent, point, time, and leading partial path at normalized distance <code>t</code>.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>t</code>: normalized path progress.</li>
+<li><code>returnPath</code>: when <code>true</code>, returns only the leading partial path.</li>
+</ul>
+<h3 id="pathgetnormalizedintervalu-v"><code>path\getNormalizedInterval(u, v)</code></h3>
+<p>Extracts one normalized interval from the full path.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>u</code>: interval start.</li>
+<li><code>v</code>: interval end.</li>
+</ul>
+<p>This is useful for trim or reveal effects that need only one portion of a contour.</p>
+<h3 id="pathshadowxshad-yshad-shadowtype-3d"><code>path\shadow(xshad, yshad, shadowType = "3D")</code></h3>
+<p>Builds 3D-like or inner-shadow geometry.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>xshad</code>: horizontal shadow offset.</li>
+<li><code>yshad</code>: vertical shadow offset.</li>
+<li><code>shadowType</code>: <code>"3D"</code> or <code>"inner"</code>.</li>
+</ul>
+<h3 id="pathmorphother-t-05"><code>path\morph(other, t = 0.5)</code></h3>
+<p>Interpolates this path into another path.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>other</code>: destination <code>Path</code>.</li>
+<li><code>t</code>: interpolation factor.</li>
+</ul>
+<h3 id="pathconverttoclipperreduce-1-flattenstraight-nil-and-pathconvertfromclippercpppaths"><code>path\convertToClipper(reduce = 1, flattenStraight = nil)</code> and <code>Path.convertFromClipper(cppPaths)</code></h3>
+<p>Convert between <code>Path</code> and the Clipper2 representation.</p>
+<p>Arguments for <code>convertToClipper</code>:</p>
+<ul>
+<li><code>reduce</code>: flatten density divisor before export.</li>
+<li><code>flattenStraight</code>: whether straight segments are also flattened.</li>
+</ul>
+<p>Arguments for <code>convertFromClipper</code>:</p>
+<ul>
+<li><code>cppPaths</code>: Clipper2 path collection.</li>
+</ul>
 <h3 id="pathuniteother-pathdifferenceother-pathintersectother-and-pathexcludeother"><code>path\unite(other)</code>, <code>path\difference(other)</code>, <code>path\intersect(other)</code>, and <code>path\exclude(other)</code></h3>
-<p>Perform boolean operations between paths.</p>
-<p>These are the core operations used by <code>Shapery/Pathfinder</code>, <code>Cut Contour</code>, and several helper macros.</p>
-<pre><code class="language-moon">result = path\difference clipPath
+<p>Boolean operations between paths.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>other</code>: clip path.</li>
+</ul>
+<p>Example:</p>
+<pre><code class="language-moon">result = pathA\difference pathB
 </code></pre>
-<h3 id="pathoffsetdelta-jointype-round-endtype-polygon-miterlimit-2-arctolerance-0"><code>path\offset(delta, joinType = "round", endType = "polygon", miterLimit = 2, arcTolerance = 0)</code></h3>
-<p>Builds expanded or contracted geometry around the path.</p>
-<p>This is the implementation-level basis for <code>Shapery/Offsetting</code> and <code>Shape expand</code>.</p>
-<pre><code class="language-moon">outline = path\offset 4, &quot;round&quot;, &quot;polygon&quot;, 2, 0.25
-</code></pre>
-<h3 id="pathroundingpathpath-radius-reduce-2"><code>Path.RoundingPath(path, radius, reduce = 2)</code></h3>
-<p>Returns a rounded-corner version of a path.</p>
-<p>This is the kind of operation used by the <code>Utilities</code> dialog when smoothing corners.</p>
-<h2 id="typical-workflow">Typical Workflow</h2>
-<p>The normal shape workflow in this library looks like this:</p>
-<ol>
-<li>parse a drawing or clip into <code>Path</code></li>
-<li>transform, trim, offset, merge, or warp it</li>
-<li>optionally send it through Clipper2-backed boolean operations</li>
-<li>export it back to ASS drawing syntax</li>
-</ol>
-<p>That is why <code>Path</code> is the real center of the geometry layer, while <code>Point</code>, <code>Segment</code>, and <code>Curve</code> are the building blocks it depends on.</p></div>
+<h3 id="pathoffsetdelta-jointype-endtype-miterlimit-arctolerance-preservecollinear-reversesolution"><code>path\offset(delta, joinType, endType, miterLimit, arcTolerance, preserveCollinear, reverseSolution)</code></h3>
+<p>Inflates or deflates the path using Clipper2.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>delta</code>: offset distance.</li>
+<li><code>joinType</code>: join style such as <code>"round"</code>, <code>"miter"</code>, or <code>"square"</code>.</li>
+<li><code>endType</code>: end style such as <code>"polygon"</code>.</li>
+<li><code>miterLimit</code>: miter limit for miter joins.</li>
+<li><code>arcTolerance</code>: tolerance for round joins.</li>
+<li><code>preserveCollinear</code>: Clipper flag for collinear edges.</li>
+<li><code>reverseSolution</code>: Clipper flag for output orientation.</li>
+</ul>
+<h3 id="pathroundingpathpath-radius-inverted-false-cornerstyle-rounded-rounding-absolute"><code>Path.RoundingPath(path, radius, inverted = false, cornerStyle = "Rounded", rounding = "Absolute")</code></h3>
+<p>Creates rounded, spiked, or chamfered corners.</p>
+<p>Arguments:</p>
+<ul>
+<li><code>path</code>: source <code>Path</code> or ASS shape string.</li>
+<li><code>radius</code>: rounding radius.</li>
+<li><code>inverted</code>: enables inward rounding behavior.</li>
+<li><code>cornerStyle</code>: <code>"Rounded"</code>, <code>"Spike"</code>, or <code>"Chamfer"</code>.</li>
+<li><code>rounding</code>: <code>"Absolute"</code> or <code>"Relative"</code>.</li>
+</ul>
+<p>Example:</p>
+<pre><code class="language-moon">rounded = Path.RoundingPath path, 8, false, &quot;Rounded&quot;, &quot;Absolute&quot;
+</code></pre></div>
             </div>
         </div>
 
