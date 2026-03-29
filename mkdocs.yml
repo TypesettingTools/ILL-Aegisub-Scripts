@@ -1,6 +1,25 @@
-plugins: []
-site_name: ILL Documentation
+plugins:
+    - search
+site_name: ILL Aegisub Scripts
+markdown_extensions:
+    - admonition
+    - attr_list
+    - md_in_html
+    - tables
 nav:
-    - Scripts: index.md
-    - Modules: modules.md
-theme: readthedocs
+    - Home: index.md
+    - Guides:
+        - Macros: macros.md
+        - Modules: modules.md
+    - Module Reference:
+        - Core: core.md
+        - Text and Tags: text-and-tags.md
+        - Geometry: geometry.md
+        - Image: image.md
+        - Clipper2: clipper2.md
+theme: mkdocs
+extra_javascript:
+    - javascripts/default-dark.js
+    - javascripts/moonscript-highlight.js
+extra:
+    homepage: index.md

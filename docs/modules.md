@@ -1,99 +1,63 @@
 # Modules
-...
 
----
+## Overview
 
-### ILL
-...
+The project is organized into three main blocks:
 
----
+- `macros/`: user-facing commands registered in Aegisub.
+- `modules/`: reusable MoonScript libraries.
+- `ffi-packages/`: native code and build scripts used by the FFI wrappers.
 
-> #### ILL.Aegi
-...
+## Public Module Map
 
----
+### `ILL.ILL`
 
-> #### ILL.Math
-...
+The main library of the project. It is the base module for text, tags, line processing, and shape manipulation.
 
----
+Main areas:
 
-> #### ILL.Table
-...
+- `Aegi`: Aegisub progress, dialog, and log integration.
+- `Config`: macro configuration persistence.
+- `Math`, `Table`, `Util`, `UTF8`: general-purpose helpers.
+- `Ass`: ASS script reading, iteration, and updates.
+- `Line`: line processing, expansion, splitting, and frame-by-frame workflows.
+- `Tag`, `Tags`, `Text`: ASS tag and text parsing/manipulation.
+- `Point`, `Segment`, `Curve`, `Path`: vector geometry.
+- `Font`: text metrics and text-to-shape conversion.
 
----
+## `ILL.IMG`
 
-> #### ILL.Util
-...
+Image loading and conversion module.
 
----
+Main areas:
 
-> #### ILL.Curve
-...
+- `IMG`: loads image files and converts them into ASS raster lines.
+- `Tracer`: color tracing pipeline with presets.
+- `Potrace`: monochrome vectorization.
+- `LIBPNG`, `LIBJPG`, `LIBGIF`, `LIBBMP`: format-specific decoders.
 
----
+## `clipper2.clipper2`
 
-> #### ILL.Path
-...
+FFI wrapper for native geometric operations.
 
----
+Main areas:
 
-> #### ILL.Point
-...
+- `CPP.path`: native path creation and manipulation.
+- `CPP.paths`: path collections and boolean operations.
+- enums for `FillRule`, `JoinType`, and `EndType`.
 
----
+## Relationship Between Modules
 
-> #### ILL.Tag
-...
+- `Shapery` mainly depends on `ILL.ILL` and `clipper2.clipper2`.
+- `Envelope Distort` depends on `ILL.ILL`.
+- `Make Image` depends on `ILL.IMG` and `ILL.ILL`.
+- `Split Text`, `Change Alignment`, and `Line To FBF` mainly depend on `ILL.ILL`.
 
----
+## Recommended Entry Point For Development
 
-> #### ILL.Tags
-...
+If you are building a new macro:
 
----
-
-> #### ILL.Text
-...
-
----
-
-> #### ILL.Ass
-...
-
----
-
-> #### ILL.Line
-...
-
----
-
-### clipper2
-...
-
----
-
-> #### clipper2.path
-...
-
----
-
-> #### clipper2.paths
-...
-
----
-
-> #### clipper2.version()
-...
-
----
-
-> #### clipper2.viewError()
-...
-
----
-
-> #### clipper2.setPrecision()
-...
-
----
+1. start with `Ass` and `Line`;
+2. use `Text`, `Tags`, and `Tag` to manipulate ASS content;
+3. use `Path` and `Point` when the workflow involves shape data;
+4. use `IMG` or `clipper2` only when image processing or heavy geometry is actually needed.
