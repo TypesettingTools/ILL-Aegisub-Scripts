@@ -1,6 +1,6 @@
 export script_name        = "Change Alignment"
 export script_description = "Changes the alignment of a text or shape without changing its original position"
-export script_version     = "1.1.1"
+export script_version     = "1.1.2"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.ChangeAlign"
 
@@ -28,12 +28,12 @@ interface = ->
 	for y = 0, 2
 		for x = 2, 0, -1 do
 			z = x + (2 - y) * 3 + 1
-			table.insert gui, {class: "checkbox", name: z, label: z, :x, :y, value: false}
+			table.insert gui, {class: "checkbox", name: z, label: "&#{z}", :x, :y, value: false}
 	return gui
 
 main = (sub, sel, activeLine) ->
-	button, elements = aegisub.dialog.display interface!, {"Ok", "Cancel"}, {close: "Cancel"}
-	if button == "Ok"
+	button, elements = aegisub.dialog.display interface!
+	if button
 		local aln
 		for k, v in pairs elements
 			if v == true
