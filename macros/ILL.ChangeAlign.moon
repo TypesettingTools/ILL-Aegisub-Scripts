@@ -1,6 +1,6 @@
 export script_name        = "Change Alignment"
 export script_description = "Changes the alignment of a text or shape without changing its original position"
-export script_version     = "1.1.1"
+export script_version     = "1.1.2"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.ChangeAlign"
 
