@@ -17,11 +17,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.1.5",
+                    "version": "1.1.6",
                     "released": "2026-04-03",
                     "files": [
                         {
-                            "sha1": "28465212dfdcd5f1ec48cc7993931276ee7dcc25",
+                            "sha1": "ede881683fd11449064109bd3cc0b7e8cd01461c",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -79,6 +79,9 @@
                 ],
                 "1.1.5": [
                     "Fix Mix mode mesh points"
+                ],
+                "1.1.6": [
+                    "Minor fix"
                 ]
             },
             "name": "Envelope Distort",
