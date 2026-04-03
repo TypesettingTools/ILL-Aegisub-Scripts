@@ -96,17 +96,19 @@ class Path
 		k = 1
 		for contour in *@path
 			j = 2
+			i = 1
 			while j <= #contour
 				prev = contour[j-1]
 				curr = contour[j]
 				if curr.id == "b"
-					if "break" == fn "b", Curve(prev, curr, contour[j+1], contour[j+2]), k
+					if "break" == fn "b", Curve(prev, curr, contour[j+1], contour[j+2]), k, i
 						return
 					j += 2
 				else
-					if "break" == fn "l", Segment(prev, curr), k
+					if "break" == fn "l", Segment(prev, curr), k, i
 						return
 				j += 1
+				i += 1
 			k += 1
 		return @
 
