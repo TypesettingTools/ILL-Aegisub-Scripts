@@ -1,6 +1,6 @@
 export script_name        = "Envelope Distort"
 export script_description = "Allows you to warp and manipulate shapes within a customizable envelope"
-export script_version     = "1.1.4"
+export script_version     = "1.1.5"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.EnvelopeDistort"
 
@@ -13,7 +13,7 @@ if haveDepCtrl
 		{
 			{
 				"ILL.ILL"
-				version: "1.8.4"
+				version: "1.8.3"
 				url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
 				feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}
@@ -44,24 +44,23 @@ performToMix = (mclips) ->
 	res = {}
 	for mclip in *mclips
 		npath = Path!
-		npath.path[1] = {}
 		mpath = Path mclip
 		mpath\callBackPath (id, seg, j, i) ->
-			if i % 2 == 0 and id == "b"
+			if npath.path[1] == nil
 				a = seg.a\clone!
-				d = seg.d\clone!
 				a.id = "l"
+				npath.path[1] = {seg.a}
+			if i % 2 == 0 and id == "b"
+				d = seg.d\clone!
 				d.id = "l"
-				table.insert npath.path[1], a
-				table.insert npath.path[1], d
+				table.insert npath.path[1], d\clone!
 			elseif id == "b"
-				table.insert npath.path[1], seg.a\clone!
 				table.insert npath.path[1], seg.b\clone!
 				table.insert npath.path[1], seg.c\clone!
 				table.insert npath.path[1], seg.d\clone!
 			elseif id == "l"
-				table.insert npath.path[1], seg.a\clone!
 				table.insert npath.path[1], seg.b\clone!
+		table.remove npath.path[1]
 		table.insert res, npath\export!
 	return res
 
