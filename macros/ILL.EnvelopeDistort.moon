@@ -1,6 +1,6 @@
 export script_name        = "Envelope Distort"
 export script_description = "Allows you to warp and manipulate shapes within a customizable envelope"
-export script_version     = "1.1.5"
+export script_version     = "1.1.6"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.EnvelopeDistort"
 
@@ -13,7 +13,7 @@ if haveDepCtrl
 		{
 			{
 				"ILL.ILL"
-				version: "1.8.3"
+				version: "1.8.4"
 				url: "https://github.com/TypesettingTools/ILL-Aegisub-Scripts/"
 				feed: "https://raw.githubusercontent.com/TypesettingTools/ILL-Aegisub-Scripts/main/DependencyControl.json"
 			}
@@ -53,7 +53,7 @@ performToMix = (mclips) ->
 			if i % 2 == 0 and id == "b"
 				d = seg.d\clone!
 				d.id = "l"
-				table.insert npath.path[1], d\clone!
+				table.insert npath.path[1], d
 			elseif id == "b"
 				table.insert npath.path[1], seg.b\clone!
 				table.insert npath.path[1], seg.c\clone!
