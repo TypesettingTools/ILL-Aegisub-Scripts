@@ -1,6 +1,6 @@
 export script_name        = "Envelope Distort"
 export script_description = "Allows you to warp and manipulate shapes within a customizable envelope"
-export script_version     = "1.1.6"
+export script_version     = "1.1.7"
 export script_author      = "ILLTeam"
 export script_namespace   = "ILL.EnvelopeDistort"
 
@@ -21,7 +21,6 @@ if haveDepCtrl
 	}
 	ILL = depctrl\requireModules!
 else
-
 	ILL = require "ILL.ILL"
 
 {:Aegi, :Ass, :Line, :Path, :Util} = ILL
@@ -88,9 +87,11 @@ makeWithMesh = (sub, sel, activeLine) ->
 			ass\removeLine l, s
 			xr, yr = aegisub.video_size!
 			screen = "m 0 0 l #{xr} 0 #{xr} #{yr} 0 #{yr} "
-			mclips = getExpandedMesh l, rows, cols, isBezier
+			local mclips
 			if lineType == "Mix"
-				mclips = performToMix mclips
+				mclips = performToMix getExpandedMesh l, 1, 1, isBezier
+			else
+				mclips = getExpandedMesh l, rows, cols, isBezier
 			l.tags\remove "clip", "iclip"
 			if l.isShape
 				l.tags\insert {{"clip", screen .. table.concat mclips}}
@@ -112,12 +113,16 @@ makeWithMesh = (sub, sel, activeLine) ->
 				table.remove mesh.path, 1
 				if perspective and (isBezier or #mesh.path != 1)
 					ass\error s, "Expected an quadrilateral"
-				mclips, colDistance, rowDistance = getExpandedMesh l, rows, cols, isBezier
+				local mclips, colDistance, rowDistance
 				if lineType == "Mix"
+					mclips, colDistance, rowDistance = getExpandedMesh l, 1, 1, isBezier
 					mclips = performToMix mclips
+				else
+					mclips, colDistance, rowDistance = getExpandedMesh l, rows, cols, isBezier
 				local area
 				if isBezier
-					area = (colDistance * rowDistance) / 100
+					dist = colDistance > rowDistance and colDistance or rowDistance
+					area = (colDistance * rowDistance) / dist
 					mesh\flatten 1, nil, area
 				Line.callBackExpand ass, l, {rows, cols, isBezier}, (line, j) ->
 					{x, y} = line.data.pos

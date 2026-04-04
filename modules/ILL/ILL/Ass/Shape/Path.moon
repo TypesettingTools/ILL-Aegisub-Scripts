@@ -267,18 +267,18 @@ class Path
 		return rectsRow\move(l, t), colDistance, rowDistance
 
 	-- Makes a distortion based on the control points given by a mesh
-	envelopeDistort: (gridMesh, gridReal, ep = 0.1) =>
+	envelopeDistort: (gridMesh, gridReal, eps = 1e-4) =>
 		assert #gridMesh == #gridReal, "The control points must have the same quantity!"
 		{:l, :t, :r, :b} = @boundingBox!
-		distort = (mesh, real, pt, eps = 0.001) ->
+		distort = (mesh, real, pt, e) ->
 			assert #real == #mesh, "The control points must have the same quantity!"
 			for i = 1, #mesh
 				with mesh[i]
-					.x = .x == l and .x - eps or (.x == r and .x + eps or .x)
-					.y = .y == t and .y - eps or (.y == b and .y + eps or .y)
+					.x = .x == l and .x - e or (.x == r and .x + e or .x)
+					.y = .y == t and .y - e or (.y == b and .y + e or .y)
 				with real[i] 
-					.x = .x == l and .x - eps or (.x == r and .x + eps or .x)
-					.y = .y == t and .y - eps or (.y == b and .y + eps or .y)
+					.x = .x == l and .x - e or (.x == r and .x + e or .x)
+					.y = .y == t and .y - e or (.y == b and .y + e or .y)
 			findAngles = (pt) ->
 				A = {}
 				for i = 1, #real
@@ -310,7 +310,7 @@ class Path
 					ny += L * .y
 			return nx, ny
 		-- https://stackoverflow.com/a/28130452/15411556
-		pointInsidePolygon = (points, p) ->
+		pointInsidePolygon = (points, p, ep = 1e-2) ->
 			n = #points
 			j = n
 			r = false
@@ -330,7 +330,7 @@ class Path
 		@map (x, y, pt) ->
 			for i = 1, #gridMesh.path
 				if pointInsidePolygon gridReal.path[i], pt
-					return distort gridMesh.path[i], gridReal.path[i], pt
+					return distort gridMesh.path[i], gridReal.path[i], pt, eps
 
 	-- Checks if all contours are open
 	areContoursOpen: =>

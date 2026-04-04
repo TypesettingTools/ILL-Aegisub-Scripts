@@ -405,9 +405,11 @@ cdef [[
 	typedef unsigned char FcChar8;
 	typedef int FcBool;
 	FcConfig* FcInitLoadConfigAndFonts(void);
+	void FcConfigDestroy(FcConfig*);
 	FcPattern* FcPatternCreate(void);
 	void FcPatternDestroy(FcPattern*);
-	FcObjectSet* FcObjectSetBuild(const char*, ...);
+	FcObjectSet* FcObjectSetCreate(void);
+	FcBool FcObjectSetAdd(FcObjectSet*, const char*);
 	void FcObjectSetDestroy(FcObjectSet*);
 	FcFontSet* FcFontList(FcConfig*, FcPattern*, FcObjectSet*);
 	void FcFontSetDestroy(FcFontSet*);
@@ -421,12 +423,23 @@ import Init from require "ILL.ILL.Font.Init"
 
 OUTLINE_MAX = bit.lshift(1, 28) - 1
 
+local fc_config
+local fc_fonts_cache
+
+get_fc_config = ->
+	return fc_config if fc_config
+	cfg = fontconfig.FcInitLoadConfigAndFonts!
+	unless cfg
+		error "fontconfig: FcInitLoadConfigAndFonts failed", 2
+	fc_config = ffi.gc cfg, fontconfig.FcConfigDestroy
+	return fc_config
+
 -- https://github.com/libass/libass/blob/5298859c298d3c570d8d7e3b883a0d63490659b8/libass/ass_font.c#L278
 set_font_metrics = (face) ->
 	-- Mimicking GDI's behavior for asc/desc/height.
 	-- These fields are (apparently) sometimes used for signed values,
 	-- despite being unsigned in the spec.
-	os2 = cast "TT_OS2*", C.FT_Get_Sfnt_Table face, C.FT_SFNT_OS2
+	os2 = cast "TT_OS2*", freetype.FT_Get_Sfnt_Table face, C.FT_SFNT_OS2
 	if os2 and (tonumber(os2.usWinAscent) + tonumber(os2.usWinDescent) != 0)
 		face.ascender = tonumber os2.usWinAscent
 		face.descender = -tonumber os2.usWinDescent
@@ -461,7 +474,9 @@ ass_face_set_size = (face, size) ->
 	rq.height = size * FONT_UPSCALE
 	rq.horiResolution = 0
 	rq.vertResolution = 0
-	freetype.FT_Request_Size face, rq
+	err = freetype.FT_Request_Size face, rq
+	if err != 0
+		error "Failed to set freetype size (FT_Request_Size err=#{tonumber err})", 2
 
 -- https://github.com/libass/libass/blob/5298859c298d3c570d8d7e3b883a0d63490659b8/libass/ass_font.c#L583
 ass_font_get_asc_desc = (face) ->
@@ -512,7 +527,7 @@ ass_get_glyph_outline = (face, has_underline, has_strikeout, addx, addy) ->
 	source = face.glyph.outline
 	local underline, strikeout
 	if adv > 0 and has_underline
-		ps = cast "TT_Postscript*", C.FT_Get_Sfnt_Table face, C.FT_SFNT_POST
+		ps = cast "TT_Postscript*", freetype.FT_Get_Sfnt_Table face, C.FT_SFNT_POST
 		if ps and tonumber(ps.underlinePosition) <= 0 and tonumber(ps.underlineThickness) > 0
 			underlinePosition = tonumber ps.underlinePosition
 			underlineThickness = tonumber ps.underlineThickness
@@ -522,7 +537,7 @@ ass_get_glyph_outline = (face, has_underline, has_strikeout, addx, addy) ->
 			if pos >= -OUTLINE_MAX and (pos + size) <= OUTLINE_MAX
 				underline = {(pos + addy) * FONT_DOWNSCALE, (pos + size + addy) * FONT_DOWNSCALE}
 	if adv > 0 and has_strikeout
-		os2 = cast "TT_OS2*", C.FT_Get_Sfnt_Table face, C.FT_SFNT_OS2
+		os2 = cast "TT_OS2*", freetype.FT_Get_Sfnt_Table face, C.FT_SFNT_OS2
 		if os2 and tonumber(os2.yStrikeoutPosition) >= 0 and tonumber(os2.yStrikeoutSize) > 0
 			yStrikeoutPosition = tonumber os2.yStrikeoutPosition
 			yStrikeoutSize = tonumber os2.yStrikeoutSize
@@ -560,34 +575,84 @@ ass_get_glyph_outline = (face, has_underline, has_strikeout, addx, addy) ->
 		}, " "
 	return path
 
+-- Normalize a string for font matching
+font_norm = (s) ->
+	return "" unless s
+	s\lower!\gsub("[%s%-%_]+", " ")\match "^%s*(.-)%s*$"
+
+-- Check if a style is bold
+font_is_bold = (s) ->
+	z = font_norm s
+	z\find("bold") or z\find("black") or z\find("heavy") or z\find("semibold") or z\find("demibold") or z\find("demi")
+
+-- Check if a style is italic
+font_is_italic = (s) ->
+	z = font_norm s
+	z\find("italic") or z\find("oblique")
+
+-- Check if a style is regular
+font_is_regular = (s) -> not font_is_bold(s) and not font_is_italic(s)
+
+-- Score a font based on bold and italic requirements
+font_score = (font, bold, italic) ->
+	style = font_norm font.style
+	font_bold = font_is_bold style
+	font_italic = font_is_italic style
+	score = 0
+	if bold == font_bold and italic == font_italic
+		return 0
+	if bold and not font_bold
+		score += 200
+	if not bold and font_bold
+		score += 300
+	if italic and not font_italic
+		score += 200
+	if not italic and font_italic
+		score += 300
+	if style\find "condensed"
+		score += 20
+	if style\find "narrow"
+		score += 10
+	return score
+
 class FreeType extends Init
 
 	init: =>
 		unless has_freetype
 			error "freetype library couldn't be loaded", 2
+
+		return if @initialized or @library
+
 		@face_cache = {}
+
+		-- Init FreeType
+		@library = new "FT_Library[1]"
+		err = freetype.FT_Init_FreeType @library
+		if err != 0
+			error "Failed to load freetype library", 2
+
+		-- Define the font and get its metrics
+		@setFont!
+
+		@initialized = true
+
+	-- Define the font and get its metrics
+	setFont: =>
 		-- Check that the font has a bold and italic variant if necessary
 		@found_bold, @found_italic = false, false
-		-- Init FreeType
-		@library = @getLib!
+
 		-- Get the font path
 		font = @fontSelect!
+
 		-- Load font face
 		@face = @getFaceFromPath font.path
+
 		set_font_metrics @face[0]
 		ass_face_set_size @face[0], @size
+
 		@ascender, @descender = ass_font_get_asc_desc @face[0]
 		@height = @ascender + @descender
 		@weight = tonumber ass_face_get_weight @face[0]
-
-	-- Get FreeType library
-	getLib: =>
-		library = new "FT_Library[1]"
-		err = freetype.FT_Init_FreeType library
-		if err != 0
-			error "Failed to load freetype library"
-		ffi.gc library, (lib) -> freetype.FT_Done_FreeType lib[0]
-		return library
 
 	-- Get face from path
 	getFaceFromPath: (path) =>
@@ -597,7 +662,9 @@ class FreeType extends Init
 		err = freetype.FT_New_Face @library[0], path, 0, face
 		if err != 0
 			error "Failed to load freetype face"
-		ffi.gc face, (f) -> freetype.FT_Done_Face f[0]
+		ffi.gc face, (f) ->
+			return unless f and f[0]
+			freetype.FT_Done_Face f[0]
 		@face_cache[path] = face
 		return face
 
@@ -610,7 +677,7 @@ class FreeType extends Init
 
 	-- Callback to access the glyphs for each character
 	callBackCharsGlyph: (text, callback) =>
-		face_size = @face[0].size.face
+		face_size = @face[0]
 		for ci, char in UTF8(text)\chars!
 			index = freetype.FT_Get_Char_Index face_size, UTF8.charcodepoint char
 			if freetype.FT_Load_Glyph(face_size, index, C.FT_LOAD_DEFAULT) != 0
@@ -629,7 +696,7 @@ class FreeType extends Init
 
 	-- Get text extents
 	getTextExtents: (text) =>
-		face_size, width = @face[0].size.face, 0
+		face_size, width = @face[0], 0
 		@callBackCharsGlyph text, (glyph) ->
 			width += tonumber(glyph.metrics.horiAdvance) + (@hspace * FONT_UPSCALE)
 		{
@@ -726,8 +793,23 @@ class FreeType extends Init
 		-- Check whether or not the fontconfig library was loaded
 		unless has_fontconfig
 			error "fontconfig library couldn't be loaded", 2
+		return fc_fonts_cache if fc_fonts_cache
+		config = get_fc_config!
+		pattern = fontconfig.FcPatternCreate!
+		unless pattern
+			error "fontconfig: FcPatternCreate failed", 2
+		pattern = ffi.gc pattern, fontconfig.FcPatternDestroy
+		object_set = fontconfig.FcObjectSetCreate!
+		unless object_set
+			error "fontconfig: FcObjectSetCreate failed", 2
+		object_set = ffi.gc object_set, fontconfig.FcObjectSetDestroy
+		for _, name in ipairs {"family", "fullname", "style", "outline", "file"}
+			fontconfig.FcObjectSetAdd object_set, name
 		-- Get fonts list from fontconfig
-		fontset = ffi.gc fontconfig.FcFontList(fontconfig.FcInitLoadConfigAndFonts!, ffi.gc(fontconfig.FcPatternCreate!, fontconfig.FcPatternDestroy), ffi.gc(fontconfig.FcObjectSetBuild("family", "fullname", "style", "outline", "file", nil), fontconfig.FcObjectSetDestroy)), fontconfig.FcFontSetDestroy
+		fontset = fontconfig.FcFontList config, pattern, object_set
+		unless fontset
+			error "fontconfig: FcFontList failed", 2
+		fontset = ffi.gc fontset, fontconfig.FcFontSetDestroy
 		local font, family, fullname, style, outline, file, cstr, cbool
 		cstr = new "FcChar8*[1]"
 		cbool = new "FcBool[1]"
@@ -761,68 +843,29 @@ class FreeType extends Init
 			else
 				return font1.name < font2.name
 		-- Return collected fonts
-		return fonts
-
-	-- Normalize a string for font matching
-	norm: (s) ->
-		return "" unless s
-		s\lower!\gsub("[%s%-%_]+", " ")\match "^%s*(.-)%s*$"
-
-	-- Check if a style is bold
-	isBold: (s) ->
-		z = FreeType.norm s
-		z\find("bold") or z\find("black") or z\find("heavy") or z\find("semibold") or z\find("demibold") or z\find("demi")
-
-	-- Check if a style is italic
-	isItalic: (s) ->
-		z = FreeType.norm s
-		z\find("italic") or z\find("oblique")
-
-	-- Check if a style is regular
-	isRegular: (s) -> not FreeType.isBold(s) and not FreeType.isItalic(s)
-
-	-- Score a font based on bold and italic requirements
-	scoreFont: (font, bold, italic) ->
-		style = FreeType.norm font.style
-		font_bold = FreeType.isBold style
-		font_italic = FreeType.isItalic style
-		score = 0
-		if bold == font_bold and italic == font_italic
-			return 0
-		if bold and not font_bold
-			score += 200
-		if not bold and font_bold
-			score += 300
-		if italic and not font_italic
-			score += 200
-		if not italic and font_italic
-			score += 300
-		if style\find "condensed"
-			score += 20
-		if style\find "narrow"
-			score += 10
-		return score
+		fc_fonts_cache = fonts
+		return fc_fonts_cache
 
 	-- Gets the directory path of the best matching font for the requested family
 	fontSelect: =>
 		fonts = @getFonts!
-		family = FreeType.norm @family
+		family = font_norm @family
 		best, best_score = nil, math.huge
 		for i = 1, fonts.n
 			font = fonts[i]
-			if FreeType.norm(font.name) != family and FreeType.norm(font.longname) != family
+			if font_norm(font.name) != family and font_norm(font.longname) != family
 				continue
 			unless @hasGlyphFromPath font.path, UTF8.charcodepoint "a"
 				continue
-			score = FreeType.scoreFont font, @bold, @italic
+			score = font_score font, @bold, @italic
 			if score < best_score
 				best = font
 				best_score = score
 				break if score == 0
 		unless best
 			error "Couldn't find #{@family} among your fonts"
-		@found_italic = FreeType.isItalic best.style
-		@found_bold = FreeType.isBold best.style
+		@found_italic = font_is_italic best.style
+		@found_bold = font_is_bold best.style
 		return best
 
 {:FreeType}
