@@ -17,11 +17,11 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.1.6",
-                    "released": "2026-04-03",
+                    "version": "1.1.7",
+                    "released": "2026-04-04",
                     "files": [
                         {
-                            "sha1": "ede881683fd11449064109bd3cc0b7e8cd01461c",
+                            "sha1": "174389ceced49ae5022b7034a6cdbfff01016549",
                             "url": "@{fileBaseUrl}@{fileName}",
                             "name": ".moon"
                         }
@@ -82,6 +82,15 @@
                 ],
                 "1.1.6": [
                     "Minor fix"
+                ],
+                "1.1.7": [
+                    "Fix many bugs",
+                    "",
+                    "Fix Unix font crash",
+                    "",
+                    "Add fonts cache",
+                    "",
+                    "Add setFont"
                 ]
             },
             "name": "Envelope Distort",
@@ -510,13 +519,13 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.8.4",
-                    "released": "2026-04-03",
+                    "version": "1.8.5",
+                    "released": "2026-04-04",
                     "files": [
                         {
                             "name": ".moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "9ce3b28e545bed115ed6dd18dbb5865f155e8b0d"
+                            "sha1": "3bb9f8fb2727f02ad7414f15198378b4c288c6e8"
                         },
                         {
                             "name": "/Ass/Shape/Curve.moon",
@@ -526,7 +535,7 @@
                         {
                             "name": "/Ass/Shape/Path.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "e810feeb29503a179d30a895fce99b7ea54d8aa3"
+                            "sha1": "e5d7019e972fb4a086608e57ac367608476bf298"
                         },
                         {
                             "name": "/Ass/Shape/Point.moon",
@@ -576,7 +585,7 @@
                         {
                             "name": "/Font/Unx.moon",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "888edbad9d1c007eb5591b84e99fb5875d73710d"
+                            "sha1": "08fb670b1dac8b12644f31d0fcafaceea070396f"
                         },
                         {
                             "name": "/Font/Win.moon",
@@ -819,6 +828,15 @@
                 ],
                 "1.8.4": [
                     "Add Mix mode to Envelope Distort"
+                ],
+                "1.8.5": [
+                    "Fix many bugs",
+                    "",
+                    "Fix Unix font crash",
+                    "",
+                    "Add fonts cache",
+                    "",
+                    "Add setFont"
                 ]
             }
         },
